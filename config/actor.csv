@@ -1,7 +1,7 @@
-"family","glyph","walls","description","speed","skills","str","dex","con","int"
+"family","glyph","walls","name","speed","skills","str","dex","con","int"
 
 0,"S","%#`*~","a soldier",5,"charge boomerang passive_charge passive_whirl",5,1,24,4
-1,"e","#`*~","an elf",6,"rocks passive_trip",2,1,16,5
+1,"e","#`*~","an elf",6,"forest_walk passive_trip",2,1,16,5
 2,"A","%#`*~","an archer",5,"shoot barrage passive_aim",3,1,18,4
 3,"M","%#`*~","a mage",7,"blast warp_space teleport passive_aim",1,1,6,11
 4,"X","%#`*~","a skeleton",4,"lie sprint",4,1,9,1
