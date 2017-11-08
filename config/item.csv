@@ -1,0 +1,19 @@
+"kind","glyph","color","desc","can_get"
+0,"x",1,"a corpse",false
+1,"^",3,"some meat - yum",true
+2,"$",3,"a gold piece",true
+3,"$",0,"a silver piece",true
+4,"?",5,"a magic ring",true
+5,"!",6,"an invisibility potion",true
+6,"]",2,"some armor",true
+7,"?",4,"boots of buoyancy",true
+8,"@",5,"an exit",false
+9,"@",6,"a teleporter",false
+10,"*",2,"a life gem",true
+11,"?",6,"a key",true
+12,"!",3,"a ring of speed",true
+18,"+",3,"a door",false
+19,"-",3,"an open door",false
+50,"@",1,"a teleport marker",false
+100,"%",6,"a sturdy tree",false
+200,"x",3,"debris",false

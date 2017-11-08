@@ -1,0 +1,10 @@
+[package]
+name = "gladrl"
+version = "0.0.0"
+authors = ["Chris Rayner <dchrisrayner@gmail.com>"]
+
+[dependencies]
+rand = "0.3.0"
+ncurses = "5.85.0"
+csv = "0.14"
+Inflector = "0.10.1"

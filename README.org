@@ -1,0 +1,75 @@
+#+TITLE: GladRL
+#+OPTIONS: toc:3 author:t creator:nil num:nil
+#+AUTHOR: Chris Rayner
+#+EMAIL: dchrisrayner@gmail.com
+
+[[file:img/screenshot.png]]
+
+* Table of Contents :TOC_3_gh:noexport:
+- [[#description][Description]]
+- [[#install][Install]]
+- [[#playing][Playing]]
+- [[#references][References]]
+
+* Description
+  GladRL is a simple ASCII (ncurses-based) game engine written as a kind of Rust
+  self-tutorial.  Warning: GladRL may not be fun.
+
+  I didn't write any of the game content.  Instead, GladRL runs on top of the
+  assets for the classic 1995 DOS game "Gladiator" by Forgotten Sages games, now
+  GPL-licensed and maintained under the name [[https://github.com/openglad/openglad][OpenGlad]].  Those assets are all in
+  the ~glad3.8~ directory.
+* Install
+  1. [[https://www.rust-lang.org/en-US/install.html][Install Rust]].
+  2. Type ~make run~
+* Playing
+  The game runs until your team is defeated, then loops again from the start.
+
+  You might want to modify ~config/keybindings.csv~ which currently features a
+  Nethack-like control scheme:
+  | ~?~ | access online help           |
+  | ~<~ | scroll the log up            |
+  | ~>~ | scroll the log down          |
+  |-----+------------------------------|
+  | ~k~ | go north                     |
+  | ~u~ | go northeast                 |
+  | ~l~ | go east                      |
+  | ~n~ | go southeast                 |
+  | ~j~ | go south                     |
+  | ~b~ | go southwest                 |
+  | ~h~ | go west                      |
+  | ~y~ | go northwest                 |
+  | ~.~ | wait one turn                |
+  | ~K~ | turn north                   |
+  | ~U~ | turn northeast               |
+  | ~L~ | turn east                    |
+  | ~N~ | turn southeast               |
+  | ~J~ | turn south                   |
+  | ~B~ | turn southwest               |
+  | ~H~ | turn west                    |
+  | ~Y~ | turn northwest               |
+  |-----+------------------------------|
+  | ~d~ | drop some gold               |
+  |-----+------------------------------|
+  | ~z~ | use your current skill       |
+  | ~s~ | switch your current skill    |
+  |-----+------------------------------|
+  | ~D~ | tell your team to defend     |
+  | ~F~ | tell your team to follow     |
+  | ~A~ | tell your team to attack     |
+  | ~R~ | tell your team to retreat    |
+  | ~;~ | let the AI decide your move  |
+  |-----+------------------------------|
+  | ~`~ | switch to the next character |
+  | ~1~ | switch to character 1        |
+  | ~2~ | switch to character 2        |
+  | ~3~ | switch to character 3        |
+  | ~4~ | switch to character 4        |
+  | ~5~ | switch to character 5        |
+  | ~6~ | switch to character 6        |
+  | ~7~ | switch to character 7        |
+  | ~8~ | switch to character 8        |
+  | ~9~ | switch to character 9        |
+* References
+  - [[https://archive.org/details/msdos_Gladiator_1995][The original Gladiator]] is up on archive.org
+  - [[https://github.com/openglad/openglad][OpenGlad]] is a modernized update of the original
