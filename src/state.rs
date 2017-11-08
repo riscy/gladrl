@@ -111,7 +111,7 @@ impl State {
             self.world.items.retain(|item| !item.is_debris());
             self.time += 1;
         }
-        let victory = self.plan.num_enemies() == 0 &&
+        let victory = self.plan.num_enemies() <= 5 &&
                       !self.world_completed.contains(&current_world_idx);
         self.extract_team(victory);
         if victory {

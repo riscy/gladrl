@@ -87,7 +87,7 @@ impl Plan {
     }
 
     pub fn update(&mut self, teams: &HashSet<usize>, world: &World, actors: &[Actor]) {
-        if self.team_0_enemies == 0 {
+        if self.team_0_enemies == 0 && self.team_0_tactic == TACTIC_ATTACK {
             self.team_0_tactic = TACTIC_EXIT;
         }
         for &team in teams {
