@@ -6,7 +6,7 @@ run: src/skills_registry.rs
 
 src/skills_registry.rs:
 	echo Registering skills...
-	bash ./src/make_skills_registry.sh >| ./src/skills_registry.rs
+	bash ./scripts/make_skills_registry.sh >| ./src/skills_registry.rs
 
 clean:
 	rm -f ./src/skills_registry.rs
