@@ -134,15 +134,15 @@ impl Plan {
         }
         let mut open_list = self.open_list(team, world, actors);
         for pos in &open_list {
-            self.set_distance_to_target(team, *pos, 0);
+            self.set_dist_to_pos(team, *pos, 0);
         }
         let maximum_steps = if team == 0 { 200 } else { 24 };
         for steps in 0..maximum_steps {
             let mut next_open_list: Vec<(u16, u16)> = Vec::new();
-            for &pos in &open_list {
+            for pos in open_list {
                 for dir in &MOVE_ACTIONS {
                     let neighbor = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
-                    if self.distance_to_target(neighbor, team) != UNKNOWN_DISTANCE {
+                    if self.dist_to_pos(neighbor, team) != UNKNOWN_DISTANCE {
                         continue;
                     }
                     // propogate if appropriate OR this neighbor is the same
@@ -151,7 +151,7 @@ impl Plan {
                     if !DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos)) ||
                        world.glyph_at(neighbor) == world.glyph_at(pos) {
                         // propagate distances to all neighbors
-                        self.set_distance_to_target(team, neighbor, steps + 1);
+                        self.set_dist_to_pos(team, neighbor, steps + 1);
                         next_open_list.push(neighbor);
                     }
                 }
@@ -163,34 +163,38 @@ impl Plan {
         }
     }
 
-    fn set_distance_to_target(&mut self, team: usize, pos: (u16, u16), val: i32) {
+    pub fn dist_to_pos(&self, pos: (u16, u16), team: usize) -> i32 {
+        self.distances[&team][(pos.1 * self.world_size.0 + pos.0) as usize]
+    }
+
+    fn set_dist_to_pos(&mut self, team: usize, pos: (u16, u16), val: i32) {
         let field = self.distances.get_mut(&team).unwrap();
         field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
     }
 
-    pub fn dist_is_greater_than(&self, pos: (u16, u16), team: usize, amt: i32) -> bool {
-        if team == 0 && self.team_0_tactic != TACTIC_ATTACK {
-            return true;
-        }
-        let dist = self.distance_to_target(pos, team);
-        dist > amt && dist != UNKNOWN_DISTANCE
-    }
-
-    pub fn distance_to_target(&self, pos: (u16, u16), team: usize) -> i32 {
-        self.distances[&team][(pos.1 * self.world_size.0 + pos.0) as usize]
-    }
-
-    pub fn gradient(&self, from: (u16, u16), to: (u16, u16), team: usize, toward: bool) -> i32 {
-        let dd = self.distance_to_target(from, team) - self.distance_to_target(to, team);
-        let toward = toward && !self.is_retreating(team);
-        if toward { dd } else { -dd }
+    pub fn gradient(&self, from: (u16, u16), to: (u16, u16), team: usize, retreat: bool) -> i32 {
+        let dd = self.dist_to_pos(from, team) - self.dist_to_pos(to, team);
+        let retreat = (retreat && self.is_attacking(team)) || self.is_retreating(team);
+        if retreat { -dd } else { dd }
     }
 
     pub fn whos_at(&self, pos: (u16, u16)) -> Option<&usize> {
         self.occupied_cells.get(&pos)
     }
 
+    pub fn is_farther_than(&self, pos: (u16, u16), team: usize, amt: i32) -> bool {
+        if team == 0 && self.team_0_tactic != TACTIC_ATTACK {
+            return true;
+        }
+        let dist = self.dist_to_pos(pos, team);
+        dist > amt && dist != UNKNOWN_DISTANCE
+    }
+
     fn is_retreating(&self, team: usize) -> bool {
         team == 0 && self.team_0_tactic == TACTIC_RETREAT
+    }
+
+    fn is_attacking(&self, team: usize) -> bool {
+        team != 0 || self.team_0_tactic == TACTIC_ATTACK
     }
 }

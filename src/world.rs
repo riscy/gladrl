@@ -35,7 +35,6 @@ impl World {
     pub fn neighbor(&self, from: (u16, u16), dir: u8, team: usize, walls: &str) -> (u16, u16) {
         let destination = self.offset(from, dir);
         // stepping on some items (doors, portals) can alter destination
-        // or the world itself (doors opening, etc)
         let mut final_destination = destination;
         for item in self.items.iter() {
             if item.pos == final_destination {
@@ -59,7 +58,7 @@ impl World {
         }
     }
 
-    pub fn press(&mut self, from: (u16, u16), dir: u8, tools: &Vec<Item>) -> Option<Item> {
+    pub fn push_wall(&mut self, from: (u16, u16), dir: u8, tools: &Vec<Item>) -> Option<Item> {
         let dest = self.offset(from, dir);
         for idx in 0..self.items.len() {
             if self.items[idx].pos == dest {
@@ -129,7 +128,7 @@ impl World {
         }
     }
 
-    pub fn push_item(&mut self, new_item: Item) {
+    pub fn add_item(&mut self, new_item: Item) {
         // prevents multiple placement of the same door:
         for item in &self.items {
             if item.pos == new_item.pos && item.kind == DOOR {

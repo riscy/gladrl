@@ -4,7 +4,7 @@ use world::World;
 use plan::Plan;
 use skills::*;
 
-pub fn should_use_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
+pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
     actor.selected_skill = 0;
     choose_skill!(should_sprint if can_sprint => actor, wld, p);
     choose_skill!(should_charge if can_charge => actor, wld, p);

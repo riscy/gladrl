@@ -65,10 +65,11 @@ impl State {
     }
 
     fn load_world_description(&mut self) {
+        let name = &self.world.name.clone();
+        self.player_mut().log_event(&format!("[{}]", name), 0);
         for line in self.world.desc.clone().lines() {
             self.view.scroll_log_up(1);
-            let time = self.time;
-            self.player_mut().log_event(&format!("{}", line), time);
+            self.player_mut().log_event(&format!("{}", line), 0);
         }
         self.view.scroll_log_down(0);
     }
@@ -131,9 +132,9 @@ impl State {
         // split actors, excluding current, to prevent reborrowing
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
         let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
-        let actors = (have_acted, yet_to_act);
+        let others = (have_acted, yet_to_act);
         actor.time = self.time;
-        actor.act(mv, &mut self.world, &self.plan, actors, &mut self.spawn);
+        actor.act(mv, &mut self.world, &self.plan, others, &mut self.spawn);
     }
 
     fn turn_from_ai(&mut self, idx: usize) -> u8 {

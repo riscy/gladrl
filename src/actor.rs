@@ -6,8 +6,8 @@ use plan::Plan;
 use world::World;
 use item::Item;
 use skills::*;
-use skills_registry::*;
-use effects::*;
+use skills_registry::{choose_skill, use_skill};
+use effects::item_effect;
 
 pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, DO_WAIT];
 pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];
@@ -176,9 +176,8 @@ impl Actor {
 
     pub fn choose(&mut self, world: &World, plan: &Plan) -> u8 {
         if self.is_projectile() {
-            self.direction = self.choose_preferred_dir();
             return self.direction;
-        } else if should_use_skill(self, world, plan) {
+        } else if choose_skill(self, world, plan) {
             return DO_SKILL;
         }
         self.choose_move(world, plan)
@@ -206,7 +205,8 @@ impl Actor {
                 }
             }
             if movement {
-                let gradient = plan.gradient(self.pos, pos, self.team, !self.is_hurt());
+                let retreat = self.is_hurt();
+                let gradient = plan.gradient(self.pos, pos, self.team, retreat);
                 if gradient > best_gradient {
                     best_direction = mv;
                     best_gradient = gradient;
@@ -254,7 +254,7 @@ impl Actor {
             self.lose_momentum(1);
         }
         match plan.whos_at(pos) {
-            Some(_team) => {
+            Some(&_team) => {
                 for other in other.0.iter_mut().filter(|xx| xx.is_blocking(pos)) {
                     self.act_touch(other, wld, mv, plan);
                 }
@@ -278,7 +278,7 @@ impl Actor {
     }
 
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
-        match world.press(self.pos, action, &self.inventory) {
+        match world.push_wall(self.pos, action, &self.inventory) {
             Some(treasure) => {
                 self.log_action(&format!("grabbed {}.", treasure.name));
                 self.inventory.push(treasure);
@@ -316,7 +316,7 @@ impl Actor {
             Some(mut item) => {
                 self.log_action(&format!("dropped {}.", item.name));
                 item.pos = world.neighbor(self.pos, self.direction, self.team, "");
-                world.items.push(item);
+                world.add_item(item);
             }
             None => {}
         }
@@ -389,6 +389,11 @@ impl Actor {
         self.is_leader = false;
     }
 
+    pub fn act_exert(&mut self, amt: u16, action: &str) {
+        self.mana -= cmp::min(self.mana, amt);
+        self.log_action(action);
+    }
+
     pub fn hurt(&mut self, amt: u16, world: &mut World) {
         self.health -= cmp::min(self.health, amt);
         if self.health == 0 {
@@ -400,11 +405,6 @@ impl Actor {
         self.stun_counter = amt;
         let momentum = self.momentum;
         self.lose_momentum(momentum);
-    }
-
-    pub fn exert(&mut self, amt: u16, action: &str) {
-        self.mana -= cmp::min(self.mana, amt);
-        self.log_action(action);
     }
 
     pub fn gain_momentum(&mut self, _amt: u8) {
@@ -474,8 +474,8 @@ impl Actor {
         self.team == 0 && self.is_alive() && self.is_mobile() && !self.is_projectile()
     }
 
-    pub fn is_ready_to_act(&self, round: u32) -> bool {
-        (round + self.random_state as u32) % u32::from(self.speed) == 0
+    pub fn is_ready_to_act(&self, time: u32) -> bool {
+        (time + self.random_state as u32) % u32::from(self.speed) == 0
     }
 
     pub fn is_mobile(&self) -> bool {
@@ -509,7 +509,7 @@ impl Actor {
     }
 
     pub fn is_in_danger(&self, p: &Plan) -> bool {
-        !p.dist_is_greater_than(self.pos, self.team, 20)
+        !p.is_farther_than(self.pos, self.team, 20)
     }
 
     pub fn is_hurt(&self) -> bool {

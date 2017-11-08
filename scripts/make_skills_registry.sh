@@ -4,7 +4,7 @@ echo -e "use world::World;"
 echo -e "use plan::Plan;"
 echo -e "use skills::*;"
 echo -e ""
-echo -e "pub fn should_use_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {"
+echo -e "pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {"
 echo -e "    actor.selected_skill = 0;"
 for skill in `grep -o 'pub fn can_[a-z_]*' ./src/skills.rs|awk -F'can_' '{print $2}'`; do
     echo -e "    choose_skill!(should_$skill if can_$skill => actor, wld, p);"

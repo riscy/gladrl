@@ -73,7 +73,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             is_leader = true;
         }
         if order == 1 || order == 2 {
-            state.world.push_item(Item::new(kind, pos, level, team));
+            state.world.add_item(Item::new(kind, pos, level, team));
             continue;
         }
 
