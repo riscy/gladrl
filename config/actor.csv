@@ -7,9 +7,9 @@
 4,"X","%#`*~","a skeleton",4,"lie sprint",4,1,9,1
 5,"C","%#`*~","a cleric",6,"heal",2,1,12,10
 6,"E","%#`","an elemental",5,"blast",4,1,18,2
-8,"o","%#`*~","a blob",7,"expand",2,1,6,1
-9,"b","%#`*~","a medium blob",8,"expand",3,1,9,2
-10,"B","%#`*~","a large blob",9,"multiply",4,1,12,3
+8,"~","%#`*","a blob",7,"expand",2,1,6,1
+9,"b","%#`*","a medium blob",8,"expand",3,1,9,2
+10,"B","%#`*","a large blob",9,"multiply",4,1,12,3
 11,"T","%#`*~","a thief",4,"sprint cloak pick passive_backstab",4,1,15,6
 12,"&","","a ghost",12,"teleport",1,1,80,5
 13,"D","%#`*~","a druid",6,"grow_tree summon_faerie",3,1,15,8
@@ -27,7 +27,7 @@
 
 7,"f","#`","a faerie",3,"passive_aim passive_descend",1,1,3,3
 50,"`","%#","an arrow",1,"passive_descend passive_drift",2,1,1,1
-51,"*","%#","a magic blast",2,"passive_charge passive_descend passive_drift",4,1,1,5
+51,"*","%#","a magic blast",2,"passive_charge passive_descend",4,1,1,5
 52,"+","#","a healing current",3,"passive_heal passive_spin passive_descend passive_drift",0,1,1,5
 53,"(","#","a boomerang",1,"passive_spin passive_descend",3,1,10,1
 54,"~","%#","warped space",3,"passive_charge passive_spin passive_descend",4,1,1,5
