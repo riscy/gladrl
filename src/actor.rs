@@ -88,7 +88,9 @@ impl Actor {
                 self.kind = kind;
                 self.glyph = row.1;
                 self.walls = row.2;
-                self.name = row.3;
+                if self.name.is_empty() {
+                    self.name = row.3;
+                }
                 self.speed = row.4;
                 self.strength = row.6;
                 self.con = row.8;
