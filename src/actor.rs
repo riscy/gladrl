@@ -283,7 +283,11 @@ impl Actor {
                 self.log_action(&format!("grabbed {}.", treasure.name));
                 self.inventory.push(treasure);
             }
-            None => {}
+            None => {
+                if self.is_leader {
+                    self.log_action("couldn't go any further.");
+                }
+            }
         }
     }
 
@@ -353,10 +357,10 @@ impl Actor {
 
     fn act_help(&mut self, other: &mut Actor, world: &mut World) {
         passive_effect!(passive_heal => self, other, world);
-        if other.stun_counter > 0 {
+        if other.stun_counter > 0 && !self.is_projectile() {
             other.stun_counter = 0;
-            self.log_action(&format!("helped {} up.", other.name));
-            other.log_action(&format!("was helped up by {}.", self.name));
+            self.log_action(&format!("hoisted {} up.", other.name));
+            other.log_action(&format!("was hoisted up by {}.", self.name));
         }
         self.lose_momentum(1);
     }
