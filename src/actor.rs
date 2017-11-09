@@ -515,7 +515,8 @@ impl Actor {
     }
 
     pub fn is_in_danger(&self, p: &Plan) -> bool {
-        !p.is_farther_than(self.pos, self.team, 20)
+        (p.is_attacking(self.team) || p.is_retreating(self.team)) &&
+        p.dist_to_pos(self.pos, self.team) < 20
     }
 
     pub fn is_hurt(&self) -> bool {

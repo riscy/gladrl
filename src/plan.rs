@@ -182,19 +182,15 @@ impl Plan {
         self.occupied_cells.get(&pos)
     }
 
-    pub fn is_farther_than(&self, pos: (u16, u16), team: usize, amt: i32) -> bool {
-        if team == 0 && self.team_0_tactic != TACTIC_ATTACK {
-            return true;
-        }
-        let dist = self.dist_to_pos(pos, team);
-        dist > amt && dist != UNKNOWN_DISTANCE
+    pub fn is_defending(&self, team: usize) -> bool {
+        team == 0 && self.team_0_tactic == TACTIC_DEFEND
     }
 
-    fn is_retreating(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == TACTIC_RETREAT
-    }
-
-    fn is_attacking(&self, team: usize) -> bool {
+    pub fn is_attacking(&self, team: usize) -> bool {
         team != 0 || self.team_0_tactic == TACTIC_ATTACK
+    }
+
+    pub fn is_retreating(&self, team: usize) -> bool {
+        team == 0 && self.team_0_tactic == TACTIC_RETREAT
     }
 }

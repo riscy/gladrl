@@ -255,7 +255,7 @@ pub fn can_boomerang(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 10
 }
 pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    !p.is_farther_than(slf.pos, slf.team, 3)
+    p.is_attacking(slf.team) && p.dist_to_pos(slf.pos, slf.team) < 3
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(10, "threw a boomerang");
@@ -346,8 +346,9 @@ pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<A
 pub fn can_grow_tree(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 6
 }
-pub fn should_grow_tree(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    should_shoot(slf, wld, p)
+pub fn should_grow_tree(slf: &Actor, _wld: &World, p: &Plan) -> bool {
+    (p.is_defending(slf.team) && p.dist_to_pos(slf.pos, slf.team) < 3) ||
+    (p.is_retreating(slf.team) && p.dist_to_pos(slf.pos, slf.team) > 20)
 }
 pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
     for dir in vec![0, 7, 1, 6, 2, 5, 3] {
