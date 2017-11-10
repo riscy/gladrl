@@ -1,9 +1,10 @@
 // Handles the scenario's map and the items scattered around it.
+use csv;
 use std::str;
 use std::collections::HashMap;
-use csv;
-use item::*;
 use inflector::Inflector; // for to_sentence_case
+use item::Item;
+use item_effects::{use_on_item, use_as_portal};
 
 pub struct World {
     pub size: (u16, u16), // cols x rows
@@ -33,18 +34,17 @@ impl World {
     }
 
     pub fn neighbor(&self, from: (u16, u16), dir: u8, team: usize, walls: &str) -> (u16, u16) {
-        let destination = self.offset(from, dir);
-        // stepping on some items (doors, portals) can alter destination
-        let mut final_destination = destination;
+        let pos = self.offset(from, dir);
+        let mut final_pos = pos;
         for item in self.items.iter() {
-            if item.pos == final_destination {
-                item.step_on(from, &mut final_destination, team, &self.items);
+            if item.pos == final_pos {
+                final_pos = use_as_portal(&item, from, final_pos, team, &self.items);
             }
         }
-        if walls.contains(self.glyph_at(final_destination)) {
+        if walls.contains(self.glyph_at(final_pos)) {
             return from;
         }
-        final_destination
+        final_pos
     }
 
     pub fn blood(&mut self, at: (u16, u16)) {
@@ -66,7 +66,7 @@ impl World {
                     return Some(self.items.swap_remove(idx));
                 }
                 for tool in tools {
-                    if tool.use_on(&mut self.items[idx]) {
+                    if use_on_item(&mut self.items[idx], tool.kind) {
                         self.log_global("A door swung open.", from, false);
                     }
                 }
@@ -129,9 +129,9 @@ impl World {
     }
 
     pub fn add_item(&mut self, new_item: Item) {
-        // prevents multiple placement of the same door:
+        // prevent multiple placement of the same object:
         for item in &self.items {
-            if item.pos == new_item.pos && item.kind == DOOR {
+            if item.pos == new_item.pos && item.kind == new_item.kind {
                 return;
             }
         }

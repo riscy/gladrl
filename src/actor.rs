@@ -4,10 +4,10 @@ use csv;
 use inflector::Inflector;
 use plan::Plan;
 use world::World;
-use item::Item;
 use skills::*;
 use skills_registry::{choose_skill, use_skill};
-use effects::item_effect;
+use item::Item;
+use item_effects::use_on_actor;
 
 pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, DO_WAIT];
 pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];
@@ -77,6 +77,7 @@ impl Actor {
             invis: 0,
         };
         actor.initialize(kind);
+        actor.restore();
         actor
     }
 
@@ -95,15 +96,15 @@ impl Actor {
                 self.strength = row.6;
                 self.con = row.8;
                 self.intel = row.9;
-                self.health = self.max_health();
-                self.mana = self.max_mana();
                 self.skills.clear();
                 for skill in row.5.split(' ') {
                     self.skills.push(skill.into());
                 }
+                for kind in self.inventory.iter().map(|it| it.kind).collect::<Vec<u8>>() {
+                    use_on_actor(self, kind);
+                }
                 break;
             }
-            // TODO: scan inventory items
         }
     }
 
@@ -283,7 +284,10 @@ impl Actor {
         match world.push_wall(self.pos, action, &self.inventory) {
             Some(treasure) => {
                 self.log_action(&format!("grabbed {}.", treasure.name));
-                self.inventory.push(treasure);
+                use_on_actor(self, treasure.kind);
+                if !treasure.can_consume {
+                    self.inventory.push(treasure);
+                }
             }
             None => {
                 if self.is_leader {
@@ -307,8 +311,9 @@ impl Actor {
         while idx < world.items.len() {
             if self.pos == world.items[idx].pos && world.items[idx].can_get {
                 let item = world.items.remove(idx);
-                self.log_action(&format!("found {}", item.name));
-                if !item_effect(self, &item) {
+                self.log_action(&format!("found {}.", item.name));
+                use_on_actor(self, item.kind);
+                if !item.can_consume {
                     self.inventory.push(item);
                 }
                 continue;
@@ -324,8 +329,10 @@ impl Actor {
                 item.pos = world.neighbor(self.pos, self.direction, self.team, "");
                 world.add_item(item);
             }
-            None => {}
+            None => self.log_action("had nothing to drop."),
         }
+        let kind = self.kind;
+        self.initialize(kind);
     }
 
     fn act_drop_all(&mut self, world: &mut World) {

@@ -52,7 +52,7 @@
   Specials:
   | ~z~ | use your current special    |
   | ~s~ | switch your current special |
-  | ~d~ | drop some gold              |
+  | ~d~ | drop an item                |
 
   Team:
   | ~D~ | tell your team to defend a spot |

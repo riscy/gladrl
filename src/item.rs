@@ -1,12 +1,7 @@
 // Handles inanimate objects like exits, potions, and treasure.
 use csv;
 
-pub const PORTAL: u8 = 9;
-pub const DOOR: u8 = 18;
-pub const DOOR_OPEN: u8 = 19;
-pub const KEY: u8 = 11;
-pub const TREE: u8 = 100;
-pub const DEBRIS: u8 = 200;
+const DEBRIS: u8 = 200;
 
 pub struct Item {
     pub name: String,
@@ -17,6 +12,7 @@ pub struct Item {
     pub color: i16,
     pub pos: (u16, u16),
     pub can_get: bool,
+    pub can_consume: bool,
     health: u16,
 }
 
@@ -31,6 +27,7 @@ impl Item {
             color: 0,
             pos: pos,
             can_get: false,
+            can_consume: false,
             health: 5,
         };
         item.initialize(kind);
@@ -40,14 +37,14 @@ impl Item {
     pub fn initialize(&mut self, kind: u8) {
         let mut reader = csv::Reader::from_file("config/item.csv").unwrap();
         for record in reader.decode() {
-            let (kind_idx, glyph, color, name, get): (u8, String, i16, String, bool) =
-                record.unwrap();
-            if kind_idx == kind {
-                self.kind = kind;
-                self.glyph = glyph.chars().nth(0).unwrap();
-                self.color = color;
-                self.name = name;
-                self.can_get = get;
+            let row: (u8, String, i16, String, bool, bool) = record.unwrap();
+            if row.0 == kind {
+                self.kind = row.0;
+                self.glyph = row.1.chars().nth(0).unwrap();
+                self.color = row.2;
+                self.name = row.3;
+                self.can_get = row.4;
+                self.can_consume = row.5;
             }
         }
     }
@@ -59,37 +56,7 @@ impl Item {
         }
     }
 
-    pub fn use_on(&self, other: &mut Item) -> bool {
-        if other.kind == DOOR && self.kind == KEY {
-            other.initialize(DOOR_OPEN);
-            return true;
-        }
-        false
-    }
-
     pub fn is_debris(&self) -> bool {
         self.kind == DEBRIS
-    }
-
-    pub fn step_on(&self, from: (u16, u16), to: &mut (u16, u16), team: usize, others: &[Item]) {
-        match self.kind {
-            PORTAL => {
-                if from == *to {
-                    for portal in others.iter().filter(|item| item.kind == 9) {
-                        if portal.level == self.level && portal.pos != self.pos {
-                            to.0 = portal.pos.0;
-                            to.1 = portal.pos.1;
-                        }
-                    }
-                }
-            }
-            DOOR | TREE => {
-                if self.team != team {
-                    to.0 = from.0;
-                    to.1 = from.1;
-                }
-            }
-            _ => {}
-        }
     }
 }

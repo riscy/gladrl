@@ -19,10 +19,10 @@ extern crate csv;
 #[macro_use]
 mod skills;
 mod skills_registry;
-mod effects;
 mod actor;
 mod world;
 mod item;
+mod item_effects;
 mod plan;
 mod view;
 mod state;
