@@ -71,7 +71,7 @@ impl State {
             self.view.scroll_log_up(1);
             self.player_mut().log_event(&format!("{}", line), 0);
         }
-        self.view.scroll_log_down(0);
+        self.view.scroll_log_down(1);
     }
 
     fn extract_team(&mut self, level_up: bool) {
