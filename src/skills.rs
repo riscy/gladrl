@@ -53,7 +53,7 @@ pub fn rand_int(max: u16) -> u16 {
 fn raycast(slf: &Actor, dir: u8, wld: &World, p: &Plan, len: u16) -> Option<(usize, u16)> {
     let mut pos = slf.pos;
     for dist in 0..len {
-        let new_pos = wld.neighbor(pos, dir, slf.team, &slf.walls);
+        let new_pos = wld.neighbor(pos, dir, slf.team, "#");
         if new_pos == pos {
             break;
         }
@@ -260,7 +260,7 @@ pub fn can_warp_space(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 20
 }
 pub fn should_warp_space(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    slf.is_in_danger(p) && !slf.is_hurt()
+    !slf.is_hurt() && p.dist_to_pos(slf.pos, slf.team) < 5
 }
 pub fn warp_space(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(20, "casted 'warp space'");
@@ -270,13 +270,14 @@ pub fn warp_space(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Acto
 }
 
 pub fn can_blast(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
-    slf.mana >= 5
+    slf.mana >= 2
 }
 pub fn should_blast(slf: &Actor, wld: &World, p: &Plan) -> bool {
     should_shoot(slf, wld, p)
 }
-pub fn blast(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    slf.act_exert(5, "released an energy blast");
+pub fn blast(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
+    passive_effect!(passive_aim => slf, wld, p);
+    slf.act_exert(2, "released an energy blast");
     spawn.push(Actor::new(51, slf.level + 5, slf.team, slf.pos, slf.direction));
 }
 
@@ -301,7 +302,7 @@ pub fn can_heal(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
 }
 pub fn should_heal(slf: &Actor, wld: &World, p: &Plan) -> bool {
     match raycast(slf, slf.direction, wld, p, 2) {
-        Some((team, _dist)) => !slf.is_hurt() && team == slf.team,
+        Some((team, _dist)) => !slf.is_hurt() && team == slf.team && p.num_enemies() != 0,
         None => false,
     }
 }
@@ -327,8 +328,8 @@ pub fn lie(slf: &mut Actor, _wld: &World, _p: &Plan, _spawn: &mut Vec<Actor>) {
 pub fn can_summon_faerie(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
-pub fn should_summon_faerie(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    slf.is_in_danger(p)
+pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
+    slf.is_in_danger(p) || should_shoot(slf, wld, p)
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "called a faerie");
