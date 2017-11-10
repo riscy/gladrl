@@ -8,10 +8,10 @@ src/skills_registry.rs:
 	echo Registering skills...
 	bash ./scripts/make_skills_registry.sh >| ./src/skills_registry.rs
 
-# Use `rustup default nightly` for clippy; then `rustup default stable`
 lint:
 	rustup default nightly
 	cargo rustc --features clippy -- -Z no-trans -Z extra-plugins=clippy
+	rustup default stable
 
 clean:
 	rm -f ./src/skills_registry.rs

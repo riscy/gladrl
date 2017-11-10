@@ -30,8 +30,8 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         let buffer = read_bytes(10, &mut file);
         let mut order = buffer[0];
         let mut kind = buffer[1];
-        let pos = (((buffer[2] as u16) + (buffer[3] as u16) * 256) / 16,
-                   ((buffer[4] as u16) + (buffer[5] as u16) * 256) / 16);
+        let pos = ((u16::from(buffer[2]) + u16::from(buffer[3]) * 256) / 16,
+                   (u16::from(buffer[4]) + u16::from(buffer[5]) * 256) / 16);
         let team = buffer[6] as usize;
         let direction = buffer[7];
         let _command = buffer[8];
@@ -48,13 +48,10 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         if order == 5 {
             // spawn points become teammates on team 0
             if team == 0 {
-                match state.player_team.pop_back() {
-                    Some(mut teammate) => {
-                        teammate.pos = pos;
-                        state.actors.push(teammate);
-                        state.team_idxs.insert(team);
-                    }
-                    None => {}
+                if let Some(mut teammate) = state.player_team.pop_back() {
+                    teammate.pos = pos;
+                    state.actors.push(teammate);
+                    state.team_idxs.insert(team);
                 }
             }
             continue;
@@ -103,13 +100,13 @@ pub fn load_world_and_spawn_team(state: &mut State) {
 // See: https://github.com/openglad/openglad/blob/master/src/pixdefs.h
 pub fn load_world_layout(world: &mut World, pix: &str) {
     let mut buffer = [0; 100_000];
-    File::open(format!("glad3.8/{}.pix", pix))
+    let _amt_read = File::open(format!("glad3.8/{}.pix", pix))
         .unwrap()
         .read(&mut buffer)
         .expect("Failed to open.");
-    world.size = (buffer[1] as u16, buffer[2] as u16);
+    world.size = (u16::from(buffer[1]), u16::from(buffer[2]));
     for index in 0..world.size.0 * world.size.1 {
-        world.tiles.push(buffer[index as usize + 3] as u16);
+        world.tiles.push(u16::from(buffer[index as usize + 3]));
     }
 }
 

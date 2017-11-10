@@ -11,8 +11,8 @@ const TACTIC_RETREAT: u8 = 3;
 const TACTIC_EXIT: u8 = 4;
 
 const UNKNOWN_DISTANCE: i32 = i32::MAX;
-const DONT_PROPAGATE_INTO: &'static str = "`*#";
-const DONT_PROPAGATE_OUT_OF: &'static str = "~`*#%";
+const DONT_PROPAGATE_INTO: &str = "`*#";
+const DONT_PROPAGATE_OUT_OF: &str = "~`*#%";
 
 pub struct Plan {
     team_0_enemies: usize,
@@ -66,8 +66,8 @@ impl Plan {
 
     pub fn tactical_position(&self, team: usize) -> (u16, u16) {
         match team {
-            0 => return self.team_0_tactical_position,
-            _ => return (0, 0),
+            0 => self.team_0_tactical_position,
+            _ => (0, 0),
         }
     }
 
@@ -121,8 +121,7 @@ impl Plan {
             TACTIC_EXIT => open_list.append(&mut self.pos_exits(world)),
             TACTIC_DEFEND => open_list.append(&mut vec![self.tactical_position(team)]),
             TACTIC_FOLLOW => open_list.append(&mut self.pos_leaders(team, actors)),
-            TACTIC_ATTACK => open_list.append(&mut self.pos_enemies(team, actors)),
-            TACTIC_RETREAT => open_list.append(&mut self.pos_enemies(team, actors)),
+            TACTIC_ATTACK | TACTIC_RETREAT => open_list.append(&mut self.pos_enemies(team, actors)),
             _ => {}
         }
         open_list

@@ -59,7 +59,7 @@ impl View {
         let yy = self.render_roster(&gs.actors, xx);
         let rows = (max_y - min_y) as usize - yy as usize;
         self.render_log(&gs.player().log, (xx + 1, yy), rows, gs.player().time);
-        mv(focus.1 as i32 - min_y, focus.0 as i32 - min_x);
+        mv(i32::from(focus.1) - min_y, i32::from(focus.0) - min_x);
         refresh();
         sleep(Duration::from_millis(self.animation_delay));
     }
@@ -90,21 +90,18 @@ impl View {
     /// Draw actors on top of items on top of exits on top of corpses.
     fn render_cell(&self, pos: (u16, u16), actors: &[Actor], world: &World) {
         assert!(!world.is_out_of_bounds((pos.0 as i16, pos.1 as i16)));
-        for actor in actors
-                .iter()
-                .filter(|aa| aa.pos == pos && aa.invis == 0 && aa.is_alive()) {
+        if let Some(actor) = actors
+               .iter()
+               .find(|a| a.pos == pos && a.invis == 0 && a.is_alive()) {
             return self.render_actor(actor);
-        }
-        for item in world.items.iter().filter(|it| it.pos == pos) {
+        } else if let Some(item) = world.items.iter().find(|i| i.pos == pos) {
             return self.render_item_or_exit(item);
-        }
-        for exit in world.exits.iter().filter(|ex| ex.pos == pos) {
+        } else if let Some(exit) = world.exits.iter().find(|ex| ex.pos == pos) {
             return self.render_item_or_exit(exit);
-        }
-        for actor in actors.iter().filter(|aa| aa.pos == pos && aa.invis == 0) {
+        } else if let Some(actor) = actors.iter().find(|a| a.pos == pos && a.invis == 0) {
             return self.render_actor(actor);
         }
-        self.render_floor(world, pos);
+        self.render_floor(world, pos)
     }
 
     fn render_actor(&self, actor: &Actor) {
@@ -224,7 +221,7 @@ impl View {
                 let entry = &log[idx as usize];
                 if entry.0 >= time {
                     attron(COLOR_PAIR(COLOR_RED));
-                } else if entry.1.starts_with("[") {
+                } else if entry.1.starts_with('[') {
                     attron(COLOR_PAIR(COLOR_YELLOW));
                 }
                 printw(&entry.1);
@@ -233,7 +230,7 @@ impl View {
                 }
                 if entry.0 >= time {
                     attroff(COLOR_PAIR(COLOR_RED));
-                } else if entry.1.starts_with("[") {
+                } else if entry.1.starts_with('[') {
                     attroff(COLOR_PAIR(COLOR_YELLOW));
                 }
             }

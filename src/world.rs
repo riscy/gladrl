@@ -36,9 +36,9 @@ impl World {
     pub fn neighbor(&self, from: (u16, u16), dir: u8, team: usize, walls: &str) -> (u16, u16) {
         let pos = self.offset(from, dir);
         let mut final_pos = pos;
-        for item in self.items.iter() {
+        for item in &self.items {
             if item.pos == final_pos {
-                final_pos = use_as_portal(&item, from, final_pos, team, &self.items);
+                final_pos = use_as_portal(item, from, final_pos, team, &self.items);
             }
         }
         if walls.contains(self.glyph_at(final_pos)) {
@@ -58,7 +58,7 @@ impl World {
         }
     }
 
-    pub fn push_wall(&mut self, from: (u16, u16), dir: u8, tools: &Vec<Item>) -> Option<Item> {
+    pub fn push_wall(&mut self, from: (u16, u16), dir: u8, tools: &[Item]) -> Option<Item> {
         let dest = self.offset(from, dir);
         for idx in 0..self.items.len() {
             if self.items[idx].pos == dest {
@@ -108,15 +108,12 @@ impl World {
     }
 
     pub fn tile_at(&self, pos: (u16, u16)) -> (char, i16) {
-        match self.tiles.get((pos.1 * self.size.0 + pos.0) as usize) {
-            Some(tile) => {
-                if self.tileset.contains_key(&tile) {
-                    return self.tileset[&tile];
-                }
+        if let Some(tile) = self.tiles.get((pos.1 * self.size.0 + pos.0) as usize) {
+            if self.tileset.contains_key(tile) {
+                return self.tileset[tile];
             }
-            _ => {}
         }
-        return ('?', 0);
+        ('?', 0)
     }
 
     fn load_tileset(&mut self, filename: &str) {

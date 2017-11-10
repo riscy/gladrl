@@ -52,5 +52,5 @@ pub fn use_as_portal(item: &Item,
         }
         _ => {}
     }
-    return (to.0, to.1);
+    to
 }

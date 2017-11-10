@@ -126,15 +126,12 @@ impl Actor {
     }
 
     pub fn log_event(&mut self, txt: &str, time: u32) {
-        match self.log.last_mut() {
-            Some(last_log) => {
-                if last_log.1 == txt {
-                    last_log.0 = time;
-                    return last_log.2 += 1;
-                }
+        if let Some(last_log) = self.log.last_mut() {
+            if last_log.1 == txt {
+                last_log.0 = time;
+                return last_log.2 += 1;
             }
-            _ => {}
-        };
+        }
         self.log.push((time, txt.to_owned(), 1));
     }
 
@@ -160,10 +157,10 @@ impl Actor {
     }
 
     pub fn selected_skill(&self) -> String {
-        if self.skills.len() > 0 {
-            return self.skills[self.selected_skill].to_owned();
+        match self.skills.get(self.selected_skill) {
+            Some(skill) => skill.to_owned(),
+            None => String::new(),
         }
-        String::new()
     }
 
     pub fn next_skill(&mut self) {
@@ -196,15 +193,12 @@ impl Actor {
                 pos = world.offset(self.pos, mv)
             }
             if !self.is_hurt() {
-                match plan.whos_at(pos) {
-                    Some(&team) => {
-                        if team != self.team || (pos != self.pos && self.can_help()) {
-                            return mv;
-                        } else if !self.can_displace() {
-                            continue;
-                        }
+                if let Some(&team) = plan.whos_at(pos) {
+                    if team != self.team || (pos != self.pos && self.can_help()) {
+                        return mv;
+                    } else if !self.can_displace() {
+                        continue;
                     }
-                    None => {}
                 }
             }
             if movement {
@@ -230,13 +224,13 @@ impl Actor {
                mv: u8,
                wld: &mut World,
                plan: &Plan,
-               others: (&mut [Actor], &mut [Actor]),
+               other: (&mut [Actor], &mut [Actor]),
                spawn: &mut Vec<Actor>) {
         if self.stun_counter == 0 {
             match mv {
                 DO_SKILL => use_skill(self, wld, plan, spawn),
                 DO_DROP => self.act_drop_item(wld),
-                _ => self.act_move(mv, wld, plan, others),
+                _ => self.act_move(mv, wld, plan, other),
             };
         }
         self.side_effects(wld);
@@ -256,25 +250,18 @@ impl Actor {
             pos = wld.offset(self.pos, mv);
             self.lose_momentum(1);
         }
-        match plan.whos_at(pos) {
-            Some(&_team) => {
-                for other in other.0.iter_mut().filter(|xx| xx.is_blocking(pos)) {
-                    self.act_touch(other, wld, mv, plan);
-                }
-                for other in other.1.iter_mut().filter(|xx| xx.is_blocking(pos)) {
-                    self.act_touch(other, wld, mv, plan);
-                }
+        if plan.whos_at(pos).is_some() {
+            for other in other.0.iter_mut().filter(|xx| xx.is_blocking(pos)) {
+                self.act_touch(other, wld, mv, plan);
             }
-            None => {
-                if !movement {
-                    if MOVE_ACTIONS.contains(&mv) {
-                        self.act_push_wall(wld, mv);
-                    }
-                } else {
-                    self.pos = pos;
-                    self.gain_momentum(1);
-                }
+            for other in other.1.iter_mut().filter(|xx| xx.is_blocking(pos)) {
+                self.act_touch(other, wld, mv, plan);
             }
+        } else if movement {
+            self.pos = pos;
+            self.gain_momentum(1);
+        } else if MOVE_ACTIONS.contains(&mv) {
+            self.act_push_wall(wld, mv);
         }
         self.act_change_direction(mv);
         passive_effect!(passive_aim => self, wld, plan);
@@ -323,20 +310,18 @@ impl Actor {
     }
 
     fn act_drop_item(&mut self, world: &mut World) {
-        match self.inventory.pop() {
-            Some(mut item) => {
-                self.log_action(&format!("dropped {}.", item.name));
-                item.pos = world.neighbor(self.pos, self.direction, self.team, "");
-                world.add_item(item);
-            }
-            None => self.log_action("had nothing to drop."),
+        if let Some(mut item) = self.inventory.pop() {
+            self.log_action(&format!("dropped {}.", item.name));
+            item.pos = world.neighbor(self.pos, self.direction, self.team, "");
+            world.add_item(item);
+            let kind = self.kind;
+            return self.initialize(kind);
         }
-        let kind = self.kind;
-        self.initialize(kind);
+        self.log_action("had nothing to drop.")
     }
 
     fn act_drop_all(&mut self, world: &mut World) {
-        while self.inventory.len() > 0 {
+        while !self.inventory.is_empty() {
             self.act_drop_item(world);
             let new_direction = self.direction + 1;
             self.act_change_direction(new_direction);
@@ -394,12 +379,12 @@ impl Actor {
             let msg = format!("{} {}!", self.name, verb);
             world.log_global(&msg, self.pos, self.is_important());
         }
-        match self.is_flesh() {
-            true => world.blood(self.pos),
-            false => self.invis = -1,
-        }
         self.act_drop_all(world);
         self.is_leader = false;
+        if !self.is_flesh() {
+            return self.invis = -1;
+        }
+        world.blood(self.pos);
     }
 
     pub fn act_exert(&mut self, amt: u16, action: &str) {
@@ -488,7 +473,7 @@ impl Actor {
     }
 
     pub fn is_ready_to_act(&self, time: u32) -> bool {
-        (time + self.random_state as u32) % u32::from(self.speed) == 0
+        (time + u32::from(self.random_state)) % u32::from(self.speed) == 0
     }
 
     pub fn is_mobile(&self) -> bool {

@@ -69,7 +69,7 @@ impl State {
         self.player_mut().log_event(&format!("[{}]", name), 0);
         for line in self.world.desc.clone().lines() {
             self.view.scroll_log_up(1);
-            self.player_mut().log_event(&format!("{}", line), 0);
+            self.player_mut().log_event(line, 0);
         }
         self.view.scroll_log_down(1);
     }
@@ -121,13 +121,12 @@ impl State {
 
     fn give_turn(&mut self, idx: usize) {
         self.plan.fast_update(&self.actors);
-        let mv = match idx == self.player_idx {
-            true => {
-                // do the expensive update while waiting for the player
-                self.plan.update(&self.team_idxs, &self.world, &self.actors);
-                self.turn_from_player()
-            }
-            _ => self.turn_from_ai(idx),
+        let mv = if idx == self.player_idx {
+            // do the expensive update while waiting for the player
+            self.plan.update(&self.team_idxs, &self.world, &self.actors);
+            self.turn_from_player()
+        } else {
+            self.turn_from_ai(idx)
         };
         // split actors, excluding current, to prevent reborrowing
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
@@ -201,9 +200,10 @@ impl State {
     }
 
     fn update_view(&mut self, is_animating: bool) {
-        let animation_delay = match is_animating {
-            true => 50 / self.player().speed as u64,
-            _ => 0,
+        let animation_delay = if is_animating {
+            50 / u64::from(self.player().speed)
+        } else {
+            0
         };
         self.view.reset(animation_delay);
         self.view.render(self);
@@ -240,8 +240,8 @@ impl State {
     }
 
     fn player_team_create(&mut self) {
-        for kind in vec![0, 2, 11, 1, 13, 5, 3] {
-            let mut actor = Actor::new(kind, 1, 0, (0, 0), 0);
+        for kind in &[0, 2, 11, 1, 13, 5, 3] {
+            let mut actor = Actor::new(*kind, 1, 0, (0, 0), 0);
             actor.is_persistent = true;
             self.player_team.push_front(actor);
         }

@@ -57,9 +57,8 @@ fn raycast(slf: &Actor, dir: u8, wld: &World, p: &Plan, len: u16) -> Option<(usi
         if new_pos == pos {
             break;
         }
-        match p.whos_at(new_pos) {
-            Some(&team) => return Some((team, dist)),
-            None => {}
+        if let Some(&team) = p.whos_at(new_pos) {
+            return Some((team, dist));
         }
         pos = new_pos;
     }
@@ -80,10 +79,10 @@ pub fn passive_drift(slf: &mut Actor, wld: &World) {
             _ => slf.direction,
         };
         let pos = wld.neighbor(slf.pos, drift_dir % 8, slf.team, &slf.walls);
-        match pos != slf.pos {
-            true => slf.pos = pos,
-            false => slf.lose_momentum(1),
+        if pos == slf.pos {
+            return slf.lose_momentum(1);
         }
+        slf.pos = pos;
     }
 }
 
@@ -116,7 +115,7 @@ pub fn passive_whirl(slf: &mut Actor, action: u8, vic: &mut Actor) {
 }
 
 pub fn passive_trip(slf: &mut Actor, dir: u8, vic: &mut Actor) {
-    let angle = (dir as i16 - slf.direction as i16).abs();
+    let angle = (i16::from(dir) - i16::from(slf.direction)).abs();
     if angle == 3 || angle == 4 || angle == 5 {
         slf.log_interaction("spun and tripped", vic);
         vic.stun(1);
@@ -125,9 +124,9 @@ pub fn passive_trip(slf: &mut Actor, dir: u8, vic: &mut Actor) {
 
 pub fn passive_backstab(slf: &mut Actor, dir: u8, vic: &mut Actor) {
     if vic.is_mobile() {
-        let angle = (dir as i16 - vic.direction as i16).abs();
+        let angle = (i16::from(dir) - i16::from(vic.direction)).abs();
         if angle == 0 || angle == 1 || angle == 7 {
-            vic.health = vic.health / 2;
+            vic.health /= 2;
             vic.stun(2);
             slf.log_action(&format!("stabbed {} from behind!", vic.name))
         } else if angle == 2 || angle == 6 {
@@ -139,13 +138,11 @@ pub fn passive_backstab(slf: &mut Actor, dir: u8, vic: &mut Actor) {
 }
 
 pub fn passive_heal(slf: &mut Actor, pal: &mut Actor, _ww: &mut World) {
-    if slf.mana >= 5 {
-        if pal.health < pal.max_health() {
-            slf.act_exert(5, &format!("healed {}", pal.name));
-            let time = slf.time;
-            pal.log_event(&format!("{} healed me.", slf.name.to_sentence_case()), time);
-            pal.recover(20);
-        }
+    if slf.mana >= 5 && pal.health < pal.max_health() {
+        slf.act_exert(5, &format!("healed {}", pal.name));
+        let time = slf.time;
+        pal.log_event(&format!("{} healed me.", slf.name.to_sentence_case()), time);
+        pal.recover(20);
     }
 }
 
@@ -153,14 +150,11 @@ pub fn passive_aim(slf: &mut Actor, wld: &World, p: &Plan) {
     let mut closest = u16::MAX;
     let init_dir = slf.direction;
     for dir in (0..8).map(|delta_dir| (init_dir + delta_dir) % 8) {
-        match raycast(slf, dir, wld, p, 10) {
-            Some((team, dist)) => {
-                if dist < closest && team != slf.team {
-                    closest = dist;
-                    slf.direction = dir;
-                }
+        if let Some((team, dist)) = raycast(slf, dir, wld, p, 10) {
+            if dist < closest && team != slf.team {
+                closest = dist;
+                slf.direction = dir;
             }
-            None => {}
         }
     }
 }
@@ -193,14 +187,12 @@ pub fn charge(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor
     slf.act_exert(4, "charged!");
     for _step in 0..2 {
         let new_pos = wld.neighbor(slf.pos, slf.direction, slf.team, &slf.walls);
-        match p.whos_at(new_pos) {
-            Some(&team) => {
-                if team == slf.team {
-                    return slf.lose_momentum(1);
-                }
-                return slf.gain_momentum(1);
+        if let Some(&team) = p.whos_at(new_pos) {
+            if team == slf.team {
+                return slf.lose_momentum(1);
             }
-            None => slf.pos = new_pos,
+        } else {
+            slf.pos = new_pos;
         }
     }
 }
@@ -351,7 +343,7 @@ pub fn should_grow_tree(slf: &Actor, _wld: &World, p: &Plan) -> bool {
     (p.is_retreating(slf.team) && p.dist_to_pos(slf.pos, slf.team) > 20)
 }
 pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
-    for dir in vec![0, 7, 1, 6, 2, 5, 3] {
+    for dir in &[0, 7, 1, 6, 2, 5, 3] {
         if !can_grow_tree(slf, wld, p) {
             break;
         }

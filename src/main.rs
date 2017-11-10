@@ -1,6 +1,3 @@
- #![cfg_attr(feature="clippy", feature(plugin))]
- #![cfg_attr(feature="clippy", plugin(clippy))]
-
 // GladRL
 // Authors: Chris Rayner (dchrisrayner @ gmail)
 // Created: March 2017
