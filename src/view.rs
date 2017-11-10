@@ -94,7 +94,7 @@ impl View {
                .iter()
                .find(|a| a.pos == pos && a.invis == 0 && a.is_alive()) {
             return self.render_actor(actor);
-        } else if let Some(item) = world.items.iter().find(|i| i.pos == pos) {
+        } else if let Some(item) = world.items.iter().rev().find(|i| i.pos == pos) {
             return self.render_item_or_exit(item);
         } else if let Some(exit) = world.exits.iter().find(|ex| ex.pos == pos) {
             return self.render_item_or_exit(exit);
@@ -105,13 +105,12 @@ impl View {
     }
 
     fn render_actor(&self, actor: &Actor) {
-        let glyph = actor.glyph();
         let color = match self.animation_delay != 0 {
             true => self.actor_status_color(actor),
             false => self.actor_color(actor),
         };
         attron(COLOR_PAIR(color));
-        addch(glyph as chtype);
+        addch(actor.glyph() as chtype);
         attroff(COLOR_PAIR(color));
     }
 
@@ -140,7 +139,7 @@ impl View {
     fn actor_status_color(&self, actor: &Actor) -> i16 {
         if actor.is_alive() && actor.is_hurt() && actor.is_flesh() {
             return 100 + COLOR_RED;
-        } else if actor.is_leader {
+        } else if actor.is_leader && actor.team != 0 {
             return 100 + COLOR_CYAN;
         }
         self.actor_color(actor)
