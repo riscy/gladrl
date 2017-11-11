@@ -100,7 +100,7 @@ impl View {
         printw(format!("{} (Y/n) ", prompt).as_str());
         loop {
             match char::from(getch() as u8) {
-                'Y' => return true,
+                'Y' | ';' => return true,
                 'n' => return false,
                 _ => {}
             }
@@ -145,9 +145,9 @@ impl View {
             2 => COLOR_BLUE,
             3 => COLOR_YELLOW,
             4 => COLOR_MAGENTA,
-            5 => COLOR_WHITE,
+            5 => COLOR_CYAN,
             6 => COLOR_RED,
-            7 => COLOR_CYAN,
+            7 => COLOR_WHITE,
             _ => 0,
         };
         if !actor.is_projectile() && color != 0 {
@@ -238,18 +238,18 @@ impl View {
             let idx = row + log.len() - amount_to_show - self.scrollback;
             if idx < log.len() {
                 let entry = &log[idx as usize];
-                if entry.0 >= time {
+                if entry.1.starts_with('[') {
                     attron(COLOR_PAIR(COLOR_RED));
-                } else if entry.1.starts_with('[') {
+                } else if entry.0 >= time {
                     attron(COLOR_PAIR(COLOR_YELLOW));
                 }
                 printw(&entry.1);
                 if entry.2 > 1 {
                     printw(&format!(" ({}x)", entry.2));
                 }
-                if entry.0 >= time {
+                if entry.1.starts_with('[') {
                     attroff(COLOR_PAIR(COLOR_RED));
-                } else if entry.1.starts_with('[') {
+                } else if entry.0 >= time {
                     attroff(COLOR_PAIR(COLOR_YELLOW));
                 }
             }
@@ -284,7 +284,7 @@ impl View {
                 (focus.1 - hlf_height, focus.1 + hlf_height)
             }
         };
-        (x_range.0 as i32, y_range.0 as i32, x_range.1 as i32, y_range.1 as i32)
+        (i32::from(x_range.0), i32::from(y_range.0), i32::from(x_range.1), i32::from(y_range.1))
     }
 }
 
@@ -296,14 +296,12 @@ pub fn start_ncurses() {
     start_color();
     for color in COLOR_BLACK..COLOR_WHITE + 1 {
         init_pair(color, color, COLOR_BLACK);
+        init_pair(color + 100, COLOR_WHITE, color);
     }
-    // colors for teams
-    init_pair(COLOR_RED + 100, COLOR_WHITE, COLOR_RED);
+    // minor adjustments:
     init_pair(COLOR_GREEN + 100, COLOR_BLACK, COLOR_GREEN);
-    init_pair(COLOR_YELLOW + 100, COLOR_BLUE, COLOR_YELLOW);
-    init_pair(COLOR_BLUE + 100, COLOR_WHITE, COLOR_BLUE);
-    init_pair(COLOR_MAGENTA + 100, COLOR_YELLOW, COLOR_MAGENTA);
-    init_pair(COLOR_CYAN + 100, COLOR_WHITE, COLOR_CYAN);
+    init_pair(COLOR_YELLOW + 100, COLOR_BLACK, COLOR_YELLOW);
+    init_pair(COLOR_CYAN + 100, COLOR_BLACK, COLOR_CYAN);
     init_pair(COLOR_WHITE + 100, COLOR_BLACK, COLOR_WHITE);
     keypad(stdscr(), true);
     cbreak();
