@@ -11,8 +11,8 @@ const TACTIC_RETREAT: u8 = 3;
 const TACTIC_EXIT: u8 = 4;
 
 const UNKNOWN_DISTANCE: i32 = i32::MAX;
-const DONT_PROPAGATE_INTO: &str = "`*#";
-const DONT_PROPAGATE_OUT_OF: &str = "~`*#%";
+const DONT_PROPAGATE_INTO: &str = "`'*#^";
+const DONT_PROPAGATE_OUT_OF: &str = "~`'*#%^";
 
 pub struct Plan {
     team_0_enemies: usize,

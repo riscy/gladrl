@@ -1,6 +1,6 @@
 "kind","glyph","color","desc","can_get","can_consume"
 0,"x",1,"a corpse",false,false
-1,"^",3,"some meat - yum",true,true
+1,"+",1,"some meat - yum",true,true
 2,"$",3,"a gold piece",true,true
 3,"$",0,"a silver piece",true,true
 4,"=",5,"a magic ring",true,false
