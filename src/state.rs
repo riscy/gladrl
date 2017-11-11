@@ -24,7 +24,7 @@ pub struct State {
 
 impl State {
     pub fn new() -> State {
-        let mut state = State {
+        State {
             world: World::new(),
             world_idx: 0,
             world_completed: Vec::new(),
@@ -37,9 +37,7 @@ impl State {
             plan: Plan::new((0, 0), &HashSet::new()),
             spawn: Vec::new(),
             view: View::new(),
-        };
-        state.view.reload_keybindings();
-        state
+        }
     }
 
     pub fn loop_game(&mut self) {
@@ -219,6 +217,7 @@ impl State {
                 }
             }
         }
+        self.update_view(false);
     }
 
     fn check_exits(&mut self) {

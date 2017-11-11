@@ -21,12 +21,15 @@ pub struct View {
 
 impl View {
     pub fn new() -> View {
-        View {
+        let mut view = View {
             animation_delay: 0,
             scrollback: 0,
             screen_xy: (0, 0),
             keybindings: HashMap::new(),
-        }
+        };
+        view.reset(0);
+        view.reload_keybindings();
+        view
     }
 
     pub fn reset(&mut self, animation_delay: u64) {
@@ -37,6 +40,23 @@ impl View {
             clear();
         }
         self.animation_delay = animation_delay;
+    }
+
+    pub fn reload_keybindings(&mut self) -> Vec<String> {
+        self.keybindings.clear();
+        let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
+        let mut reader = csv::Reader::from_file("config/keybindings.csv").unwrap();
+        for record in reader.decode() {
+            let (kbd, num, desc): (String, usize, String) = record.unwrap();
+            online_help.push(format!("{} --{}", kbd, desc));
+            let kbd_char = kbd.chars().nth(0).unwrap() as i32;
+            self.keybindings.insert(kbd_char, num);
+        }
+        self.keybindings.insert(KEY_UP as i32, 0);
+        self.keybindings.insert(KEY_RIGHT as i32, 2);
+        self.keybindings.insert(KEY_DOWN as i32, 4);
+        self.keybindings.insert(KEY_LEFT as i32, 6);
+        online_help
     }
 
     pub fn get_key_input(&mut self) -> u8 {
@@ -265,23 +285,6 @@ impl View {
             }
         };
         (x_range.0 as i32, y_range.0 as i32, x_range.1 as i32, y_range.1 as i32)
-    }
-
-    pub fn reload_keybindings(&mut self) -> Vec<String> {
-        self.keybindings.clear();
-        let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
-        let mut reader = csv::Reader::from_file("config/keybindings.csv").unwrap();
-        for record in reader.decode() {
-            let (kbd, num, desc): (String, usize, String) = record.unwrap();
-            online_help.push(format!("{} --{}", kbd, desc));
-            let kbd_char = kbd.chars().nth(0).unwrap() as i32;
-            self.keybindings.insert(kbd_char, num);
-        }
-        self.keybindings.insert(KEY_UP as i32, 0);
-        self.keybindings.insert(KEY_RIGHT as i32, 2);
-        self.keybindings.insert(KEY_DOWN as i32, 4);
-        self.keybindings.insert(KEY_LEFT as i32, 6);
-        online_help
     }
 }
 
