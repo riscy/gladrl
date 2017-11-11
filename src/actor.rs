@@ -329,7 +329,7 @@ impl Actor {
     }
 
     fn act_touch(&mut self, other: &mut Actor, world: &mut World, action: u8, plan: &Plan) {
-        if other.is_enemy_of(self.team) {
+        if other.is_enemy_of(self.team) && self.strength > 0 {
             return self.act_hit(other, action, world, plan);
         } else if self.can_displace() && other.is_mobile() {
             return self.act_displace(other, world);
@@ -422,7 +422,7 @@ impl Actor {
                 self.hurt(5, world);
             }
             if self.is_hurt() && self.stun_counter == 0 && rand_int(self.health) == 0 {
-                self.log_action("fell, bleeding profusely");
+                self.log_action("fell, bleeding profusely.");
                 self.stun(2);
                 world.blood(self.pos);
             }
@@ -439,7 +439,7 @@ impl Actor {
         if self.stun_counter > 0 {
             self.stun_counter -= 1;
             if self.stun_counter == 0 {
-                self.log_action("managed to get up");
+                self.log_action("managed to get up.");
             }
         }
         self.health = cmp::min(self.max_health(), self.health + amt);

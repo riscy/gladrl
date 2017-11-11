@@ -128,18 +128,18 @@ pub fn passive_backstab(slf: &mut Actor, dir: u8, vic: &mut Actor) {
         if angle == 0 || angle == 1 || angle == 7 {
             vic.health /= 2;
             vic.stun(2);
-            slf.log_action(&format!("stabbed {} from behind!", vic.name))
+            slf.log_interaction("backstabbed", vic);
         } else if angle == 2 || angle == 6 {
             vic.health = vic.health * 2 / 3;
             vic.stun(1);
-            slf.log_action(&format!("stabbed {} in the arm!", vic.name))
+            slf.log_interaction("gouged", vic);
         }
     }
 }
 
 pub fn passive_heal(slf: &mut Actor, pal: &mut Actor, _ww: &mut World) {
     if slf.mana >= 5 && pal.health < pal.max_health() {
-        slf.act_exert(5, &format!("healed {}", pal.name));
+        slf.act_exert(5, &format!("healed {}.", pal.name));
         let time = slf.time;
         pal.log_event(&format!("{} healed me.", slf.name.to_sentence_case()), time);
         pal.recover(20);
@@ -166,7 +166,7 @@ pub fn should_sprint(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     !slf.is_hurt() && rand_int(10) == 0
 }
 pub fn sprint(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
-    slf.act_exert(2, "sprinted ahead");
+    slf.act_exert(2, "sprinted ahead.");
     for _ii in 0..3 {
         let new_pos = wld.neighbor(slf.pos, slf.direction, slf.team, &slf.walls);
         match p.whos_at(new_pos) {
@@ -219,7 +219,7 @@ pub fn should_shoot(slf: &Actor, wld: &World, p: &Plan) -> bool {
 }
 pub fn shoot(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
-    slf.act_exert(2, "released an arrow");
+    slf.act_exert(2, "released an arrow.");
     spawn.push(Actor::new(50, slf.level + 10, slf.team, slf.pos, slf.direction));
     spawn.last_mut().unwrap().glyph = match slf.direction {
         0 | 4 => '|',
@@ -250,7 +250,7 @@ pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
     p.is_attacking(slf.team) && p.dist_to_pos(slf.pos, slf.team) < 3
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    slf.act_exert(10, "threw a boomerang");
+    slf.act_exert(10, "threw a boomerang.");
     let dir = (slf.direction + 7) % 8;
     spawn.push(Actor::new(53, slf.level, slf.team, slf.pos, dir));
     spawn.last_mut().unwrap().momentum = 100;
@@ -263,7 +263,7 @@ pub fn should_warp_space(slf: &Actor, _wld: &World, p: &Plan) -> bool {
     !slf.is_hurt() && p.dist_to_pos(slf.pos, slf.team) < 5
 }
 pub fn warp_space(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    slf.act_exert(20, "casted 'warp space'");
+    slf.act_exert(20, "casted 'warp space'.");
     for dir in 0..8 {
         spawn.push(Actor::new(54, slf.level + 5, slf.team, slf.pos, dir));
     }
@@ -277,7 +277,7 @@ pub fn should_blast(slf: &Actor, wld: &World, p: &Plan) -> bool {
 }
 pub fn blast(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
-    slf.act_exert(2, "released an energy blast");
+    slf.act_exert(2, "released an energy blast.");
     spawn.push(Actor::new(51, slf.level + 5, slf.team, slf.pos, slf.direction));
 }
 
@@ -291,7 +291,7 @@ pub fn teleport(slf: &mut Actor, wld: &World, p: &Plan, _spawn: &mut Vec<Actor>)
     loop {
         let pos = (rand_int(wld.size.0 as u16), rand_int(wld.size.1 as u16));
         if p.whos_at(pos).is_none() && !slf.walls.contains(wld.glyph_at(pos)) {
-            slf.act_exert(3, "teleported");
+            slf.act_exert(3, "teleported.");
             return slf.pos = pos;
         }
     }
@@ -307,7 +307,7 @@ pub fn should_heal(slf: &Actor, wld: &World, p: &Plan) -> bool {
     }
 }
 pub fn heal(slf: &mut Actor, _ww: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    slf.act_exert(5, "released a healing current");
+    slf.act_exert(5, "released a healing current.");
     for direction in 0..8 {
         spawn.push(Actor::new(52, 4, slf.team, slf.pos, direction));
     }
@@ -332,7 +332,7 @@ pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
     slf.is_in_danger(p) || should_shoot(slf, wld, p)
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    slf.act_exert(5, "called a faerie");
+    slf.act_exert(5, "called a faerie.");
     spawn.push(Actor::new(7, slf.level + 5, slf.team, slf.pos, slf.direction));
 }
 
@@ -350,7 +350,7 @@ pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Ac
         }
         let dir = (slf.direction + dir) % 8;
         let pos = wld.neighbor(slf.pos, dir, slf.team, &slf.walls);
-        slf.act_exert(6, "grew a tree");
+        slf.act_exert(6, "grew a tree.");
         wld.items.push(Item::new(100, pos, slf.level, slf.team));
     }
 }
@@ -425,11 +425,11 @@ pub fn pick(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>)
     for item in wld.items.iter_mut().filter(|item| item.pos == door_pos) {
         if item.kind == 18 {
             item.initialize(19);
-            return slf.act_exert(cost, "picked the lock");
+            return slf.act_exert(cost, "picked the lock.");
         } else if item.kind == 19 && p.whos_at(door_pos).is_none() {
             item.initialize(18);
             item.team = slf.team;
-            return slf.act_exert(cost, "relocked the door");
+            return slf.act_exert(cost, "relocked the door.");
         }
     }
 }
