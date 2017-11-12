@@ -116,15 +116,13 @@ impl Plan {
     }
 
     fn open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
-        let mut open_list = Vec::new();
         match self.tactic(team) {
-            TACTIC_EXIT => open_list.append(&mut self.pos_exits(world)),
-            TACTIC_DEFEND => open_list.append(&mut vec![self.tactical_position(team)]),
-            TACTIC_FOLLOW => open_list.append(&mut self.pos_leaders(team, actors)),
-            TACTIC_ATTACK | TACTIC_RETREAT => open_list.append(&mut self.pos_enemies(team, actors)),
-            _ => {}
+            TACTIC_EXIT => self.pos_exits(world),
+            TACTIC_DEFEND => vec![self.tactical_position(team)],
+            TACTIC_FOLLOW => self.pos_leaders(team, actors),
+            TACTIC_ATTACK | TACTIC_RETREAT => self.pos_enemies(team, actors),
+            _ => Vec::new(),
         }
-        open_list
     }
 
     fn update_path(&mut self, team: usize, world: &World, actors: &[Actor]) {
@@ -140,18 +138,16 @@ impl Plan {
             let mut next_open_list: Vec<(u16, u16)> = Vec::new();
             for pos in open_list {
                 for dir in &MOVE_ACTIONS {
-                    let neighbor = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
-                    if self.dist_to_pos(neighbor, team) != UNKNOWN_DISTANCE {
+                    let next = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
+                    if self.dist_to_pos(next, team) != UNKNOWN_DISTANCE {
                         continue;
                     }
-                    // propogate if appropriate OR this neighbor is the same
-                    // glyph as this (forest to forest, but not forest to
-                    // grass); lets npcs path through forests or swim to shore
+                    // propogate forest to forest, but not forest to grass --
+                    // lets npcs path through forests or cross over water
                     if !DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos)) ||
-                       world.glyph_at(neighbor) == world.glyph_at(pos) {
-                        // propagate distances to all neighbors
-                        self.set_dist_to_pos(team, neighbor, steps + 1);
-                        next_open_list.push(neighbor);
+                       world.glyph_at(next) == world.glyph_at(pos) {
+                        self.set_dist_to_pos(team, next, steps + 1);
+                        next_open_list.push(next);
                     }
                 }
             }
