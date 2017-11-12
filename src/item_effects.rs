@@ -35,22 +35,14 @@ pub fn use_as_portal(item: &Item,
                      team: usize,
                      other_items: &[Item])
                      -> (u16, u16) {
-    match item.kind {
-        PORTAL => {
-            if from == to {
-                for portal in other_items.iter().filter(|item| item.kind == PORTAL) {
-                    if portal.level == item.level && portal.pos != item.pos {
-                        return portal.pos;
-                    }
-                }
+    if item.kind == PORTAL && from == to {
+        for portal in other_items.iter().filter(|item| item.kind == PORTAL) {
+            if portal.level == item.level && portal.pos != item.pos {
+                return portal.pos;
             }
         }
-        DOOR | TREE => {
-            if item.team != team {
-                return from;
-            }
-        }
-        _ => {}
+    } else if (item.kind == DOOR || item.kind == TREE) && item.team != team {
+        return from;
     }
     to
 }

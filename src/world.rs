@@ -4,7 +4,7 @@ use std::str;
 use std::collections::HashMap;
 use inflector::Inflector; // for to_sentence_case
 use item::Item;
-use item_effects::{use_on_item, use_as_portal};
+use item_effects::{use_on_item, use_as_portal, DOOR, TREE};
 
 pub struct World {
     pub size: (u16, u16), // cols x rows
@@ -126,9 +126,11 @@ impl World {
     }
 
     pub fn add_item(&mut self, new_item: Item) {
-        // prevent multiple placement of the same object:
-        for item in &self.items {
-            if item.pos == new_item.pos && item.kind == new_item.kind {
+        // prevent multiple placement of doors, trees:
+        if new_item.kind == DOOR || new_item.kind == TREE {
+            if let Some(_item) = self.items
+                   .iter()
+                   .find(|i| i.kind == new_item.kind && i.pos == new_item.pos) {
                 return;
             }
         }
