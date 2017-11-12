@@ -73,12 +73,17 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             state.world.add_item(Item::new(kind, pos, level, team));
             continue;
         }
-
         let mut actor = Actor::new(kind, level, team, pos, direction);
         actor.is_leader = is_leader;
         if !name.is_empty() {
             actor.name = name.to_owned().to_sentence_case();
         }
+        // turn loaded faeries into regular actors, not projectiles
+        if kind == 7 {
+            actor.kind = 8;
+            actor.skills.clear();
+        }
+        assert!(actor.glyph != '?');
         assert!(actor.speed != 0);
         state.actors.push(actor);
         state.team_idxs.insert(team);

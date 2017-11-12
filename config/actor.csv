@@ -23,6 +23,7 @@
 20,"#",".","a defense tower",5,"shoot passive_aim",0,1,45,5
 30,"%",".","a pile of carnage",1,"spawn_dead",0,1,30,5
 31,"%",".","a dark tower",1,"spawn_mage blast passive_aim",0,1,36,5
+32,"%",".","a pile of carnage",1,"spawn_ghost",0,1,40,5
 33,"%",".","an unusual tree",1,"spawn_elf shoot passive_aim",0,1,30,5
 
 7,"f","'#*`","a faerie",3,"passive_aim passive_descend",1,1,3,3
