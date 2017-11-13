@@ -479,8 +479,7 @@ impl Actor {
     }
 
     pub fn is_projectile(&self) -> bool {
-        self.kind == 50 || self.kind == 51 || self.kind == 52 || self.kind == 53 ||
-        self.kind == 7 || self.kind == 54
+        self.kind >= 50 && self.kind < 60
     }
 
     pub fn is_undead(&self) -> bool {

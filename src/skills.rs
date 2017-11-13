@@ -247,7 +247,7 @@ pub fn can_boomerang(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 10
 }
 pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    p.is_attacking(slf.team) && p.dist_to_pos(slf.pos, slf.team) < 3
+    !slf.is_hurt() && p.dist_to_pos(slf.pos, slf.team) < 3
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(10, "threw a boomerang.");
@@ -273,7 +273,7 @@ pub fn can_blast(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 2
 }
 pub fn should_blast(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    should_shoot(slf, wld, p)
+    !slf.is_hurt() && should_shoot(slf, wld, p)
 }
 pub fn blast(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
@@ -287,11 +287,12 @@ pub fn can_teleport(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
 pub fn should_teleport(slf: &Actor, _wld: &World, p: &Plan) -> bool {
     slf.is_in_danger(p) && slf.health < slf.max_health() / 2
 }
-pub fn teleport(slf: &mut Actor, wld: &World, p: &Plan, _spawn: &mut Vec<Actor>) {
+pub fn teleport(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
     loop {
         let pos = (rand_int(wld.size.0 as u16), rand_int(wld.size.1 as u16));
         if p.whos_at(pos).is_none() && !slf.walls.contains(wld.glyph_at(pos)) {
             slf.act_exert(3, "teleported.");
+            wld.log_global("There was a sudden gust of wind.", pos, false);
             return slf.pos = pos;
         }
     }
@@ -333,7 +334,7 @@ pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "called a faerie.");
-    spawn.push(Actor::new(7, slf.level + 5, slf.team, slf.pos, slf.direction));
+    spawn.push(Actor::new(55, slf.level + 5, slf.team, slf.pos, slf.direction));
 }
 
 pub fn can_grow_tree(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -351,7 +352,7 @@ pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Ac
         let dir = (slf.direction + dir) % 8;
         let pos = wld.neighbor(slf.pos, dir, slf.team, &slf.walls);
         slf.act_exert(6, "grew a tree.");
-        wld.items.push(Item::new(100, pos, slf.level, slf.team));
+        wld.add_item(Item::new(100, pos, slf.level, slf.team));
     }
 }
 

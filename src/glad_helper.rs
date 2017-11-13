@@ -78,11 +78,6 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         if !name.is_empty() {
             actor.name = name.to_owned().to_sentence_case();
         }
-        // turn loaded faeries into regular actors, not projectiles
-        if kind == 7 {
-            actor.kind = 8;
-            actor.skills.clear();
-        }
         assert!(actor.glyph != '?');
         assert!(actor.move_lag != 0);
         state.actors.push(actor);
