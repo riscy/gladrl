@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use std::cmp;
 use csv;
 use ncurses::*;
-use state::State;
 use actor::Actor;
 use world::World;
 use item::Item;
@@ -68,28 +67,28 @@ impl View {
         }
     }
 
-    pub fn render(&self, gs: &State) {
+    pub fn render(&self, world: &World, actors: &[Actor], player: &Actor) {
         if !RENDER {
             return;
         }
-        let focus = gs.player().pos;
-        let (min_x, min_y, max_x, max_y) = self.rect_around(focus, &gs.world);
-        self.render_world(gs, (min_x, min_y, max_x, max_y));
+        let focus = player.pos;
+        let (min_x, min_y, max_x, max_y) = self.rect_around(focus, world);
+        self.render_world(world, actors, (min_x, min_y, max_x, max_y));
         let xx = (max_x - min_x) as i32;
-        let yy = self.render_roster(&gs.actors, xx);
+        let yy = self.render_roster(actors, xx);
         let rows = (max_y - min_y) as usize - yy as usize;
-        self.render_log(&gs.player().log, (xx + 1, yy), rows, gs.player().time);
+        self.render_log(&player.log, (xx + 1, yy), rows, player.time);
         mv(i32::from(focus.1) - min_y, i32::from(focus.0) - min_x);
         refresh();
         sleep(Duration::from_millis(self.animation_delay));
     }
 
-    fn render_world(&self, state: &State, rect: (i32, i32, i32, i32)) {
+    fn render_world(&self, world: &World, actors: &[Actor], rect: (i32, i32, i32, i32)) {
         let (min_x, min_y, max_x, max_y) = rect;
         for y in min_y..max_y {
             for x in min_x..max_x {
                 mv(y - min_y, x - min_x);
-                self.render_cell((x as u16, y as u16), &state.actors, &state.world);
+                self.render_cell((x as u16, y as u16), &actors, &world);
             }
         }
     }

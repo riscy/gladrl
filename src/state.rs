@@ -204,7 +204,7 @@ impl State {
             0
         };
         self.view.reset(animation_delay);
-        self.view.render(self);
+        self.view.render(&self.world, &self.actors, &self.player());
     }
 
     fn update_logs(&mut self) {
