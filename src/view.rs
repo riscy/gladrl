@@ -88,7 +88,7 @@ impl View {
         for y in min_y..max_y {
             for x in min_x..max_x {
                 mv(y - min_y, x - min_x);
-                self.render_cell((x as u16, y as u16), &actors, &world);
+                self.render_cell((x as u16, y as u16), actors, world);
             }
         }
     }

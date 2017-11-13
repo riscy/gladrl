@@ -513,7 +513,7 @@ impl Actor {
     }
 
     pub fn has_skill(&self, skill: &str) -> bool {
-        self.skills.iter().find(|s| s.as_str() == skill).is_some()
+        self.skills.iter().any(|s| s.as_str() == skill)
     }
 
     fn is_important(&self) -> bool {

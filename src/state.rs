@@ -205,7 +205,7 @@ impl State {
         let team_len = self.actors.iter().filter(|a| a.is_playable()).count();
         let log_len = self.player().log.len();
         self.view.reset(animation_delay, team_len, log_len);
-        self.view.render(&self.world, &self.actors, &self.player());
+        self.view.render(&self.world, &self.actors, self.player());
     }
 
     fn update_logs(&mut self) {
