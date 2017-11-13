@@ -77,8 +77,7 @@ impl World {
     }
 
     pub fn log_global(&mut self, txt: &str, pos: (u16, u16), important: bool) {
-        self.log
-            .push((pos, txt.to_sentence_case().to_owned(), important));
+        self.log.push((pos, txt.to_sentence_case(), important));
     }
 
     pub fn offset(&self, from: (u16, u16), dir: u8) -> (u16, u16) {

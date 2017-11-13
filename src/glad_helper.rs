@@ -76,7 +76,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         let mut actor = Actor::new(kind, level, team, pos, direction);
         actor.is_leader = is_leader;
         if !name.is_empty() {
-            actor.name = name.to_owned().to_sentence_case();
+            actor.name = name.to_sentence_case();
         }
         assert!(actor.glyph != '?');
         assert!(actor.move_lag != 0);
