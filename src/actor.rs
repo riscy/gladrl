@@ -234,6 +234,9 @@ impl Actor {
             };
         }
         self.side_effects(wld);
+        if self.is_alive() && !self.is_projectile() && self.is_mobile() {
+            self.act_get(wld);
+        }
     }
 
     fn act_move(&mut self,
@@ -428,7 +431,6 @@ impl Actor {
             }
             self.recover(1);
             self.mana = cmp::min(self.max_mana(), self.mana + 1);
-            self.act_get(world);
         }
         if self.invis > 0 {
             self.invis -= 1;
