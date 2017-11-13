@@ -142,10 +142,9 @@ impl Actor {
 
     pub fn log_interaction(&mut self, verb: &str, other: &mut Actor) {
         let time = cmp::max(self.time, other.time);
-        let msg = format!("I {} {}.", verb, other.name);
-        self.log_event(&msg, time);
-        let msg = format!("{} {} me!", self.name.to_sentence_case(), verb);
-        other.log_event(&msg, time);
+        let capitalized_name = self.name.to_sentence_case();
+        self.log_event(&format!("I {} {}.", verb, other.name), time);
+        other.log_event(&format!("{} {} me!", capitalized_name, verb), time);
     }
 
     pub fn select_skill(&mut self, skill: &str) {
@@ -326,8 +325,7 @@ impl Actor {
     fn act_drop_all(&mut self, world: &mut World) {
         while !self.inventory.is_empty() {
             self.act_drop_item(world);
-            let new_direction = self.direction + 1;
-            self.act_change_direction(new_direction);
+            self.direction = (self.direction + 1) % 8;
         }
     }
 
@@ -349,7 +347,6 @@ impl Actor {
             self.lose_momentum(1);
             self.log_interaction("displaced", other);
         }
-        passive_effect!(passive_heal => self, other, world);
     }
 
     fn act_help(&mut self, other: &mut Actor, world: &mut World) {
@@ -396,16 +393,15 @@ impl Actor {
     }
 
     pub fn hurt(&mut self, amt: u16, world: &mut World) {
-        self.health -= cmp::min(self.health, amt);
-        if self.health == 0 {
-            self.act_die(world);
+        if amt < self.health {
+            return self.health -= amt;
         }
+        self.act_die(world);
     }
 
     pub fn stun(&mut self, amt: i16) {
         self.stun_counter = amt;
-        let momentum = self.momentum;
-        self.lose_momentum(momentum);
+        self.lose_momentum(1);
     }
 
     pub fn gain_momentum(&mut self, _amt: u8) {
@@ -492,7 +488,7 @@ impl Actor {
     }
 
     pub fn is_flesh(&self) -> bool {
-        !self.is_projectile() && self.kind != 7 && !self.is_undead() && self.is_mobile()
+        !self.is_projectile() && !self.is_undead() && self.is_mobile()
     }
 
     pub fn is_enemy_of(&self, team: usize) -> bool {
@@ -505,7 +501,7 @@ impl Actor {
 
     pub fn is_near(&self, pos: (u16, u16)) -> bool {
         let (dx, dy) = (self.pos.0 - pos.0, self.pos.1 - pos.1);
-        dx * dx + dy * dy < 10
+        dx * dx + dy * dy <= 12
     }
 
     pub fn is_in_danger(&self, p: &Plan) -> bool {
@@ -518,7 +514,7 @@ impl Actor {
     }
 
     pub fn has_skill(&self, skill: &str) -> bool {
-        self.skills.contains(&skill.to_owned())
+        self.skills.iter().find(|s| s.as_str() == skill).is_some()
     }
 
     fn is_important(&self) -> bool {
