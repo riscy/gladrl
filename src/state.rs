@@ -69,7 +69,6 @@ impl State {
             self.view.scroll_log_up(1);
             self.player_mut().log_event(line, 0);
         }
-        self.view.scroll_log_down(1);
     }
 
     fn extract_team(&mut self, level_up: bool) {
@@ -203,7 +202,9 @@ impl State {
         } else {
             0
         };
-        self.view.reset(animation_delay);
+        let team_len = self.actors.iter().filter(|a| a.is_playable()).count();
+        let log_len = self.player().log.len();
+        self.view.reset(animation_delay, team_len, log_len);
         self.view.render(&self.world, &self.actors, &self.player());
     }
 

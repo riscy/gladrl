@@ -26,12 +26,11 @@ impl View {
             screen_xy: (0, 0),
             keybindings: HashMap::new(),
         };
-        view.reset(0);
         view.reload_keybindings();
         view
     }
 
-    pub fn reset(&mut self, animation_delay: u64) {
+    pub fn reset(&mut self, animation_delay: u64, roster_count: usize, log_len: usize) {
         let (mut max_x, mut max_y) = (0, 0);
         getmaxyx(stdscr(), &mut max_y, &mut max_x);
         if max_y != self.screen_xy.1 || max_x != self.screen_xy.0 {
@@ -39,6 +38,8 @@ impl View {
             clear();
         }
         self.animation_delay = animation_delay;
+        let logs_to_show = cmp::min(max_y as usize - roster_count - 1, log_len);
+        self.scrollback = cmp::min(log_len - logs_to_show, self.scrollback);
     }
 
     pub fn reload_keybindings(&mut self) -> Vec<String> {
@@ -76,8 +77,7 @@ impl View {
         self.render_world(world, actors, (min_x, min_y, max_x, max_y));
         let xx = (max_x - min_x) as i32;
         let yy = self.render_roster(actors, xx);
-        let rows = (max_y - min_y) as usize - yy as usize;
-        self.render_log(&player.log, (xx + 1, yy), rows, player.time);
+        self.render_log(&player.log, player.time, (xx + 1, yy));
         mv(i32::from(focus.1) - min_y, i32::from(focus.0) - min_x);
         refresh();
         sleep(Duration::from_millis(self.animation_delay));
@@ -222,19 +222,13 @@ impl View {
         self.scrollback -= amt
     }
 
-    fn render_log(&self,
-                  log: &[(u32, String, usize)],
-                  pos: (i32, i32),
-                  mut rows: usize,
-                  time: u32) {
-        let amount_to_show = cmp::min(rows, log.len());
-        if self.scrollback > 0 {
-            rows -= 1;
-        }
-        for row in 0..rows {
+    fn render_log(&self, log: &[(u32, String, usize)], time: u32, pos: (i32, i32)) {
+        let height = (self.screen_xy.1 - pos.1) as usize;
+        let max_amount_to_show = cmp::min(height, log.len());
+        for row in 0..height {
             mv(row as i32 + pos.1, pos.0);
             clrtoeol();
-            let idx = row + log.len() - amount_to_show - self.scrollback;
+            let idx = row + log.len() - self.scrollback - max_amount_to_show;
             if idx < log.len() {
                 let entry = &log[idx as usize];
                 if entry.1.starts_with('[') {
@@ -254,7 +248,7 @@ impl View {
             }
         }
         if self.scrollback > 0 {
-            mv(rows as i32 + pos.1, pos.0);
+            mv(height as i32 - 1 + pos.1, pos.0);
             clrtoeol();
             attron(COLOR_PAIR(COLOR_CYAN));
             printw(&format!("({:>2} more lines: scroll with <,>)", self.scrollback));
