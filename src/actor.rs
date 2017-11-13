@@ -27,7 +27,7 @@ pub struct Actor {
 
     pub level: u16,
     pub health: u16,
-    pub speed: u16,
+    pub move_lag: u16,
     pub mana: u16,
     pub intel: u16,
     pub con: u16,
@@ -66,7 +66,7 @@ impl Actor {
             is_leader: false,
             stun_counter: 0,
             glyph: '?',
-            speed: 1,
+            move_lag: 1,
             is_persistent: false,
             momentum: 0,
             selected_skill: 0,
@@ -92,7 +92,7 @@ impl Actor {
                 if self.name.is_empty() {
                     self.name = row.3;
                 }
-                self.speed = row.4;
+                self.move_lag = row.4;
                 self.strength = row.6;
                 self.con = row.8;
                 self.intel = row.9;
@@ -473,7 +473,7 @@ impl Actor {
     }
 
     pub fn is_ready_to_act(&self, time: u32) -> bool {
-        (time + u32::from(self.random_state)) % u32::from(self.speed) == 0
+        (time + u32::from(self.random_state)) % u32::from(self.move_lag) == 0
     }
 
     pub fn is_mobile(&self) -> bool {

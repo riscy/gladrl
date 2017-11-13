@@ -84,7 +84,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             actor.skills.clear();
         }
         assert!(actor.glyph != '?');
-        assert!(actor.speed != 0);
+        assert!(actor.move_lag != 0);
         state.actors.push(actor);
         state.team_idxs.insert(team);
     }

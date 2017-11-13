@@ -15,7 +15,7 @@ pub fn use_on_actor(actor: &mut Actor, kind: u8) -> bool {
         5 => actor.invis = 200,
         6 => actor.con += 1,
         7 => actor.walls = actor.walls.replace("~", ""),
-        12 => actor.speed = (actor.speed / 2) + 1,
+        12 => actor.move_lag = (actor.move_lag / 2) + 1,
         _ => return false,
     }
     true

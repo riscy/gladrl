@@ -199,7 +199,7 @@ impl State {
 
     fn update_view(&mut self, is_animating: bool) {
         let animation_delay = if is_animating {
-            50 / u64::from(self.player().speed)
+            50 / u64::from(self.player().move_lag)
         } else {
             0
         };
