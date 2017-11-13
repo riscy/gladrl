@@ -436,8 +436,9 @@ impl Actor {
     pub fn recover(&mut self, amt: u16) {
         if self.stun_counter > 0 {
             self.stun_counter -= 1;
-            if self.stun_counter == 0 {
-                self.log_action("managed to get up.");
+            match self.stun_counter {
+                0 => self.log_action("managed to get up."),
+                _ => self.log_action("struggled on the ground."),
             }
         }
         self.health = cmp::min(self.max_health(), self.health + amt);

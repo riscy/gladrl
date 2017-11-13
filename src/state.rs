@@ -223,8 +223,8 @@ impl State {
 
     fn check_exits(&mut self) {
         if self.player().is_ready_to_act(self.time) {
-            for exit in &self.world.exits {
-                if self.player().pos == exit.pos && (AUTOPILOT || self.view.yes_or_no("Exit?")) {
+            if let Some(exit) = self.world.exits.iter().find(|x| x.pos == self.player().pos) {
+                if AUTOPILOT || self.plan.num_enemies() <= 5 || self.view.yes_or_no("Retreat?") {
                     return self.world_idx = exit.level as usize;
                 }
             }

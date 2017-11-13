@@ -96,11 +96,11 @@ impl View {
     pub fn yes_or_no(&self, prompt: &str) -> bool {
         mv(0, 0);
         clrtoeol();
-        printw(format!("{} (Y/n) ", prompt).as_str());
+        printw(format!("{} (Y/N) ", prompt).as_str());
         loop {
             match char::from(getch() as u8) {
                 'Y' | ';' => return true,
-                'n' => return false,
+                'N' => return false,
                 _ => {}
             }
         }
