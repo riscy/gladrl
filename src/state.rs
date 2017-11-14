@@ -90,6 +90,7 @@ impl State {
         while current_world_idx == self.world_idx {
             self.actors.append(&mut self.spawn);
             self.player_control_confirm();
+            self.update_logs();
             for idx in 0..self.actors.len() {
                 if !self.actors[idx].is_alive() {
                     continue;
@@ -102,7 +103,6 @@ impl State {
                     self.give_turn(idx);
                 }
             }
-            self.update_logs();
             self.check_exits();
             self.actors.retain(|a| a.is_alive() || !a.is_projectile());
             self.world.items.retain(|item| !item.is_debris());
