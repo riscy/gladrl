@@ -183,25 +183,25 @@ impl Actor {
     }
 
     fn choose_move(&self, world: &World, plan: &Plan) -> u8 {
+        let retreat = self.is_hurt();
         let start_mv = self.choose_preferred_dir();
         let (mut best_gradient, mut best_direction) = (0, start_mv);
         for mv in MOVE_ACTIONS.iter().map(|offset| (start_mv + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
-            let movement = pos != self.pos;
+            let mut movement = pos != self.pos;
             if !movement {
                 pos = world.offset(self.pos, mv)
             }
-            if !self.is_hurt() {
+            if !retreat {
                 if let Some(&team) = plan.whos_at(pos) {
                     if team != self.team || (pos != self.pos && self.can_help()) {
                         return mv;
                     } else if !self.can_displace() {
-                        continue;
+                        movement = false;
                     }
                 }
             }
-            if movement {
-                let retreat = self.is_hurt();
+            if movement || mv == DO_WAIT {
                 let gradient = plan.gradient(self.pos, pos, self.team, retreat);
                 if gradient > best_gradient {
                     best_direction = mv;
