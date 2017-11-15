@@ -9,7 +9,7 @@
 "b", 5, "go southwest"
 "h", 6, "go west"
 "y", 7, "go northwest"
-".", 8, "wait one turn"
+".", 8, "wait or use portal"
 
 "K", 16, "turn north"
 "U", 17, "turn northeast"

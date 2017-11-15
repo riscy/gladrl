@@ -30,24 +30,24 @@
   | ~>~ | scroll the log pane down |
 
   Moving around:
-  | ~;~ | let the AI decide |
-  | ~k~ | go north          |
-  | ~u~ | go northeast      |
-  | ~l~ | go east           |
-  | ~n~ | go southeast      |
-  | ~j~ | go south          |
-  | ~b~ | go southwest      |
-  | ~h~ | go west           |
-  | ~y~ | go northwest      |
-  | ~.~ | wait one turn     |
-  | ~K~ | turn north        |
-  | ~U~ | turn northeast    |
-  | ~L~ | turn east         |
-  | ~N~ | turn southeast    |
-  | ~J~ | turn south        |
-  | ~B~ | turn southwest    |
-  | ~H~ | turn west         |
-  | ~Y~ | turn northwest    |
+  | ~;~ | let the AI decide  |
+  | ~k~ | go north           |
+  | ~u~ | go northeast       |
+  | ~l~ | go east            |
+  | ~n~ | go southeast       |
+  | ~j~ | go south           |
+  | ~b~ | go southwest       |
+  | ~h~ | go west            |
+  | ~y~ | go northwest       |
+  | ~.~ | wait or use portal |
+  | ~K~ | turn north         |
+  | ~U~ | turn northeast     |
+  | ~L~ | turn east          |
+  | ~N~ | turn southeast     |
+  | ~J~ | turn south         |
+  | ~B~ | turn southwest     |
+  | ~H~ | turn west          |
+  | ~Y~ | turn northwest     |
 
   Specials:
   | ~z~ | use your current special    |
