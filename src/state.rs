@@ -88,7 +88,6 @@ impl State {
     fn loop_turns(&mut self) {
         let current_world_idx = self.world_idx;
         while current_world_idx == self.world_idx {
-            self.actors.append(&mut self.spawn);
             self.player_control_confirm();
             self.update_logs();
             for idx in 0..self.actors.len() {
@@ -105,6 +104,7 @@ impl State {
             }
             self.check_exits();
             self.actors.retain(|a| a.is_alive() || !a.is_projectile());
+            self.actors.append(&mut self.spawn);
             self.world.items.retain(|item| !item.is_debris());
             self.time += 1;
         }
