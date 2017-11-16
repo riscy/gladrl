@@ -2,6 +2,7 @@
 #+OPTIONS: toc:3 author:t creator:nil num:nil
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
+[[https://img.shields.io/badge/version-0.0.4-blue.svg]]
 
 [[file:img/screenshot.png]]
 
