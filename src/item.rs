@@ -37,10 +37,10 @@ impl Item {
     pub fn initialize(&mut self, kind: u8) {
         let mut reader = csv::Reader::from_file("config/item.csv").unwrap();
         for record in reader.decode() {
-            let row: (u8, String, i16, String, bool, bool) = record.unwrap();
+            let row: (u8, char, i16, String, bool, bool) = record.unwrap();
             if row.0 == kind {
                 self.kind = row.0;
-                self.glyph = row.1.chars().nth(0).unwrap();
+                self.glyph = row.1;
                 self.color = row.2;
                 self.name = row.3;
                 self.can_get = row.4;

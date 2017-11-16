@@ -120,9 +120,8 @@ fn read_bytes(amt: u64, file: &mut File) -> Vec<u8> {
 // Interpret a c-style string with a nul terminator.
 fn read_c_string(max_amt: u64, mut file: &mut File) -> String {
     let buffer = read_bytes(max_amt, &mut file);
-    let strlen = buffer
-        .iter()
-        .position(|&byte| (byte as char) < ' ')
-        .unwrap();
-    str::from_utf8(&buffer[..strlen]).unwrap().to_owned()
+    if let Some(strlen) = buffer.iter().position(|&byte| (byte as char) < ' ') {
+        return str::from_utf8(&buffer[..strlen]).unwrap().to_owned();
+    }
+    String::new()
 }
