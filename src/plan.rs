@@ -40,6 +40,13 @@ impl Plan {
         plan
     }
 
+    fn tactic(&self, team: usize) -> u8 {
+        match team {
+            0 => self.team_0_tactic,
+            _ => TACTIC_ATTACK,
+        }
+    }
+
     pub fn tactic_defend(&mut self, pos: (u16, u16)) {
         self.team_0_tactic = TACTIC_DEFEND;
         self.team_0_tactical_position = pos;
@@ -57,13 +64,6 @@ impl Plan {
         self.team_0_tactic = TACTIC_RETREAT;
     }
 
-    fn tactic(&self, team: usize) -> u8 {
-        match team {
-            0 => self.team_0_tactic,
-            _ => TACTIC_ATTACK,
-        }
-    }
-
     pub fn tactical_position(&self, team: usize) -> (u16, u16) {
         match team {
             0 => self.team_0_tactical_position,
@@ -71,8 +71,16 @@ impl Plan {
         }
     }
 
-    pub fn num_enemies(&self) -> usize {
-        self.team_0_enemies
+    pub fn is_defending(&self, team: usize) -> bool {
+        team == 0 && self.team_0_tactic == TACTIC_DEFEND
+    }
+
+    pub fn is_attacking(&self, team: usize) -> bool {
+        team != 0 || self.team_0_tactic == TACTIC_ATTACK
+    }
+
+    pub fn is_retreating(&self, team: usize) -> bool {
+        team == 0 && self.team_0_tactic == TACTIC_RETREAT
     }
 
     pub fn fast_update(&mut self, actors: &[Actor]) {
@@ -91,61 +99,28 @@ impl Plan {
             self.team_0_tactic = TACTIC_EXIT;
         }
         for &team in teams {
-            self.update_path(team, world, actors);
+            self.update_paths(team, world, actors);
         }
     }
 
-    fn pos_exits(&self, world: &World) -> Vec<(u16, u16)> {
-        world.exits.iter().map(|exit| exit.pos).collect()
-    }
-
-    fn pos_enemies(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
-        actors
-            .iter()
-            .filter(|actor| actor.is_enemy_of(team) && actor.invis == 0)
-            .map(|actor| actor.pos)
-            .collect()
-    }
-
-    fn pos_leaders(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
-        actors
-            .iter()
-            .filter(|actor| actor.is_leader && actor.team == team)
-            .map(|actor| actor.pos)
-            .collect()
-    }
-
-    fn open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
-        match self.tactic(team) {
-            TACTIC_EXIT => self.pos_exits(world),
-            TACTIC_DEFEND => vec![self.tactical_position(team)],
-            TACTIC_FOLLOW => self.pos_leaders(team, actors),
-            TACTIC_ATTACK | TACTIC_RETREAT => self.pos_enemies(team, actors),
-            _ => Vec::new(),
-        }
-    }
-
-    fn update_path(&mut self, team: usize, world: &World, actors: &[Actor]) {
+    fn update_paths(&mut self, team: usize, world: &World, actors: &[Actor]) {
         for idx in 0..self.distances[&team].len() {
             self.distances.get_mut(&team).unwrap()[idx] = UNKNOWN_DISTANCE;
         }
+        let maximum_steps = if team == 0 { 200 } else { 24 };
         let mut open_list = self.open_list(team, world, actors);
         for pos in &open_list {
             self.set_dist_to_pos(team, *pos, 0);
         }
-        let maximum_steps = if team == 0 { 200 } else { 24 };
         for steps in 0..maximum_steps {
             let mut next_open_list: Vec<(u16, u16)> = Vec::new();
             for pos in open_list {
                 for dir in &MOVE_ACTIONS {
                     let next = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
-                    if self.dist_to_pos(next, team) != UNKNOWN_DISTANCE {
-                        continue;
-                    }
-                    // propogate forest to forest, but not forest to grass --
-                    // lets npcs path through forests or cross over water
-                    if !DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos)) ||
-                       world.glyph_at(next) == world.glyph_at(pos) {
+                    // propogate forest to forest, but not forest to grass:
+                    if self.dist_to_pos(next, team) == UNKNOWN_DISTANCE &&
+                       (!DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos)) ||
+                        world.glyph_at(next) == world.glyph_at(pos)) {
                         self.set_dist_to_pos(team, next, steps + 1);
                         next_open_list.push(next);
                     }
@@ -158,13 +133,47 @@ impl Plan {
         }
     }
 
+    fn open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
+        match self.tactic(team) {
+            TACTIC_EXIT => self.locate_exits(world),
+            TACTIC_DEFEND => vec![self.tactical_position(team)],
+            TACTIC_FOLLOW => self.locate_leaders(team, actors),
+            TACTIC_ATTACK | TACTIC_RETREAT => self.locate_enemies(team, actors),
+            _ => Vec::new(),
+        }
+    }
+
+    fn locate_exits(&self, world: &World) -> Vec<(u16, u16)> {
+        world.exits.iter().map(|exit| exit.pos).collect()
+    }
+
+    fn locate_enemies(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
+        actors
+            .iter()
+            .filter(|actor| actor.is_enemy_of(team) && actor.invis == 0)
+            .map(|actor| actor.pos)
+            .collect()
+    }
+
+    fn locate_leaders(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
+        actors
+            .iter()
+            .filter(|actor| actor.is_leader && actor.team == team)
+            .map(|actor| actor.pos)
+            .collect()
+    }
+
     pub fn dist_to_pos(&self, pos: (u16, u16), team: usize) -> i32 {
-        self.distances[&team][(pos.1 * self.world_size.0 + pos.0) as usize]
+        if let Some(distances) = self.distances.get(&team) {
+            return distances[(pos.1 * self.world_size.0 + pos.0) as usize];
+        }
+        0
     }
 
     fn set_dist_to_pos(&mut self, team: usize, pos: (u16, u16), val: i32) {
-        let field = self.distances.get_mut(&team).unwrap();
-        field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
+        if let Some(field) = self.distances.get_mut(&team) {
+            field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
+        }
     }
 
     pub fn gradient(&self, from: (u16, u16), to: (u16, u16), team: usize, retreat: bool) -> i32 {
@@ -173,19 +182,11 @@ impl Plan {
         if retreat { -dd } else { dd }
     }
 
+    pub fn num_enemies(&self) -> usize {
+        self.team_0_enemies
+    }
+
     pub fn whos_at(&self, pos: (u16, u16)) -> Option<&usize> {
         self.occupied_cells.get(&pos)
-    }
-
-    pub fn is_defending(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == TACTIC_DEFEND
-    }
-
-    pub fn is_attacking(&self, team: usize) -> bool {
-        team != 0 || self.team_0_tactic == TACTIC_ATTACK
-    }
-
-    pub fn is_retreating(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == TACTIC_RETREAT
     }
 }
