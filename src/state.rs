@@ -26,7 +26,7 @@ impl State {
     pub fn new() -> State {
         State {
             world: World::new(),
-            world_idx: 0,
+            world_idx: 1,
             world_completed: Vec::new(),
             time: 1,
 
@@ -41,15 +41,9 @@ impl State {
     }
 
     pub fn loop_game(&mut self) {
-        loop {
-            if self.world_idx == 0 {
-                self.player_team.clear();
-                self.player_team_create();
-                self.world_completed.clear();
-                self.world_idx = 1;
-                self.spawn.clear();
-            }
-            start_ncurses();
+        start_ncurses();
+        self.player_team_create();
+        while self.world_idx != 0 {
             glad_helper::load_world_and_spawn_team(self);
             self.plan = Plan::new(self.world.size, &self.team_idxs);
             self.player_idx = 0;
@@ -58,8 +52,9 @@ impl State {
             self.loop_turns();
             self.actors.clear();
             self.team_idxs.clear();
-            end_ncurses();
         }
+        end_ncurses();
+        println!("Score: {}", self.world_completed.len() * 100);
     }
 
     fn load_world_description(&mut self) {
@@ -225,7 +220,7 @@ impl State {
     fn check_exits(&mut self) {
         if self.player().is_ready_to_act(self.time) {
             if let Some(exit) = self.world.exits.iter().find(|x| x.pos == self.player().pos) {
-                if AUTOPILOT || self.plan.num_enemies() <= 5 || self.view.yes_or_no("Retreat?") {
+                if AUTOPILOT || self.view.yes_or_no("Exit?") {
                     return self.world_idx = exit.level as usize;
                 }
             }
