@@ -480,7 +480,7 @@ impl Actor {
     }
 
     pub fn is_ready_to_act(&self, time: u32) -> bool {
-        (time + u32::from(self.random_state)) % u32::from(self.move_lag) == 0
+        self.is_alive() && (time + u32::from(self.random_state)) % u32::from(self.move_lag) == 0
     }
 
     pub fn is_mobile(&self) -> bool {

@@ -11,6 +11,7 @@ pub struct State {
     pub world: World,
     pub world_idx: usize,
     pub world_completed: Vec<usize>,
+    score: u32,
     time: u32,
 
     pub actors: Vec<Actor>,
@@ -29,6 +30,7 @@ impl State {
             world_idx: 1,
             world_completed: Vec::new(),
             time: 1,
+            score: 0,
 
             actors: Vec::new(),
             player_idx: 0,
@@ -54,7 +56,7 @@ impl State {
             self.team_idxs.clear();
         }
         end_ncurses();
-        println!("Score: {}", self.world_completed.len() * 100);
+        println!("Score: {}", self.score - self.time);
     }
 
     fn load_world_description(&mut self) {
@@ -84,23 +86,18 @@ impl State {
         let current_world_idx = self.world_idx;
         while current_world_idx == self.world_idx {
             self.player_control_confirm();
-            self.update_logs();
             for idx in 0..self.actors.len() {
-                if !self.actors[idx].is_alive() {
-                    continue;
-                }
-                if idx == self.player_idx && !self.player().is_ready_to_act(self.time) {
-                    // draw an animation frame for each tick of play:
-                    self.update_view(true);
-                }
                 if self.actors[idx].is_ready_to_act(self.time) {
+                    self.update_logs();
                     self.give_turn(idx);
                 }
             }
-            self.check_exits();
-            self.actors.retain(|a| a.is_alive() || !a.is_projectile());
+            self.update_view(true);
+
             self.actors.append(&mut self.spawn);
+            self.actors.retain(|a| a.is_alive() || !a.is_projectile());
             self.world.items.retain(|item| !item.is_debris());
+            self.check_exits();
             self.time += 1;
         }
         let victory = self.plan.num_enemies() <= 5 &&
@@ -108,6 +105,7 @@ impl State {
         self.extract_team(victory);
         if victory {
             self.world_completed.push(current_world_idx);
+            self.score += 1000 + 100 * self.player_team.len() as u32;
         }
     }
 
@@ -194,14 +192,14 @@ impl State {
 
     fn update_view(&mut self, is_animating: bool) {
         let animation_delay = if is_animating {
-            50 / u64::from(self.player().move_lag)
+            500 / u64::from(self.player().move_lag)
         } else {
             0
         };
         let team_len = self.actors.iter().filter(|a| a.is_playable()).count();
         let log_len = self.player().log.len();
         self.view.reset(animation_delay, team_len, log_len);
-        self.view.render(&self.world, &self.actors, self.player());
+        self.view.render(&self.world, &self.actors, self.player_idx);
     }
 
     fn update_logs(&mut self) {
@@ -214,11 +212,10 @@ impl State {
                 }
             }
         }
-        self.update_view(false);
     }
 
     fn check_exits(&mut self) {
-        if self.player().is_ready_to_act(self.time) {
+        if self.player().is_ready_to_act(self.time) && self.plan.num_enemies() <= 5 {
             if let Some(exit) = self.world.exits.iter().find(|x| x.pos == self.player().pos) {
                 if AUTOPILOT || self.view.yes_or_no("Exit?") {
                     return self.world_idx = exit.level as usize;

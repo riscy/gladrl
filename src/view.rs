@@ -1,6 +1,4 @@
 // Handles interactivity: reading keys, writing to the screen.
-use std::time::Duration;
-use std::thread::sleep;
 use std::collections::HashMap;
 use std::cmp;
 use csv;
@@ -9,22 +7,22 @@ use actor::Actor;
 use world::World;
 use item::Item;
 
-const RENDER: bool = true;
-
 pub struct View {
-    animation_delay: u64,
     scrollback: usize,
     screen_xy: (i32, i32),
     keybindings: HashMap<i32, usize>,
+    last_key_pressed: i32,
+    animation_delay: u64,
 }
 
 impl View {
     pub fn new() -> View {
         let mut view = View {
-            animation_delay: 0,
             scrollback: 0,
             screen_xy: (0, 0),
             keybindings: HashMap::new(),
+            last_key_pressed: ERR,
+            animation_delay: 0,
         };
         view.reload_keybindings();
         view
@@ -60,26 +58,32 @@ impl View {
 
     pub fn get_key_input(&mut self) -> u8 {
         loop {
-            match self.keybindings.get(&getch()) {
+            let key_pressed = match self.last_key_pressed {
+                ERR => getch(),
+                _ => self.last_key_pressed,
+            };
+            self.last_key_pressed = ERR;
+            match self.keybindings.get(&key_pressed) {
                 Some(input) => return *input as u8,
                 None => continue,
             }
         }
     }
 
-    pub fn render(&self, world: &World, actors: &[Actor], player: &Actor) {
-        if !RENDER {
-            return;
-        }
-        let focus = player.pos;
+    pub fn render(&mut self, world: &World, actors: &[Actor], player: usize) {
+        let focus = actors[player].pos;
         let (min_x, min_y, max_x, max_y) = self.rect_around(focus, world);
         self.render_world(world, actors, (min_x, min_y, max_x, max_y));
         let xx = (max_x - min_x) as i32;
         let yy = self.render_roster(actors, xx);
-        self.render_log(&player.log, player.time, (xx + 1, yy));
+        self.render_log(&actors[player].log, actors[player].time, (xx + 1, yy));
         mv(i32::from(focus.1) - min_y, i32::from(focus.0) - min_x);
         refresh();
-        sleep(Duration::from_millis(self.animation_delay));
+        if self.last_key_pressed == ERR {
+            timeout(self.animation_delay as i32);
+            self.last_key_pressed = getch();
+            timeout(-1);
+        }
     }
 
     fn render_world(&self, world: &World, actors: &[Actor], rect: (i32, i32, i32, i32)) {
@@ -281,9 +285,6 @@ impl View {
 }
 
 pub fn start_ncurses() {
-    if !RENDER {
-        return;
-    }
     initscr();
     start_color();
     for color in COLOR_BLACK..COLOR_WHITE + 1 {
