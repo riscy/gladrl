@@ -1,6 +1,6 @@
 "family","glyph","walls","name","move_lag","skills","str","dex","con","int"
 
-0,"S","'^%#`*~","a soldier",5,"charge boomerang passive_charge passive_whirl",5,1,24,4
+0,"S","'^%#`*~","a soldier",5,"charge boomerang passive_slam passive_whirl",5,1,24,4
 1,"e","'^#`*~","an elf",6,"forest_walk passive_trip",2,1,16,5
 2,"A","'^%#`*~","an archer",5,"shoot barrage passive_aim",3,1,18,4
 3,"M","'^%#`*~","a mage",7,"blast warp_space teleport passive_aim",1,1,6,11
@@ -28,8 +28,8 @@
 33,"%",".","an unusual tree",1,"spawn_elf shoot passive_aim",0,1,30,5
 
 50,"`","%#","an arrow",1,"passive_descend passive_drift",2,1,1,1
-51,"*","%#","a magic blast",2,"passive_charge passive_descend",4,1,1,5
+51,"*","%#","a magic blast",2,"passive_slam passive_descend",4,1,1,5
 52,"+","#","a healing current",3,"passive_heal passive_spin passive_descend passive_drift",0,1,1,5
 53,"(","#","a boomerang",1,"passive_spin passive_descend",3,1,10,1
-54,"~","%#","warped space",3,"passive_charge passive_spin passive_descend",4,1,1,5
+54,"~","%#","warped space",3,"passive_slam passive_spin passive_descend",4,1,1,5
 55,"f","'#*`","a faerie",3,"passive_aim passive_descend",1,1,3,3

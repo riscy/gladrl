@@ -72,7 +72,7 @@ pub fn passive_spin(slf: &mut Actor) {
 }
 
 pub fn passive_drift(slf: &mut Actor, wld: &World) {
-    if slf.time % 7 == 0 {
+    if slf.time % 5 == 0 {
         let drift_dir = match slf.random_state % 4 {
             0 => slf.direction + 2,
             1 => slf.direction + 6,
@@ -93,7 +93,7 @@ pub fn passive_descend(slf: &mut Actor, wld: &mut World) {
     }
 }
 
-pub fn passive_charge(slf: &mut Actor, action: u8, vic: &mut Actor, wld: &World, p: &Plan) {
+pub fn passive_slam(slf: &mut Actor, action: u8, vic: &mut Actor, wld: &World, p: &Plan) {
     if slf.momentum != 0 && vic.is_mobile() && slf.direction == action {
         slf.log_interaction("slammed into", vic);
         vic.stun(2);
@@ -110,7 +110,7 @@ pub fn passive_whirl(slf: &mut Actor, action: u8, vic: &mut Actor) {
     let right = (slf.direction + 6) % 8;
     if action == left || action == right {
         slf.log_interaction("whirled at", vic);
-        vic.stun(3);
+        vic.stun(2);
     }
 }
 
@@ -132,7 +132,7 @@ pub fn passive_backstab(slf: &mut Actor, dir: u8, vic: &mut Actor) {
         } else if angle == 2 || angle == 6 {
             vic.health = vic.health * 2 / 3;
             vic.stun(1);
-            slf.log_interaction("gouged", vic);
+            slf.log_interaction("blindsided", vic);
         }
     }
 }
@@ -200,8 +200,8 @@ pub fn charge(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor
 pub fn can_cloak(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
-pub fn should_cloak(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
-    slf.is_hurt() || rand_int(20) == 0
+pub fn should_cloak(slf: &Actor, _wld: &World, p: &Plan) -> bool {
+    (slf.is_hurt() && !slf.is_in_danger(p))
 }
 pub fn cloak(slf: &mut Actor, _wld: &mut World, _p: &Plan, _spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "started to sneak around.");
@@ -247,7 +247,7 @@ pub fn can_boomerang(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 10
 }
 pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    !slf.is_hurt() && p.dist_to_pos(slf.pos, slf.team) < 3
+    !slf.is_hurt() && slf.is_in_danger(p)
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(10, "threw a boomerang.");
@@ -349,10 +349,11 @@ pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Ac
         if !can_grow_tree(slf, wld, p) {
             break;
         }
-        let dir = (slf.direction + dir) % 8;
-        let pos = wld.neighbor(slf.pos, dir, slf.team, &slf.walls);
-        slf.act_exert(6, "grew a tree.");
-        wld.add_item(Item::new(100, pos, slf.level, slf.team));
+        let pos = wld.neighbor(slf.pos, (slf.direction + dir) % 8, slf.team, &slf.walls);
+        if pos != slf.pos {
+            slf.act_exert(6, "grew a tree.");
+            wld.add_item(Item::new(100, pos, slf.level, slf.team));
+        }
     }
 }
 
@@ -363,7 +364,6 @@ pub fn should_expand(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     rand_int(5) == 0
 }
 pub fn expand(slf: &mut Actor, _wld: &World, _p: &Plan, _spawn: &mut Vec<Actor>) {
-    slf.log_action("expanded.");
     let new_kind = slf.kind + 1;
     slf.initialize(new_kind);
     slf.health = slf.max_health() / 2;
@@ -381,7 +381,6 @@ pub fn multiply(slf: &mut Actor, wld: &World, _p: &Plan, spawn: &mut Vec<Actor>)
     let pos = wld.neighbor(slf.pos, slf.direction, slf.team, &slf.walls);
     spawn.push(Actor::new(8, slf.level, slf.team, pos, slf.direction));
     spawn.last_mut().unwrap().health /= 2;
-    slf.log_action("split in half.");
 }
 
 pub fn can_spawn_elf(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {

@@ -363,7 +363,7 @@ impl Actor {
         passive_effect!(passive_trip => self, action, other);
         passive_effect!(passive_whirl => self, action, other);
         passive_effect!(passive_backstab => self, action, other);
-        passive_effect!(passive_charge => self, action, other, world, p);
+        passive_effect!(passive_slam => self, action, other, world, p);
         self.log_interaction("hit", other);
         self.lose_momentum(1);
         other.hurt(self.strength * self.level, world);
