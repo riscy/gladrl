@@ -42,6 +42,7 @@
 "9", 69, "switch to character 9"
 
 "d", 40, "drop an item"
+"i", 41, "see inventory"
 
 "<", 70, "scroll the log up"
 ">", 71, "scroll the log down"

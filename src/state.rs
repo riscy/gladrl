@@ -152,6 +152,7 @@ impl State {
             }
             match input {
                 32 => self.player_mut().next_skill(),
+                41 => self.player_mut().inventory(),
                 55 => {
                     let pos = self.player().pos;
                     self.plan.tactic_defend(pos);

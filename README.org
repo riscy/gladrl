@@ -20,9 +20,10 @@
   1. [[https://www.rust-lang.org/en-US/install.html][Install Rust]].
   2. Type ~make run~
 * Playing
-  The game runs until your team is defeated, then loops again from the start.
-  You might want to modify ~config/keybindings.csv~ which by default features a
-  Nethack-like control scheme as below.
+  The game runs until your team is defeated.  The easiest way to play is to just
+  press ~;~ repeatedly, and the game will play itself for you.  Otherwise use
+  the Nethack-like control scheme described below, or modify
+  ~config/keybindings.csv~ to your liking.
 
   Getting/reading help:
   | ~?~ | access online help       |
@@ -53,6 +54,7 @@
   | ~z~ | use your current special    |
   | ~s~ | switch your current special |
   | ~d~ | drop an item                |
+  | ~i~ | see inventory               |
 
   Team:
   | ~D~ | tell your team to defend a spot |

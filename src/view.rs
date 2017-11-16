@@ -47,10 +47,9 @@ impl View {
         let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
         let mut reader = csv::Reader::from_file("config/keybindings.csv").unwrap();
         for record in reader.decode() {
-            let (kbd, num, desc): (String, usize, String) = record.unwrap();
+            let (kbd, num, desc): (char, usize, String) = record.unwrap();
             online_help.push(format!("{} --{}", kbd, desc));
-            let kbd_char = kbd.chars().nth(0).unwrap() as i32;
-            self.keybindings.insert(kbd_char, num);
+            self.keybindings.insert(kbd as i32, num);
         }
         self.keybindings.insert(KEY_UP as i32, 0);
         self.keybindings.insert(KEY_RIGHT as i32, 2);

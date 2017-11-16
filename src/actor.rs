@@ -173,6 +173,14 @@ impl Actor {
         self.log_action(&format!("switched to {}.", skill));
     }
 
+    pub fn inventory(&mut self) {
+        self.log_action("turned out my pockets.");
+        for idx in 0..self.inventory.len() {
+            let log = &format!("had {}.", self.inventory[idx].name);
+            self.log_action(log);
+        }
+    }
+
     pub fn choose(&mut self, world: &World, plan: &Plan) -> u8 {
         if self.is_projectile() {
             return self.direction;
