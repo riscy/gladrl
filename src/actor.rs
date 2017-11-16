@@ -425,6 +425,8 @@ impl Actor {
         passive_effect!(passive_drift => self, world);
         passive_effect!(passive_descend => self, world);
         if !self.is_projectile() && self.is_mobile() {
+            self.recover(1);
+            self.mana = cmp::min(self.max_mana(), self.mana + 1);
             if self.walls.contains(world.glyph_at(self.pos)) {
                 self.hurt(5, world);
             }
@@ -433,8 +435,6 @@ impl Actor {
                 self.stun(2);
                 world.blood(self.pos);
             }
-            self.recover(1);
-            self.mana = cmp::min(self.max_mana(), self.mana + 1);
         }
         if self.invis > 0 {
             self.invis -= 1;
