@@ -384,7 +384,7 @@ impl Actor {
         self.health = 0;
         if !self.is_projectile() {
             let verb = if self.is_flesh() { "died" } else { "collapsed" };
-            let msg = format!("{} {}!", self.name, verb);
+            let msg = format!("{} {}!", self.name.to_sentence_case(), verb);
             world.log_global(&msg, self.pos, self.is_important());
         }
         self.act_drop_all(world);

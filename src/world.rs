@@ -2,7 +2,6 @@
 use csv;
 use std::str;
 use std::collections::HashMap;
-use inflector::Inflector; // for to_sentence_case
 use item::Item;
 use item_effects::{use_on_item, use_as_portal, DOOR, TREE};
 
@@ -77,7 +76,7 @@ impl World {
     }
 
     pub fn log_global(&mut self, txt: &str, pos: (u16, u16), important: bool) {
-        self.log.push((pos, txt.to_sentence_case(), important));
+        self.log.push((pos, txt.to_owned(), important));
     }
 
     pub fn offset(&self, from: (u16, u16), dir: u8) -> (u16, u16) {
