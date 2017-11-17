@@ -1,3 +1,4 @@
+use std::cmp;
 use std::collections::{HashSet, VecDeque};
 use actor::Actor;
 use world::World;
@@ -169,7 +170,7 @@ impl State {
                     return self.turn_from_ai(player_idx);
                 }
                 61...69 => {
-                    self.player_control_set_by_number(input - 60);
+                    self.player_control_set_by_number(input as usize - 60);
                     return self.turn_from_ai(player_idx);
                 }
                 70 => self.view.scroll_log_up(1),
@@ -248,17 +249,18 @@ impl State {
         }
     }
 
-    fn player_control_set_by_number(&mut self, mut which: u8) {
+    fn player_control_set_by_number(&mut self, mut num: usize) {
         if self.player().is_playable() {
             self.player_mut().is_leader = false;
         }
-        for idx in 0..self.actors.len() {
-            if self.actors[idx].is_playable() {
-                if which == 1 {
+        num = cmp::min(num, self.actors.iter().filter(|a| a.is_playable()).count());
+        for (idx, actor) in self.actors.iter_mut().enumerate() {
+            if actor.is_playable() {
+                num -= 1;
+                if num == 0 {
                     self.player_idx = idx;
-                    return self.player_mut().is_leader = true;
+                    return actor.is_leader = true;
                 }
-                which -= 1;
             }
         }
         self.world_idx = 0;
