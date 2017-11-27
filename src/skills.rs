@@ -110,7 +110,7 @@ pub fn passive_whirl(slf: &mut Actor, action: u8, vic: &mut Actor) {
     let right = (slf.direction + 6) % 8;
     if action == left || action == right {
         slf.log_interaction("whirled at", vic);
-        vic.stun(2);
+        vic.stun(1);
     }
 }
 
@@ -247,7 +247,7 @@ pub fn can_boomerang(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 10
 }
 pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    !slf.is_hurt() && slf.is_in_danger(p)
+    p.num_enemies() > 0 && !slf.is_hurt() && slf.is_in_danger(p)
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(10, "threw a boomerang.");
