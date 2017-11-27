@@ -1,5 +1,5 @@
 // Handles moving objects like living entities and projectiles.
-use std::cmp;
+use std::{cmp, i32};
 use csv;
 use inflector::Inflector;
 use plan::Plan;
@@ -193,7 +193,7 @@ impl Actor {
     fn choose_move(&self, world: &World, plan: &Plan) -> u8 {
         let retreat = self.is_hurt();
         let start_mv = self.choose_preferred_dir();
-        let (mut best_gradient, mut best_direction) = (0, start_mv);
+        let (mut best_gradient, mut best_direction) = (i32::MIN, start_mv);
         for mv in MOVE_ACTIONS.iter().map(|offset| (start_mv + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
             let mut movement = pos != self.pos;
@@ -509,7 +509,7 @@ impl Actor {
 
     pub fn is_near(&self, pos: (u16, u16)) -> bool {
         let (dx, dy) = (self.pos.0 - pos.0, self.pos.1 - pos.1);
-        dx * dx + dy * dy <= 12
+        dx * dx + dy * dy <= 18
     }
 
     pub fn is_in_danger(&self, p: &Plan) -> bool {
