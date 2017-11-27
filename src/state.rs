@@ -111,6 +111,7 @@ impl State {
     }
 
     fn give_turn(&mut self, idx: usize) {
+        self.actors[idx].time = self.time;
         self.plan.fast_update(&self.actors);
         let mv = if idx == self.player_idx {
             // do the expensive update while waiting for the player
@@ -123,7 +124,6 @@ impl State {
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
         let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
         let others = (have_acted, yet_to_act);
-        actor.time = self.time;
         actor.act(mv, &mut self.world, &self.plan, others, &mut self.spawn);
     }
 
