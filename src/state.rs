@@ -77,7 +77,7 @@ impl State {
                     actor.level += 1;
                 }
                 actor.log.clear();
-                actor.restore();
+                actor.recover_fully();
                 self.player_team.push_front(actor);
             }
         }
@@ -125,6 +125,7 @@ impl State {
         let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
         let others = (have_acted, yet_to_act);
         actor.act(mv, &mut self.world, &self.plan, others, &mut self.spawn);
+        actor.update(&mut self.world);
     }
 
     fn turn_from_ai(&mut self, idx: usize) -> u8 {

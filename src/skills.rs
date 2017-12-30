@@ -260,7 +260,7 @@ pub fn can_warp_space(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 20
 }
 pub fn should_warp_space(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    !slf.is_hurt() && p.dist_to_pos(slf.pos, slf.team) < 5
+    !slf.is_hurt() && p.dist_to_goal(slf.pos, slf.team) < 5
 }
 pub fn warp_space(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(20, "casted 'warp space'.");
@@ -318,12 +318,12 @@ pub fn can_lie(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     true
 }
 pub fn should_lie(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    slf.team != 0 && p.dist_to_pos(slf.pos, slf.team) > 10
+    slf.team != 0 && p.dist_to_goal(slf.pos, slf.team) > 10
 }
 pub fn lie(slf: &mut Actor, _wld: &World, _p: &Plan, _spawn: &mut Vec<Actor>) {
     slf.log_action("crumpled to the ground.");
     slf.stun(10 + rand_int(1) as i16);
-    slf.restore();
+    slf.recover_fully();
 }
 
 pub fn can_summon_faerie(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -341,8 +341,8 @@ pub fn can_grow_tree(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 6
 }
 pub fn should_grow_tree(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    (p.is_defending(slf.team) && p.dist_to_pos(slf.pos, slf.team) < 3) ||
-    (p.is_retreating(slf.team) && p.dist_to_pos(slf.pos, slf.team) > 20)
+    (p.is_defending(slf.team) && p.dist_to_goal(slf.pos, slf.team) < 3) ||
+    (p.is_retreating(slf.team) && p.dist_to_goal(slf.pos, slf.team) > 20)
 }
 pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
     for dir in &[0, 7, 1, 6, 2, 5, 3] {

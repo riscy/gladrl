@@ -77,7 +77,7 @@ impl Actor {
             invis: 0,
         };
         actor.initialize(kind);
-        actor.restore();
+        actor.recover_fully();
         actor
     }
 
@@ -187,10 +187,10 @@ impl Actor {
         } else if choose_skill(self, world, plan) {
             return DO_SKILL;
         }
-        self.choose_move(world, plan)
+        self.choose_action(world, plan)
     }
 
-    fn choose_move(&self, world: &World, plan: &Plan) -> u8 {
+    fn choose_action(&self, world: &World, plan: &Plan) -> u8 {
         let retreat = self.is_hurt();
         let start_mv = self.choose_preferred_dir();
         let (mut best_gradient, mut best_direction) = (i32::MIN, start_mv);
@@ -239,10 +239,6 @@ impl Actor {
                 DO_DROP => self.act_drop_item(wld),
                 _ => self.act_move(mv, wld, plan, other),
             };
-        }
-        self.side_effects(wld);
-        if self.is_alive() && !self.is_projectile() && self.is_mobile() {
-            self.act_get(wld);
         }
     }
 
@@ -392,7 +388,7 @@ impl Actor {
         if !self.is_flesh() {
             return self.invis = -1;
         }
-        world.blood(self.pos);
+        world.bleed(self.pos);
     }
 
     pub fn act_exert(&mut self, amt: u16, action: &str) {
@@ -420,7 +416,7 @@ impl Actor {
         self.momentum -= cmp::min(self.momentum, amt);
     }
 
-    fn side_effects(&mut self, world: &mut World) {
+    pub fn update(&mut self, world: &mut World) {
         passive_effect!(passive_spin => self);
         passive_effect!(passive_drift => self, world);
         passive_effect!(passive_descend => self, world);
@@ -433,7 +429,10 @@ impl Actor {
             if self.is_hurt() && self.stun_counter == 0 && rand_int(self.health) == 0 {
                 self.log_action("fell, bleeding profusely.");
                 self.stun(2);
-                world.blood(self.pos);
+                world.bleed(self.pos);
+            }
+            if self.is_alive() {
+                self.act_get(world);
             }
         }
         if self.invis > 0 {
@@ -452,7 +451,7 @@ impl Actor {
         self.health = cmp::min(self.max_health(), self.health + amt);
     }
 
-    pub fn restore(&mut self) {
+    pub fn recover_fully(&mut self) {
         if self.is_alive() {
             self.health = self.max_health();
             self.mana = self.max_mana();
@@ -514,7 +513,7 @@ impl Actor {
 
     pub fn is_in_danger(&self, p: &Plan) -> bool {
         (p.is_attacking(self.team) || p.is_retreating(self.team)) &&
-        p.dist_to_pos(self.pos, self.team) < 20
+        p.dist_to_goal(self.pos, self.team) < 20
     }
 
     pub fn is_hurt(&self) -> bool {

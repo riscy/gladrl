@@ -46,7 +46,7 @@ impl World {
         final_pos
     }
 
-    pub fn blood(&mut self, at: (u16, u16)) {
+    pub fn bleed(&mut self, at: (u16, u16)) {
         let mut dir = at.0 % 8;
         for _ii in 0..at.1 % 4 {
             let pos = self.offset(at, dir as u8);
