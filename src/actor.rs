@@ -100,11 +100,15 @@ impl Actor {
                 for skill in row.5.split(' ') {
                     self.skills.push(skill.into());
                 }
-                for kind in self.inventory.iter().map(|it| it.kind).collect::<Vec<u8>>() {
-                    use_on_actor(self, kind);
-                }
+                self.initialize_inventory();
                 break;
             }
+        }
+    }
+
+    fn initialize_inventory(&mut self) {
+        for kind in self.inventory.iter().map(|it| it.kind).collect::<Vec<u8>>() {
+            use_on_actor(self, kind);
         }
     }
 
