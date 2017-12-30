@@ -165,6 +165,10 @@ impl State {
                     self.plan.tactic_retreat();
                     self.player_mut().log_action("yelled, 'retreat!'");
                 }
+                59 => {
+                    self.plan.tactic_attack();
+                    return self.turn_from_ai(player_idx);
+                }
                 60 => {
                     self.player_control_next();
                     return self.turn_from_ai(player_idx);
@@ -175,10 +179,6 @@ impl State {
                 }
                 70 => self.view.scroll_log_up(1),
                 71 => self.view.scroll_log_down(1),
-                80 => {
-                    self.plan.tactic_attack();
-                    return self.turn_from_ai(player_idx);
-                }
                 90 => {
                     for key in self.view.reload_keybindings() {
                         self.player_mut().log_event(key.as_str(), 0);

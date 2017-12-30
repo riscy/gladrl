@@ -23,12 +23,14 @@
 "z", 30, "use your current skill"
 "s", 32, "switch your current skill"
 
+"d", 40, "drop an item"
+"i", 41, "see inventory"
+
 "D", 55, "tell your team to defend"
 "F", 56, "tell your team to follow"
 "A", 57, "tell your team to attack"
 "R", 58, "tell your team to retreat"
-
-";", 80, "let the AI decide your move"
+";", 59, "let the AI decide your move"
 
 "`", 60, "switch to the next character"
 "1", 61, "switch to character 1"
@@ -40,9 +42,6 @@
 "7", 67, "switch to character 7"
 "8", 68, "switch to character 8"
 "9", 69, "switch to character 9"
-
-"d", 40, "drop an item"
-"i", 41, "see inventory"
 
 "<", 70, "scroll the log up"
 ">", 71, "scroll the log down"
