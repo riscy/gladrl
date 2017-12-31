@@ -57,7 +57,7 @@ impl State {
             self.team_idxs.clear();
         }
         end_ncurses();
-        println!("Score: {}", self.score - self.time);
+        println!("Score: {}", self.score);
     }
 
     fn load_world_description(&mut self) {
@@ -106,7 +106,7 @@ impl State {
         self.extract_team(victory);
         if victory {
             self.world_completed.push(current_world_idx);
-            self.score += 1000 + 100 * self.player_team.len() as u32;
+            self.score += 100;
         }
     }
 
