@@ -176,10 +176,22 @@ impl Plan {
         }
     }
 
-    pub fn gradient(&self, from: (u16, u16), to: (u16, u16), team: usize, retreat: bool) -> i32 {
-        let dd = self.dist_to_pos(from, team) - self.dist_to_pos(to, team);
-        let retreat = (retreat && self.is_attacking(team)) || self.is_retreating(team);
-        if retreat { -dd } else { dd }
+    pub fn estimate_value(&self, pos: (u16, u16), team: usize, retreat: bool) -> i32 {
+        let retreat = self.is_retreating(team) || (retreat && self.is_attacking(team));
+        let value = self.dist_to_goal(pos, team);
+        if retreat { value } else { -value }
+    }
+
+    pub fn estimate_risk(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
+        let mut risk = 0;
+        for &mv in MOVE_ACTIONS.iter() {
+            let pos2 = wld.neighbor(pos, mv, team, DONT_PROPAGATE_OUT_OF);
+            let dist = self.dist_to_goal(pos2, team);
+            if dist != UNKNOWN_DISTANCE && pos2 != pos {
+                risk -= dist;
+            }
+        }
+        risk
     }
 
     pub fn num_enemies(&self) -> usize {

@@ -197,7 +197,8 @@ impl Actor {
     fn choose_action(&self, world: &World, plan: &Plan) -> u8 {
         let retreat = self.is_hurt();
         let start_mv = self.choose_preferred_dir();
-        let (mut best_gradient, mut best_direction) = (i32::MIN, start_mv);
+        let (mut best_value, mut best_direction) = (i32::MIN, start_mv);
+        let mut best_risk = i32::MAX;
         for mv in MOVE_ACTIONS.iter().map(|offset| (start_mv + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
             let mut movement = pos != self.pos;
@@ -214,10 +215,14 @@ impl Actor {
                 }
             }
             if movement || mv == DO_WAIT {
-                let gradient = plan.gradient(self.pos, pos, self.team, retreat);
-                if gradient > best_gradient {
-                    best_direction = mv;
-                    best_gradient = gradient;
+                let value = plan.estimate_value(pos, self.team, retreat);
+                if value >= best_value {
+                    let risk = plan.estimate_risk(pos, self.team, world);
+                    if value > best_value || risk < best_risk {
+                        best_direction = mv;
+                        best_value = value;
+                        best_risk = risk;
+                    }
                 }
             }
         }
