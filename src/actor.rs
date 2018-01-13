@@ -247,7 +247,12 @@ impl Actor {
             match mv {
                 DO_SKILL => use_skill(self, wld, plan, spawn),
                 DO_DROP => self.act_drop_item(wld),
-                _ => self.act_move(mv, wld, plan, other),
+                _ => {
+                    if self.is_mobile() {
+                        self.act_move(mv, wld, plan, other);
+                    }
+                    self.act_change_direction(mv, wld, plan);
+                }
             };
         }
     }
@@ -257,9 +262,6 @@ impl Actor {
                 wld: &mut World,
                 plan: &Plan,
                 other: (&mut [Actor], &mut [Actor])) {
-        if !self.is_mobile() {
-            return self.act_change_direction(mv);
-        }
         let mut pos = wld.neighbor(self.pos, mv, self.team, &self.walls);
         let movement = self.pos != pos;
         if !movement {
@@ -279,8 +281,6 @@ impl Actor {
         } else if MOVE_ACTIONS.contains(&mv) {
             self.act_push_wall(wld, mv);
         }
-        self.act_change_direction(mv);
-        passive_effect!(passive_aim => self, wld, plan);
     }
 
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
@@ -300,13 +300,14 @@ impl Actor {
         }
     }
 
-    fn act_change_direction(&mut self, dir: u8) {
+    fn act_change_direction(&mut self, dir: u8, wld: &World, plan: &Plan) {
         if MOVE_ACTIONS.contains(&dir) {
             self.direction = dir % 8;
         } else if TURN_ACTIONS.contains(&dir) {
             self.log_action("turned in place.");
             self.direction = dir % 8;
         }
+        passive_effect!(passive_aim => self, wld, plan);
     }
 
     fn act_get(&mut self, world: &mut World) {
