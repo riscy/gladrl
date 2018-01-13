@@ -178,8 +178,8 @@ impl Plan {
 
     pub fn estimate_value(&self, pos: (u16, u16), team: usize, retreat: bool) -> i32 {
         let retreat = self.is_retreating(team) || (retreat && self.is_attacking(team));
-        let value = self.dist_to_goal(pos, team);
-        if retreat { value } else { -value }
+        let dist_to_goal = self.dist_to_goal(pos, team);
+        if retreat { dist_to_goal } else { -dist_to_goal }
     }
 
     pub fn estimate_risk(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
