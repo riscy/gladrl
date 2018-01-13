@@ -72,8 +72,8 @@ pub fn passive_spin(slf: &mut Actor) {
 }
 
 pub fn passive_drift(slf: &mut Actor, wld: &World) {
-    if slf.time % 5 == 0 {
-        let drift_dir = match slf.random_state % 4 {
+    if slf.time % 10 == 0 {
+        let drift_dir = match slf.random_seed % 4 {
             0 => slf.direction + 2,
             1 => slf.direction + 6,
             _ => slf.direction,

@@ -33,13 +33,14 @@ pub struct Actor {
     pub con: u16,
     pub strength: u16,
     pub walls: String,
-    pub stun_counter: i16,
-    pub invis: i16,
     pub selected_skill: usize,
+
     pub momentum: u8,
+    pub stun: i16,
+    pub invis: i16,
 
     pub log: Vec<(u32, String, usize)>,
-    pub random_state: u16,
+    pub random_seed: u16,
     pub skills: Vec<String>,
     inventory: Vec<Item>,
 
@@ -62,9 +63,9 @@ impl Actor {
             direction: dir,
             name: String::new(),
             walls: String::new(),
-            random_state: rand_int(200),
+            random_seed: rand_int(200),
             is_leader: false,
-            stun_counter: 0,
+            stun: 0,
             glyph: '?',
             move_lag: 1,
             is_persistent: false,
@@ -115,7 +116,7 @@ impl Actor {
     pub fn glyph(&self) -> char {
         if !self.is_alive() {
             return 'x';
-        } else if self.stun_counter > 0 {
+        } else if self.stun > 0 {
             return self.glyph.to_lowercase().next().unwrap();
         }
         self.glyph
@@ -242,7 +243,7 @@ impl Actor {
                plan: &Plan,
                other: (&mut [Actor], &mut [Actor]),
                spawn: &mut Vec<Actor>) {
-        if self.stun_counter == 0 {
+        if self.stun == 0 {
             match mv {
                 DO_SKILL => use_skill(self, wld, plan, spawn),
                 DO_DROP => self.act_drop_item(wld),
@@ -364,8 +365,8 @@ impl Actor {
 
     fn act_help(&mut self, other: &mut Actor, world: &mut World) {
         passive_effect!(passive_heal => self, other, world);
-        if other.stun_counter > 0 && !self.is_projectile() {
-            other.stun_counter = 0;
+        if other.stun > 0 && !self.is_projectile() {
+            other.stun = 0;
             self.log_action(&format!("hoisted {} up.", other.name));
             other.log_action(&format!("was hoisted up by {}.", self.name));
         }
@@ -413,7 +414,7 @@ impl Actor {
     }
 
     pub fn stun(&mut self, amt: i16) {
-        self.stun_counter = amt;
+        self.stun = amt;
         self.lose_momentum(1);
     }
 
@@ -435,7 +436,7 @@ impl Actor {
             if self.walls.contains(world.glyph_at(self.pos)) {
                 self.hurt(5, world);
             }
-            if self.is_hurt() && self.stun_counter == 0 && rand_int(self.health) == 0 {
+            if self.is_hurt() && self.stun == 0 && rand_int(self.health) == 0 {
                 self.log_action("fell, bleeding profusely.");
                 self.stun(2);
                 world.bleed(self.pos);
@@ -450,9 +451,9 @@ impl Actor {
     }
 
     pub fn recover(&mut self, amt: u16) {
-        if self.stun_counter > 0 {
-            self.stun_counter -= 1;
-            match self.stun_counter {
+        if self.stun > 0 {
+            self.stun -= 1;
+            match self.stun {
                 0 => self.log_action("managed to get up."),
                 _ => self.log_action("struggled on the ground."),
             }
@@ -488,7 +489,7 @@ impl Actor {
     }
 
     pub fn is_ready_to_act(&self, time: u32) -> bool {
-        self.is_alive() && (time + u32::from(self.random_state)) % u32::from(self.move_lag) == 0
+        self.is_alive() && (time + u32::from(self.random_seed)) % u32::from(self.move_lag) == 0
     }
 
     pub fn is_mobile(&self) -> bool {
