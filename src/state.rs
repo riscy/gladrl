@@ -106,7 +106,7 @@ impl State {
         self.extract_team(victory);
         if victory {
             self.world_completed.push(current_world_idx);
-            self.score += 100;
+            self.score += 10 * self.player_team.len() as u32;
         }
     }
 
