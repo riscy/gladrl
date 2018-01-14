@@ -196,17 +196,16 @@ impl Actor {
     }
 
     fn choose_action(&self, world: &World, plan: &Plan) -> u8 {
-        let retreat = self.is_hurt();
-        let start_mv = self.choose_preferred_dir();
-        let (mut best_value, mut best_direction) = (i32::MIN, start_mv);
+        let start_dir = self.choose_preferred_dir();
+        let (mut best_value, mut best_direction) = (i32::MIN, start_dir);
         let mut best_risk = i32::MAX;
-        for mv in MOVE_ACTIONS.iter().map(|offset| (start_mv + offset) % 9) {
+        for mv in MOVE_ACTIONS.iter().map(|offset| (start_dir + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
             let mut movement = pos != self.pos;
             if !movement {
                 pos = world.offset(self.pos, mv)
             }
-            if !retreat {
+            if !self.is_hurt() {
                 if let Some(&team) = plan.whos_at(pos) {
                     if team != self.team || (pos != self.pos && self.can_help()) {
                         return mv;
@@ -216,9 +215,9 @@ impl Actor {
                 }
             }
             if movement || mv == DO_WAIT {
-                let value = plan.estimate_value(pos, self.team, retreat);
+                let value = self.value_of_pos(pos, plan);
                 if value >= best_value {
-                    let risk = plan.estimate_risk(pos, self.team, world);
+                    let risk = self.estimate_risk(pos, world, plan);
                     if value > best_value || risk < best_risk {
                         best_direction = mv;
                         best_value = value;
@@ -228,6 +227,21 @@ impl Actor {
             }
         }
         best_direction
+    }
+
+    // Value of pos is proportionate to distance from the goal
+    fn value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
+        let retreat = plan.is_retreating(self.team) ||
+                      (self.is_hurt() && plan.is_attacking(self.team));
+        let dist = plan.dist_to_goal(pos, self.team);
+        if retreat { dist } else { -dist }
+    }
+
+    fn estimate_risk(&self, pos: (u16, u16), world: &World, plan: &Plan) -> i32 {
+        if self.team == 0 {
+            return 0;
+        }
+        -plan.dist_to_goal_avg(pos, self.team, world)
     }
 
     fn choose_preferred_dir(&self) -> u8 {

@@ -163,6 +163,18 @@ impl Plan {
             .collect()
     }
 
+    pub fn dist_to_goal_avg(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
+        let mut avg = 0;
+        for &mv in MOVE_ACTIONS.iter() {
+            let new_pos = wld.neighbor(pos, mv, team, DONT_PROPAGATE_OUT_OF);
+            let dist = self.dist_to_goal(new_pos, team);
+            if dist != UNKNOWN_DISTANCE {
+                avg += dist;
+            }
+        }
+        avg / (MOVE_ACTIONS.len() as i32)
+    }
+
     pub fn dist_to_goal(&self, from: (u16, u16), team: usize) -> i32 {
         if let Some(distances) = self.distances.get(&team) {
             return distances[(from.1 * self.world_size.0 + from.0) as usize];
@@ -174,24 +186,6 @@ impl Plan {
         if let Some(field) = self.distances.get_mut(&team) {
             field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
         }
-    }
-
-    pub fn estimate_value(&self, pos: (u16, u16), team: usize, retreat: bool) -> i32 {
-        let retreat = self.is_retreating(team) || (retreat && self.is_attacking(team));
-        let dist_to_goal = self.dist_to_goal(pos, team);
-        if retreat { dist_to_goal } else { -dist_to_goal }
-    }
-
-    pub fn estimate_risk(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
-        let mut risk = 0;
-        for &mv in MOVE_ACTIONS.iter() {
-            let pos2 = wld.neighbor(pos, mv, team, DONT_PROPAGATE_OUT_OF);
-            let dist = self.dist_to_goal(pos2, team);
-            if dist != UNKNOWN_DISTANCE && pos2 != pos {
-                risk -= dist;
-            }
-        }
-        risk
     }
 
     pub fn num_enemies(&self) -> usize {
