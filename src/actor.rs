@@ -300,7 +300,7 @@ impl Actor {
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
         match world.push_wall(self.pos, action, &self.inventory) {
             Some(treasure) => {
-                self.log_action(&format!("grabbed {}.", treasure.name));
+                self.log_action(&format!("reached out and got {}.", treasure.name));
                 use_on_actor(self, treasure.kind);
                 if !treasure.can_consume {
                     self.inventory.push(treasure);
