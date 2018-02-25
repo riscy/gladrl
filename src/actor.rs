@@ -7,7 +7,7 @@ use world::World;
 use skills::*;
 use skills_registry::{choose_skill, use_skill};
 use item::Item;
-use item_effects::use_on_actor;
+use item_effects;
 
 pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, DO_WAIT];
 pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];
@@ -109,7 +109,7 @@ impl Actor {
 
     fn initialize_inventory(&mut self) {
         for kind in self.inventory.iter().map(|it| it.kind).collect::<Vec<u8>>() {
-            use_on_actor(self, kind);
+            item_effects::use_on_actor(self, kind);
         }
     }
 
@@ -301,7 +301,7 @@ impl Actor {
         match world.push_wall(self.pos, action, &self.inventory) {
             Some(treasure) => {
                 self.log_action(&format!("reached out and got {}.", treasure.name));
-                use_on_actor(self, treasure.kind);
+                item_effects::use_on_actor(self, treasure.kind);
                 if !treasure.can_consume {
                     self.inventory.push(treasure);
                 }
@@ -330,7 +330,7 @@ impl Actor {
             if self.pos == world.items[idx].pos && world.items[idx].can_get {
                 let item = world.items.remove(idx);
                 self.log_action(&format!("found {}.", item.name));
-                use_on_actor(self, item.kind);
+                item_effects::use_on_actor(self, item.kind);
                 if !item.can_consume {
                     self.inventory.push(item);
                 }
