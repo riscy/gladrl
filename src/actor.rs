@@ -231,10 +231,12 @@ impl Actor {
 
     // How good this position is to the actor (larger is better)
     fn value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
-        let retreat = plan.is_retreating(self.team) ||
-                      (self.is_hurt() && plan.is_attacking(self.team));
         let dist = plan.dist_to_goal(pos, self.team);
-        if retreat { dist } else { -dist }
+        if self.is_retreating(plan) {
+            dist
+        } else {
+            -dist
+        }
     }
 
     fn estimate_risk(&self, pos: (u16, u16), world: &World, plan: &Plan) -> i32 {
@@ -543,6 +545,9 @@ impl Actor {
         (p.is_attacking(self.team) || p.is_retreating(self.team))
             && p.dist_to_goal(self.pos, self.team) < 20
     }
+
+    fn is_retreating(&self, plan: &Plan) -> bool {
+        plan.is_retreating(self.team) || (self.is_hurt() && plan.is_attacking(self.team))
     }
 
     pub fn is_hurt(&self) -> bool {
