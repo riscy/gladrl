@@ -188,6 +188,10 @@ impl Plan {
         }
     }
 
+    pub fn is_near_enemy(&self, pos: (u16, u16), team: usize) -> bool {
+        (self.is_attacking(team) || self.is_retreating(team)) && self.dist_to_goal(pos, team) < 10
+    }
+
     pub fn num_enemies(&self) -> usize {
         self.team_0_enemies
     }

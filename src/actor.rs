@@ -541,11 +541,6 @@ impl Actor {
         dx * dx + dy * dy <= 18
     }
 
-    pub fn is_near_enemy(&self, p: &Plan) -> bool {
-        (p.is_attacking(self.team) || p.is_retreating(self.team))
-            && p.dist_to_goal(self.pos, self.team) < 20
-    }
-
     fn is_retreating(&self, plan: &Plan) -> bool {
         plan.is_retreating(self.team) || (self.is_hurt() && plan.is_attacking(self.team))
     }
