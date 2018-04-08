@@ -201,7 +201,7 @@ pub fn can_cloak(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
 pub fn should_cloak(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    (slf.is_hurt() && !slf.is_in_danger(p))
+    (slf.is_hurt() && !slf.is_near_enemy(p))
 }
 pub fn cloak(slf: &mut Actor, _wld: &mut World, _p: &Plan, _spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "started to sneak around.");
@@ -233,7 +233,7 @@ pub fn can_barrage(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 6
 }
 pub fn should_barrage(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    slf.is_in_danger(p) && should_shoot(slf, wld, p)
+    slf.is_near_enemy(p) && should_shoot(slf, wld, p)
 }
 pub fn barrage(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     slf.direction = (slf.direction + 7) % 8;
@@ -247,7 +247,7 @@ pub fn can_boomerang(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 10
 }
 pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    p.num_enemies() > 0 && !slf.is_hurt() && slf.is_in_danger(p)
+    p.num_enemies() > 5 && slf.is_near_enemy(p) && rand_int(60) == 0
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(10, "threw a boomerang.");
@@ -285,7 +285,7 @@ pub fn can_teleport(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 3
 }
 pub fn should_teleport(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    slf.is_in_danger(p) && slf.health < slf.max_health() / 2
+    slf.is_near_enemy(p) && slf.health < slf.max_health() / 2
 }
 pub fn teleport(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
     loop {
@@ -330,7 +330,7 @@ pub fn can_summon_faerie(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
 pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    slf.is_in_danger(p) || should_shoot(slf, wld, p)
+    slf.is_near_enemy(p) || should_shoot(slf, wld, p)
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "called a faerie.");
