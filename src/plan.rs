@@ -17,7 +17,7 @@ const DONT_PROPAGATE_OUT_OF: &str = "~`'*#%^";
 pub struct Plan {
     team_0_enemies: usize,
     team_0_tactic: u8,
-    team_0_tactical_position: (u16, u16),
+    team_0_muster_point: (u16, u16),
     occupied_cells: HashMap<(u16, u16), usize>,
     world_size: (u16, u16),
     distances: HashMap<usize, Vec<i32>>,
@@ -31,7 +31,7 @@ impl Plan {
             world_size: world_size,
             team_0_enemies: 0,
             team_0_tactic: TACTIC_FOLLOW,
-            team_0_tactical_position: (0, 0),
+            team_0_muster_point: (0, 0),
         };
         for &team in teams {
             let area = (world_size.1 * world_size.0) as usize;
@@ -49,7 +49,7 @@ impl Plan {
 
     pub fn tactic_defend(&mut self, pos: (u16, u16)) {
         self.team_0_tactic = TACTIC_DEFEND;
-        self.team_0_tactical_position = pos;
+        self.team_0_muster_point = pos;
     }
 
     pub fn tactic_follow(&mut self) {
@@ -64,9 +64,9 @@ impl Plan {
         self.team_0_tactic = TACTIC_RETREAT;
     }
 
-    pub fn tactical_position(&self, team: usize) -> (u16, u16) {
+    fn muster_point(&self, team: usize) -> (u16, u16) {
         match team {
-            0 => self.team_0_tactical_position,
+            0 => self.team_0_muster_point,
             _ => (0, 0),
         }
     }
@@ -136,7 +136,7 @@ impl Plan {
     fn open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
         match self.tactic(team) {
             TACTIC_EXIT => self.locate_exits(world),
-            TACTIC_DEFEND => vec![self.tactical_position(team)],
+            TACTIC_DEFEND => vec![self.muster_point(team)],
             TACTIC_FOLLOW => self.locate_leaders(team, actors),
             TACTIC_ATTACK | TACTIC_RETREAT => self.locate_enemies(team, actors),
             _ => Vec::new(),
