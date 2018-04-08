@@ -14,8 +14,10 @@ pub fn load_world_and_spawn_team(state: &mut State) {
     state.world = World::new();
     let mut file = File::open(format!("glad3.8/scen{}.fss", state.world_idx)).unwrap();
     let version = read_bytes(4, &mut file)[3]; // "FSS<version>"
-    load_world_layout(&mut state.world,
-                      str::from_utf8(&read_bytes(8, &mut file)).unwrap());
+    load_world_layout(
+        &mut state.world,
+        str::from_utf8(&read_bytes(8, &mut file)).unwrap(),
+    );
     if version >= 6 {
         state.world.name = read_c_string(30, &mut file);
     }
@@ -30,8 +32,10 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         let buffer = read_bytes(10, &mut file);
         let mut order = buffer[0];
         let mut kind = buffer[1];
-        let pos = ((u16::from(buffer[2]) + u16::from(buffer[3]) * 256) / 16,
-                   (u16::from(buffer[4]) + u16::from(buffer[5]) * 256) / 16);
+        let pos = (
+            (u16::from(buffer[2]) + u16::from(buffer[3]) * 256) / 16,
+            (u16::from(buffer[4]) + u16::from(buffer[5]) * 256) / 16,
+        );
         let team = buffer[6] as usize;
         let direction = buffer[7];
         let _command = buffer[8];

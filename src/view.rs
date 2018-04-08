@@ -113,8 +113,9 @@ impl View {
     fn render_cell(&self, pos: (u16, u16), actors: &[Actor], world: &World) {
         assert!(!world.is_out_of_bounds((pos.0 as i16, pos.1 as i16)));
         if let Some(actor) = actors
-               .iter()
-               .find(|a| a.pos == pos && a.invis == 0 && a.is_alive()) {
+            .iter()
+            .find(|a| a.pos == pos && a.invis == 0 && a.is_alive())
+        {
             return self.render_actor(actor);
         } else if let Some(item) = world.items.iter().rev().find(|i| i.pos == pos) {
             return self.render_item_or_exit(item);
@@ -254,7 +255,10 @@ impl View {
             mv(height as i32 - 1 + pos.1, pos.0);
             clrtoeol();
             attron(COLOR_PAIR(COLOR_CYAN));
-            printw(&format!("({:>2} more lines: scroll with <,>)", self.scrollback));
+            printw(&format!(
+                "({:>2} more lines: scroll with <,>)",
+                self.scrollback
+            ));
             attroff(COLOR_PAIR(COLOR_CYAN));
         }
     }
@@ -280,7 +284,12 @@ impl View {
                 (focus.1 - hlf_height, focus.1 + hlf_height)
             }
         };
-        (i32::from(x_range.0), i32::from(y_range.0), i32::from(x_range.1), i32::from(y_range.1))
+        (
+            i32::from(x_range.0),
+            i32::from(y_range.0),
+            i32::from(x_range.1),
+            i32::from(y_range.1),
+        )
     }
 }
 

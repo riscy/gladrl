@@ -118,9 +118,10 @@ impl Plan {
                 for dir in &MOVE_ACTIONS {
                     let next = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
                     // propogate forest to forest, but not forest to grass:
-                    if self.dist_to_goal(next, team) == UNKNOWN_DISTANCE &&
-                       (!DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos)) ||
-                        world.glyph_at(next) == world.glyph_at(pos)) {
+                    if self.dist_to_goal(next, team) == UNKNOWN_DISTANCE
+                        && (!DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos))
+                            || world.glyph_at(next) == world.glyph_at(pos))
+                    {
                         self.set_dist_to_goal(team, next, steps + 1);
                         next_open_list.push(next);
                     }

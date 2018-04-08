@@ -2,7 +2,7 @@ use std::cmp;
 use std::collections::{HashSet, VecDeque};
 use actor::Actor;
 use world::World;
-use view::{View, start_ncurses, end_ncurses};
+use view::{end_ncurses, start_ncurses, View};
 use plan::Plan;
 use glad_helper;
 
@@ -101,8 +101,8 @@ impl State {
             self.check_exits();
             self.time += 1;
         }
-        let victory = self.plan.num_enemies() <= 5 &&
-                      !self.world_completed.contains(&current_world_idx);
+        let victory =
+            self.plan.num_enemies() <= 5 && !self.world_completed.contains(&current_world_idx);
         self.extract_team(victory);
         if victory {
             self.world_completed.push(current_world_idx);
@@ -243,8 +243,9 @@ impl State {
     }
 
     fn player_control_confirm(&mut self) {
-        if self.player_idx >= self.actors.len() || !self.player().is_leader ||
-           !self.player().is_playable() {
+        if self.player_idx >= self.actors.len() || !self.player().is_leader
+            || !self.player().is_playable()
+        {
             self.player_idx = 0;
             self.player_control_set_by_number(1);
         }
