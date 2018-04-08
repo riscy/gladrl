@@ -220,7 +220,13 @@ pub fn should_shoot(slf: &Actor, wld: &World, p: &Plan) -> bool {
 pub fn shoot(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
     slf.act_exert(2, "released an arrow.");
-    spawn.push(Actor::new(50, slf.level + 10, slf.team, slf.pos, slf.direction));
+    spawn.push(Actor::new(
+        50,
+        slf.level + 10,
+        slf.team,
+        slf.pos,
+        slf.direction,
+    ));
     spawn.last_mut().unwrap().glyph = match slf.direction {
         0 | 4 => '|',
         2 | 6 => '-',
@@ -278,7 +284,13 @@ pub fn should_blast(slf: &Actor, wld: &World, p: &Plan) -> bool {
 pub fn blast(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
     slf.act_exert(2, "released an energy blast.");
-    spawn.push(Actor::new(51, slf.level + 5, slf.team, slf.pos, slf.direction));
+    spawn.push(Actor::new(
+        51,
+        slf.level + 5,
+        slf.team,
+        slf.pos,
+        slf.direction,
+    ));
 }
 
 pub fn can_teleport(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -334,15 +346,21 @@ pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "called a faerie.");
-    spawn.push(Actor::new(55, slf.level + 5, slf.team, slf.pos, slf.direction));
+    spawn.push(Actor::new(
+        55,
+        slf.level + 5,
+        slf.team,
+        slf.pos,
+        slf.direction,
+    ));
 }
 
 pub fn can_grow_tree(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 6
 }
 pub fn should_grow_tree(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    (p.is_defending(slf.team) && p.dist_to_goal(slf.pos, slf.team) < 3) ||
-    (p.is_retreating(slf.team) && p.dist_to_goal(slf.pos, slf.team) > 20)
+    (p.is_defending(slf.team) && p.dist_to_goal(slf.pos, slf.team) < 3)
+        || (p.is_retreating(slf.team) && p.dist_to_goal(slf.pos, slf.team) > 20)
 }
 pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
     for dir in &[0, 7, 1, 6, 2, 5, 3] {

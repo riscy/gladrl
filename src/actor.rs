@@ -1,4 +1,4 @@
-// Handles moving objects like living entities and projectiles.
+// Handles active objects like living entities and projectiles.
 use std::{cmp, i32};
 use csv;
 use inflector::Inflector;
@@ -229,7 +229,7 @@ impl Actor {
         best_direction
     }
 
-    // Value of pos is proportionate to distance from the goal
+    // How good this position is to the actor (larger is better)
     fn value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
         let retreat = plan.is_retreating(self.team) ||
                       (self.is_hurt() && plan.is_attacking(self.team));
@@ -251,12 +251,14 @@ impl Actor {
         self.direction
     }
 
-    pub fn act(&mut self,
-               mv: u8,
-               wld: &mut World,
-               plan: &Plan,
-               other: (&mut [Actor], &mut [Actor]),
-               spawn: &mut Vec<Actor>) {
+    pub fn act(
+        &mut self,
+        mv: u8,
+        wld: &mut World,
+        plan: &Plan,
+        other: (&mut [Actor], &mut [Actor]),
+        spawn: &mut Vec<Actor>,
+    ) {
         if self.stun == 0 {
             match mv {
                 DO_SKILL => use_skill(self, wld, plan, spawn),
@@ -271,11 +273,13 @@ impl Actor {
         }
     }
 
-    fn act_move(&mut self,
-                mv: u8,
-                wld: &mut World,
-                plan: &Plan,
-                other: (&mut [Actor], &mut [Actor])) {
+    fn act_move(
+        &mut self,
+        mv: u8,
+        wld: &mut World,
+        plan: &Plan,
+        other: (&mut [Actor], &mut [Actor]),
+    ) {
         let mut pos = wld.neighbor(self.pos, mv, self.team, &self.walls);
         let movement = self.pos != pos;
         if !movement {
@@ -306,11 +310,9 @@ impl Actor {
                     self.inventory.push(treasure);
                 }
             }
-            None => {
-                if self.is_leader {
-                    self.log_action("couldn't go any further.");
-                }
-            }
+            None => if self.is_leader {
+                self.log_action("couldn't go any further.");
+            },
         }
     }
 
@@ -368,8 +370,9 @@ impl Actor {
     }
 
     fn act_displace(&mut self, other: &mut Actor, world: &mut World) {
-        if !self.walls.contains(world.glyph_at(other.pos)) &&
-           !other.walls.contains(world.glyph_at(self.pos)) {
+        if !self.walls.contains(world.glyph_at(other.pos))
+            && !other.walls.contains(world.glyph_at(self.pos))
+        {
             let new_pos = other.pos;
             other.pos = (self.pos.0, self.pos.1);
             self.pos = new_pos;
