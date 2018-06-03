@@ -1,4 +1,4 @@
-"key", "numeric code", "description"
+"key (safe to edit)", "internal code", "description"
 "?", 90, "access online help"
 
 "k", 0, "go north"
