@@ -1,3 +1,4 @@
+// Handling of the global game state.
 use std::cmp;
 use std::collections::{HashSet, VecDeque};
 use actor::Actor;
@@ -111,28 +112,28 @@ impl State {
     }
 
     fn give_turn(&mut self, idx: usize) {
-        self.actors[idx].time = self.time;
         self.plan.fast_update(&self.actors);
-        let mv = if idx == self.player_idx {
+        let choice = if idx == self.player_idx {
             // do the expensive update while waiting for the player
             self.plan.update(&self.team_idxs, &self.world, &self.actors);
-            self.turn_from_player()
+            self.choice_from_player()
         } else {
-            self.turn_from_ai(idx)
+            self.choice_from_ai(idx)
         };
         // split actors, excluding current, to prevent reborrowing
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
         let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
         let others = (have_acted, yet_to_act);
-        actor.act(mv, &mut self.world, &self.plan, others, &mut self.spawn);
+        actor.time = self.time;
+        actor.act(choice, &mut self.world, &self.plan, others, &mut self.spawn);
         actor.update(&mut self.world);
     }
 
-    fn turn_from_ai(&mut self, idx: usize) -> u8 {
+    fn choice_from_ai(&mut self, idx: usize) -> u8 {
         self.actors[idx].choose(&self.world, &self.plan)
     }
 
-    fn turn_from_player(&mut self) -> u8 {
+    fn choice_from_player(&mut self) -> u8 {
         let player_idx = self.player_idx;
         loop {
             self.update_view(false);
@@ -168,15 +169,15 @@ impl State {
                 }
                 59 => {
                     self.plan.tactic_attack();
-                    return self.turn_from_ai(player_idx);
+                    return self.choice_from_ai(player_idx);
                 }
                 60 => {
                     self.player_control_next();
-                    return self.turn_from_ai(player_idx);
+                    return self.choice_from_ai(player_idx);
                 }
                 61...69 => {
                     self.player_control_set_by_number(input as usize - 60);
-                    return self.turn_from_ai(player_idx);
+                    return self.choice_from_ai(player_idx);
                 }
                 70 => self.view.scroll_log_up(1),
                 71 => self.view.scroll_log_down(1),
