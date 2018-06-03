@@ -181,7 +181,7 @@ pub fn can_charge(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 4
 }
 pub fn should_charge(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
-    rand_int(30) == 0
+    rand_int(60) == 0
 }
 pub fn charge(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
     slf.act_exert(4, "charged!");
