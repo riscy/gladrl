@@ -1,13 +1,13 @@
 // Handles active objects like living entities and projectiles.
-use std::{cmp, i32};
 use csv;
 use inflector::Inflector;
-use plan::Plan;
-use world::World;
-use skills::*;
-use skills_registry::{choose_skill, use_skill};
 use item::Item;
 use item_effects;
+use plan::Plan;
+use skills::*;
+use skills_registry::{choose_skill, use_skill};
+use std::{cmp, i32};
+use world::World;
 
 pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, DO_WAIT];
 pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];

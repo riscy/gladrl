@@ -29,12 +29,13 @@ pub fn use_on_item(item: &mut Item, kind: u8) -> bool {
     false
 }
 
-pub fn use_as_portal(item: &Item,
-                     from: (u16, u16),
-                     to: (u16, u16),
-                     team: usize,
-                     other_items: &[Item])
-                     -> (u16, u16) {
+pub fn use_as_portal(
+    item: &Item,
+    from: (u16, u16),
+    to: (u16, u16),
+    team: usize,
+    other_items: &[Item],
+) -> (u16, u16) {
     if item.kind == PORTAL && from == to {
         for portal in other_items.iter().filter(|item| item.kind == PORTAL) {
             if portal.level == item.level && portal.pos != item.pos {

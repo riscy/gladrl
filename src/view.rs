@@ -1,11 +1,11 @@
 // Handles interactivity: reading keys, writing to the screen.
-use std::collections::HashMap;
-use std::cmp;
-use csv;
-use ncurses::*;
 use actor::Actor;
-use world::World;
+use csv;
 use item::Item;
+use ncurses::*;
+use std::cmp;
+use std::collections::HashMap;
+use world::World;
 
 pub struct View {
     scrollback: usize,

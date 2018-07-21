@@ -1,19 +1,19 @@
+extern crate csv;
 extern crate inflector;
 extern crate ncurses;
 extern crate rand;
-extern crate csv;
 
 #[macro_use]
 mod skills;
-mod skills_registry;
 mod actor;
-mod world;
+mod glad_helper;
 mod item;
 mod item_effects;
 mod plan;
-mod view;
+mod skills_registry;
 mod state;
-mod glad_helper;
+mod view;
+mod world;
 
 use state::State;
 

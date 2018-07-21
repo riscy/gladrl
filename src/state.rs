@@ -1,11 +1,11 @@
 // Handling of the global game state.
+use actor::Actor;
+use glad_helper;
+use plan::Plan;
 use std::cmp;
 use std::collections::{HashSet, VecDeque};
-use actor::Actor;
-use world::World;
 use view::{end_ncurses, start_ncurses, View};
-use plan::Plan;
-use glad_helper;
+use world::World;
 
 pub const AUTOPILOT: bool = false;
 
@@ -244,7 +244,8 @@ impl State {
     }
 
     fn player_control_confirm(&mut self) {
-        if self.player_idx >= self.actors.len() || !self.player().is_leader
+        if self.player_idx >= self.actors.len()
+            || !self.player().is_leader
             || !self.player().is_playable()
         {
             self.player_idx = 0;

@@ -1,11 +1,11 @@
 // Handles actors' special abilities and side effects.
-use std::{cmp, u16};
-use rand::*;
 use actor::Actor;
-use world::World;
+use inflector::Inflector;
 use item::Item;
 use plan::Plan;
-use inflector::Inflector; // for to_sentence_case
+use rand::*;
+use std::{cmp, u16};
+use world::World; // for to_sentence_case
 
 // hook simple skills into any part of the actor's behavior
 macro_rules! passive_effect {

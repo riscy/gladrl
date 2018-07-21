@@ -1,9 +1,9 @@
 // Handles the scenario's map and the items scattered around it.
 use csv;
-use std::str;
-use std::collections::HashMap;
 use item::Item;
-use item_effects::{use_on_item, use_as_portal, DOOR, TREE};
+use item_effects::{use_as_portal, use_on_item, DOOR, TREE};
+use std::collections::HashMap;
+use std::str;
 
 pub struct World {
     pub size: (u16, u16), // cols x rows
@@ -81,12 +81,14 @@ impl World {
 
     pub fn offset(&self, from: (u16, u16), dir: u8) -> (u16, u16) {
         let mut to = (from.0 as i16, from.1 as i16);
-        match dir {       // handle n/s components
+        match dir {
+            // handle n/s components
             0 | 1 | 7 => to.1 -= 1,
             3 | 4 | 5 => to.1 += 1,
             _ => {}
         }
-        match dir {       // handle e/w components
+        match dir {
+            // handle e/w components
             1 | 2 | 3 => to.0 += 1,
             5 | 6 | 7 => to.0 -= 1,
             _ => {}
@@ -127,8 +129,9 @@ impl World {
         // prevent multiple placement of doors, trees:
         if new_item.kind == DOOR || new_item.kind == TREE {
             if let Some(_item) = self.items
-                   .iter()
-                   .find(|i| i.kind == new_item.kind && i.pos == new_item.pos) {
+                .iter()
+                .find(|i| i.kind == new_item.kind && i.pos == new_item.pos)
+            {
                 return;
             }
         }
