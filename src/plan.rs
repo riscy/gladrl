@@ -107,25 +107,10 @@ impl Plan {
         let maximum_steps = if team == 0 { 200 } else { 24 };
         let mut open_list = self.open_list(team, world, actors);
         self.initialize_all_distances(team, &open_list);
-        for steps in 0..maximum_steps {
-            let mut next_open_list: Vec<(u16, u16)> = Vec::new();
-            for pos in open_list {
-                for dir in &MOVE_ACTIONS {
-                    let next = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
-                    // propogate forest to forest, but not forest to grass:
-                    if self.distance_to_goal(next, team) == UNKNOWN_DISTANCE
-                        && (!DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos))
-                            || world.glyph_at(next) == world.glyph_at(pos))
-                    {
-                        self.set_distance_to_goal(team, next, steps + 1);
-                        next_open_list.push(next);
-                    }
-                }
-            }
-            if next_open_list.is_empty() {
-                break;
-            }
-            open_list = next_open_list;
+        let mut step = 0;
+        while !open_list.is_empty() && step < maximum_steps {
+            open_list = self.relax_distances_and_expand(open_list, step, team, world);
+            step += 1;
         }
     }
 
@@ -146,6 +131,30 @@ impl Plan {
         for pos in open_list {
             self.set_distance_to_goal(team, *pos, 0);
         }
+    }
+
+    fn relax_distances_and_expand(
+        &mut self,
+        open_list: Vec<(u16, u16)>,
+        step: i32,
+        team: usize,
+        wld: &World,
+    ) -> Vec<(u16, u16)> {
+        let mut next_open_list: Vec<(u16, u16)> = Vec::new();
+        for pos in open_list {
+            for dir in &MOVE_ACTIONS {
+                let next_pos = wld.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
+                // propogate forest to forest, but not forest to grass:
+                if self.distance_to_goal(next_pos, team) == UNKNOWN_DISTANCE
+                    && (!DONT_PROPAGATE_OUT_OF.contains(wld.glyph_at(pos))
+                        || wld.glyph_at(next_pos) == wld.glyph_at(pos))
+                {
+                    self.set_distance_to_goal(team, next_pos, step + 1);
+                    next_open_list.push(next_pos);
+                }
+            }
+        }
+        next_open_list
     }
 
     fn locate_exits(&self, world: &World) -> Vec<(u16, u16)> {
