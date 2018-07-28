@@ -104,14 +104,9 @@ impl Plan {
     }
 
     fn update_paths(&mut self, team: usize, world: &World, actors: &[Actor]) {
-        for idx in 0..self.distances[&team].len() {
-            self.distances.get_mut(&team).unwrap()[idx] = UNKNOWN_DISTANCE;
-        }
         let maximum_steps = if team == 0 { 200 } else { 24 };
         let mut open_list = self.open_list(team, world, actors);
-        for pos in &open_list {
-            self.set_distance_to_goal(team, *pos, 0);
-        }
+        self.initialize_all_distances(team, &open_list);
         for steps in 0..maximum_steps {
             let mut next_open_list: Vec<(u16, u16)> = Vec::new();
             for pos in open_list {
@@ -141,6 +136,15 @@ impl Plan {
             TACTIC_FOLLOW => self.locate_leaders(team, actors),
             TACTIC_ATTACK | TACTIC_RETREAT => self.locate_enemies(team, actors),
             _ => Vec::new(),
+        }
+    }
+
+    fn initialize_all_distances(&mut self, team: usize, open_list: &Vec<(u16, u16)>) {
+        for idx in 0..self.distances[&team].len() {
+            self.distances.get_mut(&team).unwrap()[idx] = UNKNOWN_DISTANCE;
+        }
+        for pos in open_list {
+            self.set_distance_to_goal(team, *pos, 0);
         }
     }
 
