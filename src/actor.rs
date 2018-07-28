@@ -231,7 +231,7 @@ impl Actor {
 
     // How good this position is to the actor (larger is better)
     fn value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
-        let dist = plan.dist_to_goal(pos, self.team);
+        let dist = plan.distance_to_goal(pos, self.team);
         if self.is_retreating(plan) {
             dist
         } else {
@@ -243,7 +243,7 @@ impl Actor {
         if self.team == 0 {
             return 0;
         }
-        -plan.dist_to_goal_avg(pos, self.team, world)
+        -plan.distance_to_goal_avg(pos, self.team, world)
     }
 
     fn choose_preferred_dir(&self) -> u8 {

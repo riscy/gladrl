@@ -110,7 +110,7 @@ impl Plan {
         let maximum_steps = if team == 0 { 200 } else { 24 };
         let mut open_list = self.open_list(team, world, actors);
         for pos in &open_list {
-            self.set_dist_to_goal(team, *pos, 0);
+            self.set_distance_to_goal(team, *pos, 0);
         }
         for steps in 0..maximum_steps {
             let mut next_open_list: Vec<(u16, u16)> = Vec::new();
@@ -118,11 +118,11 @@ impl Plan {
                 for dir in &MOVE_ACTIONS {
                     let next = world.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
                     // propogate forest to forest, but not forest to grass:
-                    if self.dist_to_goal(next, team) == UNKNOWN_DISTANCE
+                    if self.distance_to_goal(next, team) == UNKNOWN_DISTANCE
                         && (!DONT_PROPAGATE_OUT_OF.contains(world.glyph_at(pos))
                             || world.glyph_at(next) == world.glyph_at(pos))
                     {
-                        self.set_dist_to_goal(team, next, steps + 1);
+                        self.set_distance_to_goal(team, next, steps + 1);
                         next_open_list.push(next);
                     }
                 }
@@ -164,11 +164,11 @@ impl Plan {
             .collect()
     }
 
-    pub fn dist_to_goal_avg(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
+    pub fn distance_to_goal_avg(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
         let mut avg = 0;
         for &mv in MOVE_ACTIONS.iter() {
             let new_pos = wld.neighbor(pos, mv, team, DONT_PROPAGATE_OUT_OF);
-            let dist = self.dist_to_goal(new_pos, team);
+            let dist = self.distance_to_goal(new_pos, team);
             if dist != UNKNOWN_DISTANCE {
                 avg += dist;
             }
@@ -176,21 +176,22 @@ impl Plan {
         avg / (MOVE_ACTIONS.len() as i32)
     }
 
-    pub fn dist_to_goal(&self, from: (u16, u16), team: usize) -> i32 {
+    pub fn distance_to_goal(&self, from: (u16, u16), team: usize) -> i32 {
         if let Some(distances) = self.distances.get(&team) {
             return distances[(from.1 * self.world_size.0 + from.0) as usize];
         }
         0
     }
 
-    fn set_dist_to_goal(&mut self, team: usize, pos: (u16, u16), val: i32) {
+    fn set_distance_to_goal(&mut self, team: usize, pos: (u16, u16), val: i32) {
         if let Some(field) = self.distances.get_mut(&team) {
             field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
         }
     }
 
     pub fn is_near_enemy(&self, pos: (u16, u16), team: usize) -> bool {
-        (self.is_attacking(team) || self.is_retreating(team)) && self.dist_to_goal(pos, team) < 10
+        (self.is_attacking(team) || self.is_retreating(team))
+            && self.distance_to_goal(pos, team) < 10
     }
 
     pub fn num_enemies(&self) -> usize {
