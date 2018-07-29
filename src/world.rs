@@ -138,3 +138,20 @@ impl World {
         self.items.push(new_item);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    static x: i32 = 123;
+
+    fn test_world() -> World {
+        World::new()
+    }
+
+    #[test]
+    fn sample() {
+        let _world = test_world();
+        assert_eq!(true, true);
+    }
+}

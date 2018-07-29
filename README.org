@@ -2,7 +2,8 @@
 #+OPTIONS: toc:3 author:t creator:nil num:nil
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
-[[https://img.shields.io/badge/version-0.0.5-blue.svg]]
+
+[[https://travis-ci.org/riscy/gladrl][https://travis-ci.org/riscy/gladrl.svg?branch=master]] [[https://img.shields.io/badge/version-0.0.6-blue.svg]]
 
 [[file:img/screenshot.png]]
 
