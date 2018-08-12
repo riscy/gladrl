@@ -60,3 +60,27 @@ impl Item {
         self.kind == DEBRIS
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_initialize() {
+        let mut item = Item::new(DEBRIS, (0, 0), 1, 0);
+        assert!(item.is_debris());
+        // reinitializing changes the item's type from debris:
+        item.initialize(0);
+        assert!(!item.is_debris());
+    }
+
+    #[test]
+    fn test_damage() {
+        let mut item = Item::new(0, (0, 0), 1, 0);
+        assert!(!item.is_debris());
+        for _ii in 0..5 {
+            item.damage();
+        }
+        assert!(item.is_debris());
+    }
+}
