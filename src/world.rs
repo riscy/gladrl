@@ -32,6 +32,13 @@ impl World {
         world
     }
 
+    pub fn load_layout(&mut self, size: (u16, u16)) {
+        self.size = size;
+        for _index in 0..self.size.0 * self.size.1 {
+            self.tiles.push(1);
+        }
+    }
+
     pub fn neighbor(&self, from: (u16, u16), dir: u8, team: usize, walls: &str) -> (u16, u16) {
         let pos = self.offset(from, dir);
         let mut final_pos = pos;
