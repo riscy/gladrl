@@ -156,15 +156,18 @@ mod tests {
     use super::*;
     use item_effects::{DOOR, DOOR_OPEN, KEY};
 
-    fn test_world(width_and_height: u16) -> World {
+    fn fixtures() -> (World, String) {
         let mut world = World::new();
-        world.reshape((width_and_height, width_and_height));
-        world
+        world.reshape((5, 5));
+        world.add_item(Item::new(DOOR, (1, 1), 0, 0));
+        world.add_item(Item::new(KEY, (4, 4), 0, 0));
+        let impassable_tiles = String::from("#");
+        return (world, impassable_tiles);
     }
 
     #[test]
     fn test_reshape() {
-        let world = test_world(5);
+        let (world, _) = fixtures();
         assert_eq!(world.tiles.len(), 25);
         assert!(world.is_out_of_bounds((6, 6)));
         for xx in 0..5 {
@@ -177,38 +180,33 @@ mod tests {
 
     #[test]
     fn test_offset_and_neighbor() {
+        let (world, impassable_tiles) = fixtures();
         let dir = 0;
-        let world = test_world(5);
-        let impassable_tiles = "";
         assert_eq!(world.offset((0, 0), dir), (0, 0));
-        assert_eq!(world.neighbor((0, 0), dir, 0, impassable_tiles), (0, 0));
-        let impassable_tiles = "#";
+        assert_eq!(world.neighbor((0, 0), dir, 0, &impassable_tiles), (0, 0));
         assert_eq!(world.offset((2, 2), dir), (2, 1));
-        assert_eq!(world.neighbor((2, 2), dir, 0, impassable_tiles), (2, 1));
-        let impassable_tiles = ".";
+        assert_eq!(world.neighbor((2, 2), dir, 0, &impassable_tiles), (2, 1));
         assert_eq!(world.offset((2, 2), dir), (2, 1));
-        assert_eq!(world.neighbor((2, 2), dir, 0, impassable_tiles), (2, 2));
+        assert_eq!(world.neighbor((2, 2), dir, 0, "."), (2, 2));
     }
 
     #[test]
     fn test_bleed() {
-        let mut world = test_world(5);
+        let (mut world, _) = fixtures();
         world.bleed((2, 2));
         assert!(world.tiles.iter().any(|tile| tile == &200));
     }
 
     #[test]
     fn test_push_wall() {
-        let mut world = test_world(5);
+        let (mut world, _) = fixtures();
         let mut actor_inventory = vec![];
-        world.add_item(Item::new(DOOR, (1, 1), 0, 0));
 
-        // pushing against the door does nothing:
+        // pushing the door does not create an open door
         assert!(world.push_wall((0, 1), 2, &actor_inventory).is_none());
-        assert!(world.items[0].kind == DOOR);
+        assert!(!world.items.iter().any(|item| item.kind == OPEN_DOOR));
 
-        // reaching for a key on the ground picks it up:
-        world.add_item(Item::new(KEY, (4, 4), 0, 0));
+        // reaching for the key on the ground picks it up:
         let treasure = world.push_wall((3, 4), 2, &actor_inventory).unwrap();
         assert_eq!(world.items.len(), 1);
         assert_eq!(treasure.kind, KEY);

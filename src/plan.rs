@@ -221,50 +221,46 @@ mod tests {
     use super::*;
     use std::iter::FromIterator;
 
+    fn fixtures() -> (Plan, World, Vec<Actor>, HashSet<usize>) {
+        let team_idxs = HashSet::from_iter(vec![0, 1]);
+        let mut world = World::new();
+        world.reshape((5, 5));
+        let plan = Plan::new((5, 5), &team_idxs);
+        let actors = vec![
+            Actor::new(1, 1, 0, (0, 0), 0),
+            Actor::new(1, 1, 1, (1, 4), 0),
+        ];
+        return (plan, world, actors, team_idxs);
+    }
+
     #[test]
     fn test_tactics() {
-        let mut plan = Plan::new((5, 5), &HashSet::new());
-
+        let (mut plan, _, _, _) = fixtures();
         plan.tactic_defend((2, 2));
         assert!(plan.is_defending(0));
         assert!(!plan.is_defending(1));
         assert_eq!(plan.muster_point(0), (2, 2));
-
         plan.tactic_attack();
         assert!(plan.is_attacking(0));
-
         plan.tactic_retreat();
         assert!(plan.is_retreating(0));
-
         plan.tactic_follow();
         assert!(!(plan.is_attacking(0) || plan.is_defending(0) || plan.is_retreating(0)));
     }
 
     #[test]
     fn test_fast_update_and_whos_at() {
-        let mut plan = Plan::new((5, 5), &HashSet::new());
-        let (first_team, second_team) = (0, 1);
-        plan.fast_update(&vec![
-            Actor::new(1, 1, first_team, (0, 0), 0),
-            Actor::new(1, 1, second_team, (4, 4), 0),
-        ]);
+        let (mut plan, _, actors, _) = fixtures();
+        plan.fast_update(&actors);
         assert_eq!(plan.num_enemies(), 1);
-        assert_eq!(plan.whos_at((0, 0)).unwrap(), &first_team);
-        assert_eq!(plan.whos_at((4, 4)).unwrap(), &second_team);
+        assert_eq!(plan.whos_at((0, 0)).unwrap(), &0);
+        assert_eq!(plan.whos_at((1, 4)).unwrap(), &1);
         assert!(plan.whos_at((2, 2)).is_none());
     }
 
     #[test]
     fn test_update() {
-        let teams = vec![0, 1];
-        let team_idxs = HashSet::from_iter(teams.clone());
-        let mut plan = Plan::new((5, 5), &team_idxs);
-        let mut world = World::new();
-        world.reshape((5, 5));
-        let actors = vec![
-            Actor::new(1, 1, teams[0], (0, 0), 0),
-            Actor::new(1, 1, teams[1], (1, 4), 0),
-        ];
+        let (mut plan, world, actors, team_idxs) = fixtures();
         plan.tactic_attack(); // ensure teams are attacking each other
         plan.fast_update(&actors); // ensures enemy counts are correct
         plan.update(&team_idxs, &world, &actors);
