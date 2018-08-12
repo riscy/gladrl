@@ -1,12 +1,12 @@
 // Handles loading of game assets from the original Gladiator 3.8 sources.
-use std::str;
-use std::io::prelude::*;
-use std::fs::File;
-use inflector::Inflector;
-use state::State;
-use world::World;
 use actor::Actor;
+use inflector::Inflector;
 use item::Item;
+use state::State;
+use std::fs::File;
+use std::io::prelude::*;
+use std::str;
+use world::World;
 
 // See: https://github.com/openglad/openglad/blob/master/src/base.h
 // NOTE: Will pop state.player_team into spawn locations.
