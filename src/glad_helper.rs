@@ -108,7 +108,7 @@ pub fn load_world_layout(world: &mut World, pix: &str) {
         .unwrap()
         .read(&mut buffer)
         .expect("Failed to open.");
-    world.load_layout((u16::from(buffer[1]), u16::from(buffer[2])));
+    world.reshape((u16::from(buffer[1]), u16::from(buffer[2])));
     for index in 0..((world.size.0 * world.size.1) as usize) {
         world.tiles[index] = u16::from(buffer[index as usize + 3]);
     }

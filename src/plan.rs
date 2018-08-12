@@ -1,8 +1,8 @@
 // Handles tactics (for team 0), pathfinding, identifying friends/foes.
-use actor::{Actor, MOVE_ACTIONS};
+use actor::Actor;
 use std::collections::{HashMap, HashSet};
 use std::i32;
-use world::World;
+use world::{World, MOVE_ACTIONS};
 
 const TACTIC_ATTACK: u8 = 0;
 const TACTIC_FOLLOW: u8 = 1;

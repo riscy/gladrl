@@ -7,12 +7,8 @@ use plan::Plan;
 use skills::*;
 use skills_registry::{choose_skill, use_skill};
 use std::{cmp, i32};
-use world::World;
+use world::{World, MOVE_ACTIONS, TURN_ACTIONS, WAIT_ACTION};
 
-pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, DO_WAIT];
-pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];
-
-const DO_WAIT: u8 = 8;
 const DO_SKILL: u8 = 30;
 const DO_DROP: u8 = 40;
 
@@ -214,7 +210,7 @@ impl Actor {
                     }
                 }
             }
-            if movement || mv == DO_WAIT {
+            if movement || mv == WAIT_ACTION {
                 let value = self.value_of_pos(pos, plan);
                 if value >= best_value {
                     let risk = self.estimate_risk(pos, world, plan);

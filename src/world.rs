@@ -5,6 +5,10 @@ use item_effects::{use_as_portal, use_on_item, DOOR, DOOR_OPEN, KEY, TREE};
 use std::collections::HashMap;
 use std::str;
 
+pub const WAIT_ACTION: u8 = 8;
+pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, WAIT_ACTION];
+pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];
+
 pub struct World {
     pub size: (u16, u16), // cols x rows
     pub name: String,
@@ -32,7 +36,7 @@ impl World {
         world
     }
 
-    pub fn load_layout(&mut self, size: (u16, u16)) {
+    pub fn reshape(&mut self, size: (u16, u16)) {
         self.size = size;
         for _index in 0..self.size.0 * self.size.1 {
             self.tiles.push(1);
@@ -135,7 +139,8 @@ impl World {
     pub fn add_item(&mut self, new_item: Item) {
         // prevent multiple placement of doors, trees:
         if new_item.kind == DOOR || new_item.kind == TREE {
-            if let Some(_item) = self.items
+            if let Some(_item) = self
+                .items
                 .iter()
                 .find(|i| i.kind == new_item.kind && i.pos == new_item.pos)
             {
@@ -152,12 +157,12 @@ mod tests {
 
     fn test_world(width_and_height: u16) -> World {
         let mut world = World::new();
-        world.load_layout((width_and_height, width_and_height));
+        world.reshape((width_and_height, width_and_height));
         world
     }
 
     #[test]
-    fn test_load_layout() {
+    fn test_reshape() {
         let world = test_world(5);
         assert_eq!(world.tiles.len(), 25);
         assert!(world.is_out_of_bounds((6, 6)));
