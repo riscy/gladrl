@@ -2,6 +2,7 @@
 use actor::Actor;
 use std::collections::{HashMap, HashSet};
 use std::i32;
+use std::iter::FromIterator;
 use world::{World, MOVE_ACTIONS};
 
 const TACTIC_ATTACK: u8 = 0;
@@ -213,5 +214,67 @@ impl Plan {
 
     pub fn whos_at(&self, pos: (u16, u16)) -> Option<&usize> {
         self.occupied_cells.get(&pos)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tactics() {
+        let mut plan = Plan::new((5, 5), &HashSet::new());
+
+        plan.tactic_defend((2, 2));
+        assert!(plan.is_defending(0));
+        assert!(!plan.is_defending(1));
+        assert_eq!(plan.muster_point(0), (2, 2));
+
+        plan.tactic_attack();
+        assert!(plan.is_attacking(0));
+
+        plan.tactic_retreat();
+        assert!(plan.is_retreating(0));
+
+        plan.tactic_follow();
+        assert!(!(plan.is_attacking(0) || plan.is_defending(0) || plan.is_retreating(0)));
+    }
+
+    #[test]
+    fn test_fast_update_and_whos_at() {
+        let mut plan = Plan::new((5, 5), &HashSet::new());
+        let (first_team, second_team) = (0, 1);
+        plan.fast_update(&vec![
+            Actor::new(1, 1, first_team, (0, 0), 0),
+            Actor::new(1, 1, second_team, (4, 4), 0),
+        ]);
+        assert_eq!(plan.num_enemies(), 1);
+        assert_eq!(plan.whos_at((0, 0)).unwrap(), &first_team);
+        assert_eq!(plan.whos_at((4, 4)).unwrap(), &second_team);
+        assert!(plan.whos_at((2, 2)).is_none());
+    }
+
+    #[test]
+    fn test_update() {
+        let teams = vec![0, 1];
+        let team_idxs = HashSet::from_iter(teams.clone());
+        let mut plan = Plan::new((5, 5), &team_idxs);
+        let mut world = World::new();
+        world.reshape((5, 5));
+        let actors = vec![
+            Actor::new(1, 1, teams[0], (0, 0), 0),
+            Actor::new(1, 1, teams[1], (1, 4), 0),
+        ];
+        plan.tactic_attack(); // ensure teams are attacking each other
+        plan.fast_update(&actors); // ensures enemy counts are correct
+        plan.update(&team_idxs, &world, &actors);
+        for actor in actors {
+            assert_eq!(plan.distance_to_goal(actor.pos, actor.team), 4);
+            assert!(
+                plan.distances[&actor.team]
+                    .iter()
+                    .all(|distance| distance != &UNKNOWN_DISTANCE)
+            );
+        }
     }
 }
