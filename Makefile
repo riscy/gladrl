@@ -4,6 +4,9 @@
 run: src/skills_registry.rs
 	RUST_BACKTRACE=1 cargo run --release
 
+test:
+	cargo test
+
 src/skills_registry.rs:
 	echo Registering skills...
 	bash ./scripts/make_skills_registry.sh >| ./src/skills_registry.rs

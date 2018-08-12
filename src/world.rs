@@ -1,7 +1,7 @@
 // Handles the scenario's map and the items scattered around it.
 use csv;
 use item::Item;
-use item_effects::{use_as_portal, use_on_item, DOOR, TREE};
+use item_effects::{use_as_portal, use_on_item, DOOR, DOOR_OPEN, KEY, TREE};
 use std::collections::HashMap;
 use std::str;
 
@@ -150,15 +150,66 @@ impl World {
 mod tests {
     use super::*;
 
-    static x: i32 = 123;
-
-    fn test_world() -> World {
-        World::new()
+    fn test_world(width_and_height: u16) -> World {
+        let mut world = World::new();
+        world.load_layout((width_and_height, width_and_height));
+        world
     }
 
     #[test]
-    fn sample() {
-        let _world = test_world();
-        assert_eq!(true, true);
+    fn test_load_layout() {
+        let world = test_world(5);
+        assert_eq!(world.tiles.len(), 25);
+        assert!(world.is_out_of_bounds((6, 6)));
+        for xx in 0..5 {
+            for yy in 0..5 {
+                assert_eq!(world.tile_at((xx, yy)), ('.', 0));
+                assert_eq!(world.glyph_at((xx, yy)), '.');
+            }
+        }
+    }
+
+    #[test]
+    fn test_offset_and_neighbor() {
+        let dir = 0;
+        let world = test_world(5);
+        let impassable_tiles = "";
+        assert_eq!(world.offset((0, 0), dir), (0, 0));
+        assert_eq!(world.neighbor((0, 0), dir, 0, impassable_tiles), (0, 0));
+        let impassable_tiles = "#";
+        assert_eq!(world.offset((2, 2), dir), (2, 1));
+        assert_eq!(world.neighbor((2, 2), dir, 0, impassable_tiles), (2, 1));
+        let impassable_tiles = ".";
+        assert_eq!(world.offset((2, 2), dir), (2, 1));
+        assert_eq!(world.neighbor((2, 2), dir, 0, impassable_tiles), (2, 2));
+    }
+
+    #[test]
+    fn test_bleed() {
+        let mut world = test_world(5);
+        world.bleed((2, 2));
+        assert!(world.tiles.iter().any(|tile| tile == &200));
+    }
+
+    #[test]
+    fn test_push_wall() {
+        let mut world = test_world(5);
+        let mut actor_inventory = vec![];
+        world.add_item(Item::new(DOOR, (1, 1), 0, 0));
+
+        // pushing against the door does nothing:
+        assert!(world.push_wall((0, 1), 2, &actor_inventory).is_none());
+        assert!(world.items[0].kind == DOOR);
+
+        // reaching for a key on the ground picks it up:
+        world.add_item(Item::new(KEY, (4, 4), 0, 0));
+        let treasure = world.push_wall((3, 4), 2, &actor_inventory).unwrap();
+        assert_eq!(world.items.len(), 1);
+        assert_eq!(treasure.kind, KEY);
+
+        // pushing against the locked door, with the key, opens it:
+        actor_inventory.push(treasure);
+        world.push_wall((0, 1), 2, &actor_inventory);
+        assert!(world.items[0].kind == DOOR_OPEN);
     }
 }
