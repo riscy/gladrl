@@ -12,4 +12,4 @@ install:
   - cargo build --verbose
 
 script:
-  - cargo test
+  - RUST_BACKTRACE=full cargo test
