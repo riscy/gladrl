@@ -1,7 +1,7 @@
 // Handles the scenario's map and the items scattered around it.
 use csv;
 use item::Item;
-use item_effects::{use_as_portal, use_on_item, DOOR, DOOR_OPEN, KEY, TREE};
+use item_effects::{use_as_portal, use_on_item, DOOR, TREE};
 use std::collections::HashMap;
 use std::str;
 
@@ -154,6 +154,7 @@ impl World {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use item_effects::{DOOR, DOOR_OPEN, KEY};
 
     fn test_world(width_and_height: u16) -> World {
         let mut world = World::new();

@@ -2,7 +2,6 @@
 use actor::Actor;
 use std::collections::{HashMap, HashSet};
 use std::i32;
-use std::iter::FromIterator;
 use world::{World, MOVE_ACTIONS};
 
 const TACTIC_ATTACK: u8 = 0;
@@ -220,6 +219,7 @@ impl Plan {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::iter::FromIterator;
 
     #[test]
     fn test_tactics() {
