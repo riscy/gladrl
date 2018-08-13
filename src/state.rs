@@ -44,6 +44,12 @@ impl State {
         }
     }
 
+    pub fn add_actor(&mut self, actor: Actor) {
+        let team = actor.team;
+        self.actors.push(actor);
+        self.team_idxs.insert(team);
+    }
+
     pub fn loop_game(&mut self) {
         start_ncurses();
         self.player_team_create();

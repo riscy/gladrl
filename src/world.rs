@@ -204,7 +204,7 @@ mod tests {
 
         // pushing the door does not create an open door
         assert!(world.push_wall((0, 1), 2, &actor_inventory).is_none());
-        assert!(!world.items.iter().any(|item| item.kind == OPEN_DOOR));
+        assert!(!world.items.iter().any(|item| item.kind == DOOR_OPEN));
 
         // reaching for the key on the ground picks it up:
         let treasure = world.push_wall((3, 4), 2, &actor_inventory).unwrap();

@@ -84,8 +84,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         }
         assert!(actor.glyph != '?');
         assert!(actor.move_lag != 0);
-        state.actors.push(actor);
-        state.team_idxs.insert(team);
+        state.add_actor(actor);
     }
 
     if !state.world_completed.contains(&state.world_idx) {
