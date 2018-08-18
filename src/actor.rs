@@ -252,11 +252,13 @@ impl Actor {
     pub fn act(
         &mut self,
         mv: u8,
+        time: u32,
         wld: &mut World,
         plan: &Plan,
         other: (&mut [Actor], &mut [Actor]),
         spawn: &mut Vec<Actor>,
     ) {
+        self.time = time;
         if self.stun == 0 {
             match mv {
                 DO_SKILL => use_skill(self, wld, plan, spawn),

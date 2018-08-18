@@ -130,8 +130,14 @@ impl State {
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
         let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
         let others = (have_acted, yet_to_act);
-        actor.time = self.time;
-        actor.act(choice, &mut self.world, &self.plan, others, &mut self.spawn);
+        actor.act(
+            choice,
+            self.time,
+            &mut self.world,
+            &self.plan,
+            others,
+            &mut self.spawn,
+        );
         actor.update(&mut self.world);
     }
 
