@@ -1,15 +1,10 @@
-.SILENT:
-.PHONY: clean
+.PHONY: run test lint clean
 
-run: src/skills_registry.rs
-	RUST_BACKTRACE=1 cargo run --release
+run: $(SKILLS_REGISTRY)
+	RUST_BACKTRACE=full cargo run --release
 
 test:
 	RUST_BACKTRACE=full cargo test -- --nocapture
-
-src/skills_registry.rs:
-	echo Registering skills...
-	bash ./scripts/make_skills_registry.sh >| ./src/skills_registry.rs
 
 lint:
 	rustup default nightly
@@ -18,3 +13,12 @@ lint:
 
 clean:
 	rm -f ./src/skills_registry.rs
+
+#----------------------------------------------------------------------------
+# Automatically add skills to registry source file $(SKILLS_REGISTRY).
+#----------------------------------------------------------------------------
+SKILLS_REGISTRY_SCRIPT=scripts/make_skills_registry.sh
+SKILLS_REGISTRY=src/skills_registry.rs
+
+$(SKILLS_REGISTRY): $(SKILLS_REGISTRY_SCRIPT)
+	bash $(SKILLS_REGISTRY_SCRIPT) >| $(SKILLS_REGISTRY)
