@@ -360,11 +360,16 @@ impl Actor {
 
     fn act_touch(&mut self, other: &mut Actor, world: &mut World, action: u8, plan: &Plan) {
         if other.is_enemy_of(self.team) && self.strength > 0 {
+            passive_effect!(passive_trip => self, action, other);
+            passive_effect!(passive_whirl => self, action, other);
+            passive_effect!(passive_backstab => self, action, other);
+            passive_effect!(passive_slam => self, action, other, world, plan);
             return self.act_hit(other, action, world, plan);
         } else if self.can_displace() && other.is_mobile() {
             return self.act_displace(other, world);
         }
-        self.act_help(other, world)
+        passive_effect!(passive_heal => self, other, world);
+        self.act_help(other)
     }
 
     fn act_displace(&mut self, other: &mut Actor, world: &mut World) {
@@ -379,8 +384,7 @@ impl Actor {
         }
     }
 
-    fn act_help(&mut self, other: &mut Actor, world: &mut World) {
-        passive_effect!(passive_heal => self, other, world);
+    fn act_help(&mut self, other: &mut Actor) {
         if other.stun > 0 && !self.is_projectile() {
             other.stun = 0;
             self.log_action(&format!("hoisted {} up.", other.name));
@@ -390,10 +394,6 @@ impl Actor {
     }
 
     fn act_hit(&mut self, other: &mut Actor, action: u8, world: &mut World, p: &Plan) {
-        passive_effect!(passive_trip => self, action, other);
-        passive_effect!(passive_whirl => self, action, other);
-        passive_effect!(passive_backstab => self, action, other);
-        passive_effect!(passive_slam => self, action, other, world, p);
         self.log_interaction("hit", other);
         self.lose_momentum(1);
         other.hurt(self.strength * self.level, world);
@@ -533,7 +533,10 @@ impl Actor {
     }
 
     pub fn is_near(&self, pos: (u16, u16)) -> bool {
-        let (dx, dy) = (self.pos.0 - pos.0, self.pos.1 - pos.1);
+        let (dx, dy) = (
+            self.pos.0 as i32 - pos.0 as i32,
+            self.pos.1 as i32 - pos.1 as i32,
+        );
         dx * dx + dy * dy <= 18
     }
 
