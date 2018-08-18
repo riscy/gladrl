@@ -583,8 +583,8 @@ mod tests {
         assert!(soldier.is_flesh());
         assert!(soldier.is_mobile());
         assert!(soldier.is_playable());
-        assert!(soldier.is_enemy_of(1));
-        assert!(soldier.can_block());
+        assert!(soldier.is_enemy_of(archer.team));
+        assert!(soldier.can_block() && soldier.is_blocking(soldier.pos));
         assert!(!soldier.is_hurt());
         assert!(!soldier.is_undead());
         assert!(!soldier.is_projectile());
@@ -612,7 +612,7 @@ mod tests {
 
     #[test]
     fn test_stun_and_recover() {
-        let (mut soldier, mut archer, _world, _plan) = fixtures();
+        let (mut soldier, mut archer, mut world, _plan) = fixtures();
         soldier.gain_momentum(1);
         assert_eq!(soldier.glyph(), 'S');
         soldier.stun(1);
@@ -620,6 +620,11 @@ mod tests {
         assert_eq!(soldier.glyph(), 's');
         archer.act_help(&mut soldier);
         assert_eq!(soldier.glyph(), 'S');
+        soldier.hurt(1, &mut world);
+        soldier.act_exert(10, "threw an elf");
+        soldier.recover_fully();
+        assert_eq!(soldier.health, soldier.max_health());
+        assert_eq!(soldier.mana, soldier.max_mana());
     }
 
     #[test]
