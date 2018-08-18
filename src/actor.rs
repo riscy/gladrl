@@ -364,7 +364,7 @@ impl Actor {
             passive_effect!(passive_whirl => self, action, other);
             passive_effect!(passive_backstab => self, action, other);
             passive_effect!(passive_slam => self, action, other, world, plan);
-            return self.act_hit(other, action, world, plan);
+            return self.act_hit(other, world);
         } else if self.can_displace() && other.is_mobile() {
             return self.act_displace(other, world);
         }
@@ -393,7 +393,7 @@ impl Actor {
         self.lose_momentum(1);
     }
 
-    fn act_hit(&mut self, other: &mut Actor, action: u8, world: &mut World, p: &Plan) {
+    fn act_hit(&mut self, other: &mut Actor, world: &mut World) {
         self.log_interaction("hit", other);
         self.lose_momentum(1);
         other.hurt(self.strength * self.level, world);
@@ -604,7 +604,7 @@ mod tests {
         soldier.hurt(all_but_2, &mut world);
         assert!(soldier.is_alive() && soldier.is_hurt());
         archer.act_touch(&mut soldier, &mut world, 2, &plan);
-        archer.act_hit(&mut soldier, 2, &mut world, &plan);
+        archer.act_hit(&mut soldier, &mut world);
         assert!(!soldier.is_alive());
     }
 
@@ -622,10 +622,10 @@ mod tests {
 
     #[test]
     fn test_gain_and_lose_momentum() {
-        let (mut soldier, mut archer, mut world, plan) = fixtures();
+        let (mut soldier, mut archer, mut world, _plan) = fixtures();
         soldier.gain_momentum(1);
         assert_eq!(soldier.momentum, 1);
-        soldier.act_hit(&mut archer, 6, &mut world, &plan);
+        soldier.act_hit(&mut archer, &mut world);
         assert_eq!(soldier.momentum, 0);
     }
 
