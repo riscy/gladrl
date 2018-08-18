@@ -556,3 +556,89 @@ impl Actor {
         self.team == 0 || self.is_persistent || self.is_leader
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
+
+    fn fixtures() -> (Actor, Actor, World, Plan) {
+        let soldier = Actor::new(0, 1, 0, (2, 2), 2);
+        let archer = Actor::new(2, 1, 1, (1, 2), 0);
+        let boots = Item::new(7, (2, 2), 0, 0);
+        let plan = Plan::new((5, 5), &HashSet::from_iter(vec![0, 1]));
+        let mut world = World::new();
+        world.reshape((5, 5));
+        world.add_item(boots);
+        return (soldier, archer, world, plan);
+    }
+
+    #[test]
+    fn test_predicates() {
+        let (soldier, archer, _world, _plan) = fixtures();
+        assert!(soldier.is_alive());
+        assert!(soldier.is_flesh());
+        assert!(soldier.is_mobile());
+        assert!(soldier.is_playable());
+        assert!(soldier.is_enemy_of(1));
+        assert!(soldier.can_block());
+        assert!(!soldier.is_hurt());
+        assert!(!soldier.is_undead());
+        assert!(!soldier.is_projectile());
+        assert!(archer.has_skill("shoot"));
+        assert!(soldier.has_skill("charge"));
+    }
+
+    #[test]
+    fn test_is_near() {
+        let (soldier, archer, _world, _plan) = fixtures();
+        assert!(soldier.is_near(archer.pos));
+        assert!(!soldier.is_near((100, 100)));
+    }
+
+    #[test]
+    fn test_enemy_interactions() {
+        let (mut soldier, mut archer, mut world, plan) = fixtures();
+        let all_but_2 = soldier.health - 2;
+        soldier.hurt(all_but_2, &mut world);
+        assert!(soldier.is_alive() && soldier.is_hurt());
+        archer.act_touch(&mut soldier, &mut world, 2, &plan);
+        archer.act_hit(&mut soldier, 2, &mut world, &plan);
+        assert!(!soldier.is_alive());
+    }
+
+    #[test]
+    fn test_stun_and_recover() {
+        let (mut soldier, mut archer, _world, _plan) = fixtures();
+        soldier.gain_momentum(1);
+        assert_eq!(soldier.glyph(), 'S');
+        soldier.stun(1);
+        assert_eq!(soldier.momentum, 0);
+        assert_eq!(soldier.glyph(), 's');
+        archer.act_help(&mut soldier);
+        assert_eq!(soldier.glyph(), 'S');
+    }
+
+    #[test]
+    fn test_gain_and_lose_momentum() {
+        let (mut soldier, mut archer, mut world, plan) = fixtures();
+        soldier.gain_momentum(1);
+        assert_eq!(soldier.momentum, 1);
+        soldier.act_hit(&mut archer, 6, &mut world, &plan);
+        assert_eq!(soldier.momentum, 0);
+    }
+
+    #[test]
+    fn test_get_and_drop() {
+        let (mut soldier, _archer, mut world, plan) = fixtures();
+        soldier.act_get(&mut world);
+        assert_eq!(soldier.inventory.len(), 1);
+        soldier.act_drop_all(&mut world);
+        assert_eq!(soldier.inventory.len(), 0);
+        // move forward and wait for auto-pickup:
+        soldier.act_move(2, &mut world, &plan, (&mut [], &mut []));
+        soldier.update(&mut world);
+        assert_eq!(soldier.inventory.len(), 1);
+    }
+}
