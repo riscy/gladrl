@@ -8,7 +8,8 @@ test:
 
 lint:
 	rustup default nightly
-	cargo rustc --features clippy -- -Z no-trans -Z extra-plugins=clippy
+	rustup component add clippy-preview --toolchain=nightly
+	cargo-clippy
 	rustup default stable
 
 clean:
