@@ -79,7 +79,7 @@ impl Actor {
     }
 
     pub fn initialize(&mut self, kind: u8) {
-        let mut reader = csv::Reader::from_file("config/actor.csv").unwrap();
+        let mut reader = csv::Reader::from_file("config/glad/actor.csv").unwrap();
         for record in reader.decode() {
             let row: (u8, char, String, String, u16, String, u16, u16, u16, u16) = record.unwrap();
             if row.0 == kind {

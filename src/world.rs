@@ -32,7 +32,7 @@ impl World {
             log: Vec::new(),
             tileset: HashMap::new(),
         };
-        world.load_tileset("config/world.csv");
+        world.load_tileset("config/glad/world.csv");
         world
     }
 
