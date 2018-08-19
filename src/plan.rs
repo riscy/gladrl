@@ -26,9 +26,9 @@ pub struct Plan {
 impl Plan {
     pub fn new(world_size: (u16, u16), teams: &HashSet<usize>) -> Plan {
         let mut plan = Plan {
+            world_size,
             distances: HashMap::new(),
             occupied_cells: HashMap::new(),
-            world_size: world_size,
             team_0_enemies: 0,
             team_0_tactic: TACTIC_FOLLOW,
             team_0_muster_point: (0, 0),
@@ -124,7 +124,7 @@ impl Plan {
         }
     }
 
-    fn initialize_all_distances(&mut self, team: usize, open_list: &Vec<(u16, u16)>) {
+    fn initialize_all_distances(&mut self, team: usize, open_list: &[(u16, u16)]) {
         for idx in 0..self.distances[&team].len() {
             self.distances.get_mut(&team).unwrap()[idx] = UNKNOWN_DISTANCE;
         }
@@ -179,8 +179,8 @@ impl Plan {
 
     pub fn distance_to_goal_avg(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
         let mut avg = 0;
-        for &mv in MOVE_ACTIONS.iter() {
-            let new_pos = wld.neighbor(pos, mv, team, DONT_PROPAGATE_OUT_OF);
+        for mv in &MOVE_ACTIONS {
+            let new_pos = wld.neighbor(pos, *mv, team, DONT_PROPAGATE_OUT_OF);
             let dist = self.distance_to_goal(new_pos, team);
             if dist != UNKNOWN_DISTANCE {
                 avg += dist;

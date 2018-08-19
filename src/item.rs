@@ -19,13 +19,13 @@ pub struct Item {
 impl Item {
     pub fn new(kind: u8, pos: (u16, u16), level: u16, team: usize) -> Item {
         let mut item = Item {
+            kind,
+            pos,
+            level,
+            team,
             name: String::new(),
-            kind: 0,
-            team: team,
-            level: level,
             glyph: '0',
             color: 0,
-            pos: pos,
             can_get: false,
             can_consume: false,
             health: 5,

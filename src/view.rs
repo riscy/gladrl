@@ -128,9 +128,10 @@ impl View {
     }
 
     fn render_actor(&self, actor: &Actor) {
-        let color = match self.animation_delay != 0 {
-            true => self.actor_status_color(actor),
-            false => self.actor_color(actor),
+        let color = if self.animation_delay != 0 {
+            self.actor_status_color(actor)
+        } else {
+            self.actor_color(actor)
         };
         attron(COLOR_PAIR(color));
         addch(actor.glyph() as chtype);

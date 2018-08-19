@@ -45,18 +45,18 @@ pub struct Actor {
 }
 
 impl Actor {
-    pub fn new(kind: u8, level: u16, team: usize, pos: (u16, u16), dir: u8) -> Actor {
+    pub fn new(kind: u8, level: u16, team: usize, pos: (u16, u16), direction: u8) -> Actor {
         let mut actor = Actor {
-            kind: 0,
-            pos: pos,
-            level: level,
+            kind,
+            pos,
+            level,
+            team,
+            direction,
             health: 1,
             strength: 1,
             con: 1,
             intel: 1,
             mana: 1,
-            team: team,
-            direction: dir,
             name: String::new(),
             walls: String::new(),
             random_seed: rand_int(200),
@@ -536,8 +536,8 @@ impl Actor {
 
     pub fn is_near(&self, pos: (u16, u16)) -> bool {
         let (dx, dy) = (
-            self.pos.0 as i32 - pos.0 as i32,
-            self.pos.1 as i32 - pos.1 as i32,
+            i32::from(self.pos.0) - i32::from(pos.0),
+            i32::from(self.pos.1) - i32::from(pos.1),
         );
         dx * dx + dy * dy <= 18
     }
