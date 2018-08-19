@@ -52,7 +52,7 @@ impl State {
 
     pub fn loop_game(&mut self) {
         start_ncurses();
-        self.player_team_create();
+        glad_helper::create_player_team(self);
         while self.world_idx != 0 {
             glad_helper::load_world_and_spawn_team(self);
             self.plan = Plan::new(self.world.size, &self.team_idxs);
@@ -245,14 +245,6 @@ impl State {
 
     pub fn player_mut(&mut self) -> &mut Actor {
         &mut self.actors[self.player_idx]
-    }
-
-    fn player_team_create(&mut self) {
-        for kind in &[0, 2, 11, 1, 13, 5, 3] {
-            let mut actor = Actor::new(*kind, 1, 0, (0, 0), 0);
-            actor.is_persistent = true;
-            self.player_team.push_front(actor);
-        }
     }
 
     fn player_control_confirm(&mut self) {
