@@ -8,8 +8,5 @@ os:
 rust:
   - stable
 
-install:
-  - cargo build --verbose
-
 script:
-  - RUST_BACKTRACE=full cargo test
+  - make test
