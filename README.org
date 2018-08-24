@@ -3,7 +3,7 @@
 #+AUTHOR: Chris Rayner
 #+EMAIL: dchrisrayner@gmail.com
 
-[[https://travis-ci.org/riscy/gladrl][https://travis-ci.org/riscy/gladrl.svg?branch=master]] [[https://img.shields.io/badge/version-0.0.6-blue.svg]]
+[[https://travis-ci.org/riscy/gladrl][https://travis-ci.org/riscy/gladrl.svg?branch=master]]
 
 [[file:img/screenshot.png]]
 
