@@ -125,13 +125,12 @@ impl State {
         // split actors, excluding current, to prevent reborrowing
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
         let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
-        let others = (have_acted, yet_to_act);
         actor.act(
             choice,
             self.time,
             &mut self.world,
             &self.plan,
-            others,
+            &mut vec![have_acted, yet_to_act],
             &mut self.spawn,
         );
         actor.update(&mut self.world);

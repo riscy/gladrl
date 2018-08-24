@@ -255,7 +255,7 @@ impl Actor {
         time: u32,
         wld: &mut World,
         plan: &Plan,
-        other: (&mut [Actor], &mut [Actor]),
+        other: &mut Vec<&mut [Actor]>,
         spawn: &mut Vec<Actor>,
     ) {
         self.time = time;
@@ -273,13 +273,7 @@ impl Actor {
         }
     }
 
-    fn act_move(
-        &mut self,
-        mv: u8,
-        wld: &mut World,
-        plan: &Plan,
-        other: (&mut [Actor], &mut [Actor]),
-    ) {
+    fn act_move(&mut self, mv: u8, wld: &mut World, plan: &Plan, other: &mut Vec<&mut [Actor]>) {
         let mut pos = wld.neighbor(self.pos, mv, self.team, &self.walls);
         let movement = self.pos != pos;
         if !movement {
@@ -287,11 +281,10 @@ impl Actor {
             self.lose_momentum(1);
         }
         if plan.whos_at(pos).is_some() {
-            for other in other.0.iter_mut().filter(|xx| xx.is_blocking(pos)) {
-                self.act_touch(other, wld, mv, plan);
-            }
-            for other in other.1.iter_mut().filter(|xx| xx.is_blocking(pos)) {
-                self.act_touch(other, wld, mv, plan);
+            for actors in other {
+                for actor in actors.iter_mut().filter(|xx| xx.is_blocking(pos)) {
+                    self.act_touch(actor, wld, mv, plan);
+                }
             }
         } else if movement {
             self.pos = pos;
@@ -644,7 +637,7 @@ mod tests {
         soldier.act_drop_all(&mut world);
         assert_eq!(soldier.inventory.len(), 0);
         // move forward and wait for auto-pickup:
-        soldier.act_move(2, &mut world, &plan, (&mut [], &mut []));
+        soldier.act_move(2, &mut world, &plan, &mut vec![]);
         soldier.update(&mut world);
         assert_eq!(soldier.inventory.len(), 1);
     }
