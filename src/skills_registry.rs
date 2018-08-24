@@ -4,6 +4,7 @@ use plan::Plan;
 use skills::*;
 use world::World;
 
+#[allow(warnings)]
 pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
     actor.selected_skill = 0;
     choose_skill!(should_sprint if can_sprint => actor, wld, p);
@@ -28,6 +29,7 @@ pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
     false
 }
 
+#[allow(warnings)]
 pub fn use_skill(actor: &mut Actor, wld: &mut World, p: &Plan, spawn: &mut Vec<Actor>) {
     use_skill!(sprint if can_sprint => actor, wld, p, spawn);
     use_skill!(charge if can_charge => actor, wld, p, spawn);

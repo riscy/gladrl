@@ -4,6 +4,7 @@ echo -e "use plan::Plan;"
 echo -e "use skills::*;"
 echo -e "use world::World;"
 echo -e ""
+echo -e "#[allow(warnings)]"
 echo -e "pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {"
 echo -e "    actor.selected_skill = 0;"
 for skill in `grep -o 'pub fn can_[a-z_]*' ./src/skills.rs|awk -F'can_' '{print $2}'`; do
@@ -12,6 +13,7 @@ done
 echo -e "    false";
 echo -e "}"
 echo -e ""
+echo -e "#[allow(warnings)]"
 echo -e "pub fn use_skill(actor: &mut Actor, wld: &mut World, p: &Plan, spawn: &mut Vec<Actor>) {"
 for skill in `grep -o 'pub fn can_[a-z_]*' ./src/skills.rs|awk -F'can_' '{print $2}'`; do
     echo -e "    use_skill!($skill if can_$skill => actor, wld, p, spawn);"
