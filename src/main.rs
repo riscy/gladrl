@@ -18,6 +18,12 @@ mod world;
 use state::State;
 
 fn main() {
+    view::start_ncurses();
     let mut game_state = State::new();
-    game_state.loop_game();
+    game_state.loop_game(
+        glad_helper::create_player_team,
+        glad_helper::load_world_and_spawn_team,
+    );
+    view::end_ncurses();
+    println!("Score: {}", game_state.score);
 }

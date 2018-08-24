@@ -1,10 +1,9 @@
 // Handling of the global game state.
 use actor::Actor;
-use glad_helper;
 use plan::Plan;
 use std::cmp;
 use std::collections::{HashSet, VecDeque};
-use view::{end_ncurses, start_ncurses, View};
+use view::View;
 use world::World;
 
 pub const AUTOPILOT: bool = false;
@@ -13,7 +12,7 @@ pub struct State {
     pub world: World,
     pub world_idx: usize,
     pub world_completed: Vec<usize>,
-    score: u32,
+    pub score: u32,
     time: u32,
 
     pub actors: Vec<Actor>,
@@ -50,11 +49,10 @@ impl State {
         self.team_idxs.insert(team);
     }
 
-    pub fn loop_game(&mut self) {
-        start_ncurses();
-        glad_helper::create_player_team(self);
+    pub fn loop_game(&mut self, setup_game: fn(&mut State), setup_scenario: fn(&mut State)) {
+        setup_game(self);
         while self.world_idx != 0 {
-            glad_helper::load_world_and_spawn_team(self);
+            setup_scenario(self);
             self.plan = Plan::new(self.world.size, &self.team_idxs);
             self.player_idx = 0;
             self.player_control_confirm();
@@ -63,8 +61,6 @@ impl State {
             self.actors.clear();
             self.team_idxs.clear();
         }
-        end_ncurses();
-        println!("Score: {}", self.score);
     }
 
     fn load_world_description(&mut self) {
