@@ -28,7 +28,7 @@ impl View {
         view
     }
 
-    pub fn reset(&mut self, animation_delay: u64, roster_count: usize, log_len: usize) {
+    fn reset(&mut self, animation_delay: u64, roster_count: usize, log_len: usize) {
         let (mut max_x, mut max_y) = (0, 0);
         getmaxyx(stdscr(), &mut max_y, &mut max_x);
         if max_y != self.screen_xy.1 || max_x != self.screen_xy.0 {
@@ -70,7 +70,12 @@ impl View {
         }
     }
 
-    pub fn render(&mut self, world: &World, actors: &[Actor], player: usize) {
+    pub fn render(&mut self, world: &World, actors: &[Actor], player: usize, animation_cycle: u64) {
+        self.reset(
+            animation_cycle / u64::from(actors[player].move_lag),
+            actors.iter().filter(|a| a.is_playable()).count(),
+            actors[player].log.len(),
+        );
         let focus = actors[player].pos;
         let (min_x, min_y, max_x, max_y) = self.rect_around(focus, world);
         self.render_world(world, actors, (min_x, min_y, max_x, max_y));

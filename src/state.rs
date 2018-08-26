@@ -96,7 +96,8 @@ impl State {
                     self.give_turn(idx);
                 }
             }
-            self.update_view(true);
+            self.view
+                .render(&self.world, &self.actors, self.player_idx, 500);
 
             self.actors.append(&mut self.spawn);
             self.actors.retain(|a| a.is_alive() || !a.is_projectile());
@@ -143,7 +144,8 @@ impl State {
     fn choice_from_player(&mut self) -> u8 {
         let player_idx = self.player_idx;
         loop {
-            self.update_view(false);
+            self.view
+                .render(&self.world, &self.actors, self.player_idx, 0);
             let input = if AUTOPILOT {
                 self.plan.tactic_attack();
                 self.actors[player_idx].choose(&self.world, &self.plan)
@@ -198,18 +200,6 @@ impl State {
                 _ => return input,
             }
         }
-    }
-
-    fn update_view(&mut self, is_animating: bool) {
-        let animation_delay = if is_animating {
-            500 / u64::from(self.player().move_lag)
-        } else {
-            0
-        };
-        let team_len = self.actors.iter().filter(|a| a.is_playable()).count();
-        let log_len = self.player().log.len();
-        self.view.reset(animation_delay, team_len, log_len);
-        self.view.render(&self.world, &self.actors, self.player_idx);
     }
 
     fn update_logs(&mut self) {
