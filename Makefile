@@ -17,6 +17,7 @@ lint:
 
 clean:
 	rm -f ./src/skills_registry.rs
+	cargo clean
 
 # Automatically add skills to registry source file $(SKILLS_REGISTRY).
 $(SKILLS_REGISTRY): $(SKILLS_REGISTRY_SCRIPT)
