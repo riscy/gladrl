@@ -483,12 +483,12 @@ impl Actor {
         self.health > 0
     }
 
-    pub fn can_block(&self) -> bool {
+    pub fn is_combatant(&self) -> bool {
         !self.is_projectile() && self.is_alive()
     }
 
     fn is_blocking(&self, pos: (u16, u16)) -> bool {
-        self.can_block() && self.pos == pos
+        self.is_combatant() && self.pos == pos
     }
 
     fn can_displace(&self) -> bool {
@@ -577,7 +577,7 @@ mod tests {
         assert!(soldier.is_mobile());
         assert!(soldier.is_playable());
         assert!(soldier.is_enemy_of(archer.team));
-        assert!(soldier.can_block() && soldier.is_blocking(soldier.pos));
+        assert!(soldier.is_combatant() && soldier.is_blocking(soldier.pos));
         assert!(!soldier.is_hurt());
         assert!(!soldier.is_undead());
         assert!(!soldier.is_projectile());

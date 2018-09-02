@@ -86,7 +86,7 @@ impl Plan {
     pub fn fast_update(&mut self, actors: &[Actor]) {
         self.occupied_cells.clear();
         self.team_0_enemies = 0;
-        for actor in actors.iter().filter(|actor| actor.can_block()) {
+        for actor in actors.iter().filter(|actor| actor.is_combatant()) {
             self.occupied_cells.insert(actor.pos, actor.team);
             if actor.team != 0 {
                 self.team_0_enemies += 1;
