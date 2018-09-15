@@ -12,7 +12,7 @@
 10,"*",2,"a life gem",true,true
 11,"`",6,"a key",true,false
 12,"""",3,"an amulet of speed",true,false
-18,"+",3,"a door",false,false
+18,"+",3,"a locked door",false,false
 19,"-",3,"an open door",false,false
 50,"@",1,"a teleport marker",false,false
 100,"%",6,"a sturdy tree",false,false

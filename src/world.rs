@@ -75,15 +75,22 @@ impl World {
                 if self.items[idx].can_get {
                     return Some(self.items.swap_remove(idx));
                 }
-                for tool in tools {
-                    if use_on_item(&mut self.items[idx], tool.kind) {
-                        self.log_global("A door swung open.", from, false);
-                    }
-                }
-                self.items[idx].damage();
+                self.push_item(from, idx, tools);
             }
         }
         None
+    }
+
+    fn push_item(&mut self, from: (u16, u16), idx: usize, tools: &[Item]) {
+        if self.items[idx].kind != DOOR {
+            return;
+        }
+        for tool in tools {
+            if use_on_item(&mut self.items[idx], tool.kind) {
+                return self.log_global("A door swung open.", from, false);
+            }
+        }
+        self.items[idx].damage();
     }
 
     pub fn log_global(&mut self, txt: &str, pos: (u16, u16), important: bool) {
