@@ -9,7 +9,7 @@ run: $(SKILLS_REGISTRY)
 test: $(SKILLS_REGISTRY)
 	RUST_BACKTRACE=full cargo test -- --nocapture
 
-lint:
+lint: $(SKILLS_REGISTRY)
 	rustup default nightly
 	rustup component add clippy-preview --toolchain=nightly
 	cargo-clippy || true
