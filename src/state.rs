@@ -6,31 +6,31 @@ use std::collections::{HashSet, VecDeque};
 use view::View;
 use world::World;
 
-pub const AUTOPILOT: bool = false;
-
 pub struct State {
     pub world: World,
     pub world_idx: usize,
     pub world_completed: Vec<usize>,
     pub score: u32,
     time: u32,
+    autopilot: bool,
 
     pub actors: Vec<Actor>,
     pub player_idx: usize,
     pub player_team: VecDeque<Actor>,
     pub team_idxs: HashSet<usize>,
     pub plan: Plan,
+    pub view: View,
     spawn: Vec<Actor>,
-    view: View,
 }
 
 impl State {
-    pub fn new() -> State {
+    pub fn new(view: View) -> State {
         State {
             world: World::new(),
             world_idx: 1,
             world_completed: Vec::new(),
             time: 1,
+            autopilot: true,
             score: 0,
 
             actors: Vec::new(),
@@ -39,7 +39,7 @@ impl State {
             team_idxs: HashSet::new(),
             plan: Plan::new((0, 0), &HashSet::new()),
             spawn: Vec::new(),
-            view: View::new(),
+            view,
         }
     }
 
@@ -96,8 +96,7 @@ impl State {
                     self.give_turn(idx);
                 }
             }
-            self.view
-                .render(&self.world, &self.actors, self.player_idx, 500);
+            self.view.render(&self.world, &self.actors, self.player_idx);
 
             self.actors.append(&mut self.spawn);
             self.actors.retain(|a| a.is_alive() || !a.is_projectile());
@@ -144,9 +143,8 @@ impl State {
     fn choice_from_player(&mut self) -> u8 {
         let player_idx = self.player_idx;
         loop {
-            self.view
-                .render(&self.world, &self.actors, self.player_idx, 0);
-            let input = if AUTOPILOT {
+            self.view.render(&self.world, &self.actors, self.player_idx);
+            let input = if self.autopilot {
                 self.plan.tactic_attack();
                 self.actors[player_idx].choose(&self.world, &self.plan)
             } else {
@@ -217,7 +215,7 @@ impl State {
     fn check_exits(&mut self) {
         if self.player().is_ready_to_act(self.time) && self.plan.num_enemies() <= 5 {
             if let Some(exit) = self.world.exits.iter().find(|x| x.pos == self.player().pos) {
-                if AUTOPILOT || self.view.yes_or_no("Exit?") {
+                if self.autopilot || self.view.yes_or_no("Exit?") {
                     return self.world_idx = exit.level as usize;
                 }
             }
@@ -269,5 +267,34 @@ impl State {
                 return self.player_mut().is_leader = true;
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use glad_helper;
+
+    fn fixtures() -> State {
+        let mut state = State::new(View::new(0));
+        glad_helper::create_player_team(&mut state);
+        glad_helper::load_world_and_spawn_team(&mut state);
+        state.player_idx = 0;
+        state.load_world_description();
+        state
+    }
+
+    #[test]
+    fn test_player_control() {
+        let mut state = fixtures();
+        state.player_control_confirm();
+        assert!(state.player().is_playable());
+        assert!(state.player().is_leader);
+    }
+
+    #[test]
+    fn test_loop_turns() {
+        // let mut state = fixtures();
+        // state.loop_turns();
     }
 }

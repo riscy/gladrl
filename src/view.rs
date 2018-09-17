@@ -8,34 +8,62 @@ use std::collections::HashMap;
 use world::World;
 
 pub struct View {
+    headless: bool,
     scrollback: usize,
     screen_xy: (i32, i32),
     keybindings: HashMap<i32, usize>,
     last_key_pressed: i32,
-    animation_delay: u64,
+    animation_frame: i32, // delay per frame
+    animation_cycle: i32, // total delay
 }
 
 impl View {
-    pub fn new() -> View {
+    pub fn new(animation_cycle: i32) -> View {
         let mut view = View {
+            headless: true,
             scrollback: 0,
             screen_xy: (0, 0),
             keybindings: HashMap::new(),
             last_key_pressed: ERR,
-            animation_delay: 0,
+            animation_frame: 0,
+            animation_cycle,
         };
         view.reload_keybindings();
         view
     }
 
-    fn reset(&mut self, animation_delay: u64, roster_count: usize, log_len: usize) {
+    pub fn start_ncurses(&mut self) {
+        initscr();
+        start_color();
+        for color in COLOR_BLACK..COLOR_WHITE + 1 {
+            init_pair(color, color, COLOR_BLACK);
+            init_pair(color + 100, COLOR_WHITE, color);
+        }
+        // minor adjustments:
+        init_pair(COLOR_GREEN + 100, COLOR_BLACK, COLOR_GREEN);
+        init_pair(COLOR_YELLOW + 100, COLOR_BLACK, COLOR_YELLOW);
+        init_pair(COLOR_CYAN + 100, COLOR_BLACK, COLOR_CYAN);
+        init_pair(COLOR_WHITE + 100, COLOR_BLACK, COLOR_WHITE);
+        keypad(stdscr(), true);
+        cbreak();
+        noecho();
+        clear();
+        self.headless = false;
+    }
+
+    pub fn end_ncurses(&mut self) {
+        clear();
+        endwin();
+        self.headless = true;
+    }
+
+    fn reset(&mut self, roster_count: usize, log_len: usize) {
         let (mut max_x, mut max_y) = (0, 0);
         getmaxyx(stdscr(), &mut max_y, &mut max_x);
         if max_y != self.screen_xy.1 || max_x != self.screen_xy.0 {
             self.screen_xy = (max_x, max_y);
             clear();
         }
-        self.animation_delay = animation_delay;
         let logs_to_show = cmp::min(max_y as usize - roster_count - 1, log_len);
         self.scrollback = cmp::min(log_len - logs_to_show, self.scrollback);
     }
@@ -70,9 +98,9 @@ impl View {
         }
     }
 
-    pub fn render(&mut self, world: &World, actors: &[Actor], player: usize, animation_cycle: u64) {
+    pub fn render(&mut self, world: &World, actors: &[Actor], player: usize) {
+        self.animation_frame = self.animation_cycle / i32::from(actors[player].move_lag);
         self.reset(
-            animation_cycle / u64::from(actors[player].move_lag),
             actors.iter().filter(|a| a.is_playable()).count(),
             actors[player].log.len(),
         );
@@ -85,7 +113,7 @@ impl View {
         mv(i32::from(focus.1) - min_y, i32::from(focus.0) - min_x);
         refresh();
         if self.last_key_pressed == ERR {
-            timeout(self.animation_delay as i32);
+            timeout(self.animation_frame);
             self.last_key_pressed = getch();
             timeout(-1);
         }
@@ -133,7 +161,7 @@ impl View {
     }
 
     fn render_actor(&self, actor: &Actor) {
-        let color = if self.animation_delay != 0 {
+        let color = if self.animation_frame != 0 {
             self.actor_status_color(actor)
         } else {
             self.actor_color(actor)
@@ -297,27 +325,4 @@ impl View {
             i32::from(y_range.1),
         )
     }
-}
-
-pub fn start_ncurses() {
-    initscr();
-    start_color();
-    for color in COLOR_BLACK..COLOR_WHITE + 1 {
-        init_pair(color, color, COLOR_BLACK);
-        init_pair(color + 100, COLOR_WHITE, color);
-    }
-    // minor adjustments:
-    init_pair(COLOR_GREEN + 100, COLOR_BLACK, COLOR_GREEN);
-    init_pair(COLOR_YELLOW + 100, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(COLOR_CYAN + 100, COLOR_BLACK, COLOR_CYAN);
-    init_pair(COLOR_WHITE + 100, COLOR_BLACK, COLOR_WHITE);
-    keypad(stdscr(), true);
-    cbreak();
-    noecho();
-    clear();
-}
-
-pub fn end_ncurses() {
-    clear();
-    endwin();
 }
