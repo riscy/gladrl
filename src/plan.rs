@@ -226,10 +226,7 @@ mod tests {
         let mut world = World::new();
         world.reshape((5, 5));
         let plan = Plan::new((5, 5), &team_idxs);
-        let actors = vec![
-            Actor::new(1, 1, 0, (0, 0), 0),
-            Actor::new(1, 1, 1, (1, 4), 0),
-        ];
+        let actors = vec![Actor::new(1, 1, 0, (0, 0)), Actor::new(1, 1, 1, (1, 4))];
         return (plan, world, actors, team_idxs);
     }
 

@@ -45,13 +45,13 @@ pub struct Actor {
 }
 
 impl Actor {
-    pub fn new(kind: u8, level: u16, team: usize, pos: (u16, u16), direction: u8) -> Actor {
+    pub fn new(kind: u8, level: u16, team: usize, pos: (u16, u16)) -> Actor {
         let mut actor = Actor {
             kind,
             pos,
             level,
             team,
-            direction,
+            direction: 0,
             health: 1,
             strength: 1,
             con: 1,
@@ -559,8 +559,8 @@ mod tests {
     use std::iter::FromIterator;
 
     fn fixtures() -> (Actor, Actor, World, Plan) {
-        let soldier = Actor::new(0, 1, 0, (2, 2), 2);
-        let archer = Actor::new(2, 1, 1, (1, 2), 0);
+        let soldier = Actor::new(0, 1, 0, (2, 2));
+        let archer = Actor::new(2, 1, 1, (1, 2));
         let boots = Item::new(7, (2, 2), 0, 0);
         let plan = Plan::new((5, 5), &HashSet::from_iter(vec![0, 1]));
         let mut world = World::new();
@@ -632,6 +632,7 @@ mod tests {
     #[test]
     fn test_get_and_drop() {
         let (mut soldier, _archer, mut world, plan) = fixtures();
+        soldier.direction = 2;
         soldier.act_get(&mut world);
         assert_eq!(soldier.inventory.len(), 1);
         soldier.act_drop_all(&mut world);

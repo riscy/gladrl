@@ -77,7 +77,8 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             state.world.add_item(Item::new(kind, pos, level, team));
             continue;
         }
-        let mut actor = Actor::new(kind, level, team, pos, direction);
+        let mut actor = Actor::new(kind, level, team, pos);
+        actor.direction = direction;
         actor.is_leader = is_leader;
         if !name.is_empty() {
             actor.name = name.to_sentence_case();
@@ -115,7 +116,7 @@ pub fn load_world_layout(world: &mut World, pix: &str) {
 
 pub fn create_player_team(state: &mut State) {
     for kind in &[0, 2, 11, 1, 13, 5, 3] {
-        let mut actor = Actor::new(*kind, 1, 0, (0, 0), 0);
+        let mut actor = Actor::new(*kind, 1, 0, (0, 0));
         actor.is_persistent = true;
         state.player_team.push_front(actor);
     }

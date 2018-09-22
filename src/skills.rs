@@ -220,19 +220,15 @@ pub fn should_shoot(slf: &Actor, wld: &World, p: &Plan) -> bool {
 pub fn shoot(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
     slf.act_exert(2, "released an arrow.");
-    spawn.push(Actor::new(
-        50,
-        slf.level + 10,
-        slf.team,
-        slf.pos,
-        slf.direction,
-    ));
-    spawn.last_mut().unwrap().glyph = match slf.direction {
+    let mut shot = Actor::new(50, slf.level + 10, slf.team, slf.pos);
+    shot.glyph = match slf.direction {
         0 | 4 => '|',
         2 | 6 => '-',
         1 | 5 => '/',
         _ => '\\',
     };
+    shot.direction = slf.direction;
+    spawn.push(shot);
 }
 
 pub fn can_barrage(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -257,9 +253,10 @@ pub fn should_boomerang(slf: &Actor, _wld: &World, p: &Plan) -> bool {
 }
 pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(10, "threw a boomerang.");
-    let dir = (slf.direction + 7) % 8;
-    spawn.push(Actor::new(53, slf.level, slf.team, slf.pos, dir));
-    spawn.last_mut().unwrap().momentum = 100;
+    let mut boomerang = Actor::new(53, slf.level, slf.team, slf.pos);
+    boomerang.direction = (slf.direction + 7) % 8;
+    boomerang.momentum = 100;
+    spawn.push(boomerang);
 }
 
 pub fn can_warp_space(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -270,8 +267,10 @@ pub fn should_warp_space(slf: &Actor, _wld: &World, p: &Plan) -> bool {
 }
 pub fn warp_space(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(20, "casted 'warp space'.");
-    for dir in 0..8 {
-        spawn.push(Actor::new(54, slf.level + 5, slf.team, slf.pos, dir));
+    for direction in 0..8 {
+        let mut blast = Actor::new(54, slf.level + 5, slf.team, slf.pos);
+        blast.direction = direction;
+        spawn.push(blast);
     }
 }
 
@@ -284,13 +283,9 @@ pub fn should_blast(slf: &Actor, wld: &World, p: &Plan) -> bool {
 pub fn blast(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
     slf.act_exert(2, "released an energy blast.");
-    spawn.push(Actor::new(
-        51,
-        slf.level + 5,
-        slf.team,
-        slf.pos,
-        slf.direction,
-    ));
+    let mut blast = Actor::new(51, slf.level + 5, slf.team, slf.pos);
+    blast.direction = slf.direction;
+    spawn.push(blast);
 }
 
 pub fn can_teleport(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -322,7 +317,9 @@ pub fn should_heal(slf: &Actor, wld: &World, p: &Plan) -> bool {
 pub fn heal(slf: &mut Actor, _ww: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "released a healing current.");
     for direction in 0..8 {
-        spawn.push(Actor::new(52, 4, slf.team, slf.pos, direction));
+        let mut healing_current = Actor::new(52, 4, slf.team, slf.pos);
+        healing_current.direction = direction;
+        spawn.push(healing_current);
     }
 }
 
@@ -346,13 +343,9 @@ pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "called a faerie.");
-    spawn.push(Actor::new(
-        55,
-        slf.level + 5,
-        slf.team,
-        slf.pos,
-        slf.direction,
-    ));
+    let mut faerie = Actor::new(55, slf.level + 5, slf.team, slf.pos);
+    faerie.direction = slf.direction;
+    spawn.push(faerie);
 }
 
 pub fn can_grow_tree(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -397,7 +390,7 @@ pub fn multiply(slf: &mut Actor, wld: &World, _p: &Plan, spawn: &mut Vec<Actor>)
     slf.initialize(8);
     slf.health = slf.max_health() / 2;
     let pos = wld.neighbor(slf.pos, slf.direction, slf.team, &slf.walls);
-    spawn.push(Actor::new(8, slf.level, slf.team, pos, slf.direction));
+    spawn.push(Actor::new(8, slf.level, slf.team, pos));
     spawn.last_mut().unwrap().health /= 2;
 }
 
@@ -408,7 +401,7 @@ pub fn should_spawn_elf(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     rand_int(50) == 0
 }
 pub fn spawn_elf(slf: &Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    spawn.push(Actor::new(1, slf.level, slf.team, slf.pos, 0));
+    spawn.push(Actor::new(1, slf.level, slf.team, slf.pos));
 }
 
 pub fn can_spawn_dead(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -418,7 +411,7 @@ pub fn should_spawn_dead(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     rand_int(50) == 0
 }
 pub fn spawn_dead(slf: &Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    spawn.push(Actor::new(4, slf.level, slf.team, slf.pos, 0));
+    spawn.push(Actor::new(4, slf.level, slf.team, slf.pos));
 }
 
 pub fn can_spawn_mage(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -428,7 +421,7 @@ pub fn should_spawn_mage(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     rand_int(50) == 0
 }
 pub fn spawn_mage(slf: &Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    spawn.push(Actor::new(3, slf.level, slf.team, slf.pos, 0));
+    spawn.push(Actor::new(3, slf.level, slf.team, slf.pos));
 }
 
 pub fn can_pick(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
