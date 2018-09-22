@@ -24,13 +24,13 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(view: View) -> State {
+    pub fn new() -> State {
         State {
             world: World::new(),
             world_idx: 1,
             world_completed: Vec::new(),
             time: 1,
-            autopilot: true,
+            autopilot: false,
             score: 0,
 
             actors: Vec::new(),
@@ -39,7 +39,7 @@ impl State {
             team_idxs: HashSet::new(),
             plan: Plan::new((0, 0), &HashSet::new()),
             spawn: Vec::new(),
-            view,
+            view: View::new(200),
         }
     }
 
@@ -276,11 +276,14 @@ mod tests {
     use glad_helper;
 
     fn fixtures() -> State {
-        let mut state = State::new(View::new(0));
+        let mut state = State::new();
+        state.world_idx = 42;
         glad_helper::create_player_team(&mut state);
         glad_helper::load_world_and_spawn_team(&mut state);
-        state.player_idx = 0;
+        state.plan = Plan::new(state.world.size, &state.team_idxs);
         state.load_world_description();
+        state.player_idx = 0;
+        state.autopilot = true;
         state
     }
 
@@ -294,7 +297,11 @@ mod tests {
 
     #[test]
     fn test_loop_turns() {
-        // let mut state = fixtures();
-        // state.loop_turns();
+        let mut state = fixtures();
+        assert!(state.world_idx != 0);
+        // state.view.start_ncurses();
+        state.loop_turns();
+        // state.view.end_ncurses();
+        assert!(state.world_idx == 0); // defeat condition
     }
 }

@@ -18,7 +18,7 @@ mod world;
 use state::State;
 
 fn main() {
-    let mut game_state = State::new(view::View::new(200));
+    let mut game_state = State::new();
     game_state.view.start_ncurses();
     game_state.loop_game(
         glad_helper::create_player_team,

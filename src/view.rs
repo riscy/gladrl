@@ -99,6 +99,9 @@ impl View {
     }
 
     pub fn render(&mut self, world: &World, actors: &[Actor], player: usize) {
+        if self.headless {
+            return;
+        }
         self.animation_frame = self.animation_cycle / i32::from(actors[player].move_lag);
         self.reset(
             actors.iter().filter(|a| a.is_playable()).count(),
