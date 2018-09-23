@@ -183,7 +183,7 @@ impl State {
                     return self.choice_from_ai(player_idx);
                 }
                 61...69 => {
-                    self.player_control_set_by_number(input as usize - 60);
+                    self.player_control_set_by_number(usize::from(input - 60));
                     return self.choice_from_ai(player_idx);
                 }
                 70 => self.view.scroll_log_up(1),
