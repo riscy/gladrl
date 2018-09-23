@@ -104,7 +104,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
 // See: https://github.com/openglad/openglad/blob/master/src/pixdefs.h
 pub fn load_world_layout(world: &mut World, pix: &str) {
     let mut buffer = [0; 100_000];
-    let _amt_read = File::open(format!("glad3.8/{}.pix", pix))
+    let _amt_read = File::open(format!("glad3.8/{}.pix", pix.to_lowercase()))
         .unwrap()
         .read(&mut buffer)
         .expect("Failed to open.");
