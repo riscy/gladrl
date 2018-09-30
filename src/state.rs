@@ -299,9 +299,9 @@ mod tests {
     fn test_loop_turns() {
         let mut state = fixtures();
         assert!(state.world_idx != 0);
-        // state.view.start_ncurses();
+        // state.view.show();
         state.loop_turns();
-        // state.view.end_ncurses();
+        // state.view.hide();
         assert!(state.world_idx == 0); // defeat condition
     }
 }

@@ -303,9 +303,7 @@ impl Actor {
                     self.inventory.push(treasure);
                 }
             }
-            None => if self.is_leader {
-                self.log_action("couldn't go any further.");
-            },
+            None => {}
         }
     }
 

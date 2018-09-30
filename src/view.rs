@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use world::World;
 
 pub struct View {
-    headless: bool,
+    hidden: bool,
     scrollback: usize,
     screen_xy: (i32, i32),
     keybindings: HashMap<i32, usize>,
@@ -20,7 +20,7 @@ pub struct View {
 impl View {
     pub fn new(animation_cycle: i32) -> View {
         let mut view = View {
-            headless: true,
+            hidden: true,
             scrollback: 0,
             screen_xy: (0, 0),
             keybindings: HashMap::new(),
@@ -32,7 +32,7 @@ impl View {
         view
     }
 
-    pub fn start_ncurses(&mut self) {
+    pub fn show(&mut self) {
         initscr();
         start_color();
         for color in COLOR_BLACK..COLOR_WHITE + 1 {
@@ -48,13 +48,13 @@ impl View {
         cbreak();
         noecho();
         clear();
-        self.headless = false;
+        self.hidden = false;
     }
 
-    pub fn end_ncurses(&mut self) {
+    pub fn hide(&mut self) {
         clear();
         endwin();
-        self.headless = true;
+        self.hidden = true;
     }
 
     fn reset(&mut self, roster_count: usize, log_len: usize) {
@@ -99,7 +99,7 @@ impl View {
     }
 
     pub fn render(&mut self, world: &World, actors: &[Actor], player: usize) {
-        if self.headless {
+        if self.hidden {
             return;
         }
         self.animation_frame = self.animation_cycle / i32::from(actors[player].move_lag);
