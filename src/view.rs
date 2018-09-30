@@ -33,6 +33,9 @@ impl View {
     }
 
     pub fn show(&mut self) {
+        if !self.hidden {
+            return;
+        }
         initscr();
         start_color();
         for color in COLOR_BLACK..COLOR_WHITE + 1 {
@@ -52,6 +55,9 @@ impl View {
     }
 
     pub fn hide(&mut self) {
+        if self.hidden {
+            return;
+        }
         clear();
         endwin();
         self.hidden = true;
