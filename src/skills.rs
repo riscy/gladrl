@@ -2,6 +2,8 @@
 use actor::Actor;
 use inflector::Inflector;
 use item::Item;
+use item_effects::{DOOR, DOOR_OPEN};
+
 use plan::Plan;
 use rand::*;
 use std::{cmp, u16};
@@ -434,11 +436,11 @@ pub fn pick(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>)
     let door_pos = wld.offset(slf.pos, slf.direction);
     let cost = slf.max_mana();
     for item in wld.items.iter_mut().filter(|item| item.pos == door_pos) {
-        if item.kind == 18 {
-            item.initialize(19);
+        if item.kind == DOOR {
+            item.initialize(DOOR_OPEN);
             return slf.act_exert(cost, "picked the lock.");
-        } else if item.kind == 19 && p.whos_at(door_pos).is_none() {
-            item.initialize(18);
+        } else if item.kind == DOOR_OPEN && p.whos_at(door_pos).is_none() {
+            item.initialize(DOOR);
             item.team = slf.team;
             return slf.act_exert(cost, "relocked the door.");
         }

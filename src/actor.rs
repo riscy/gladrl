@@ -38,7 +38,7 @@ pub struct Actor {
     pub log: Vec<(u32, String, usize)>,
     pub random_seed: u16,
     pub skills: Vec<String>,
-    inventory: Vec<Item>,
+    pub inventory: Vec<Item>,
 
     pub is_leader: bool,
     pub is_persistent: bool,
@@ -97,10 +97,10 @@ impl Actor {
                 for skill in row.5.split(' ') {
                     self.skills.push(skill.into());
                 }
-                self.initialize_inventory();
                 break;
             }
         }
+        self.initialize_inventory();
     }
 
     fn initialize_inventory(&mut self) {
@@ -297,7 +297,7 @@ impl Actor {
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
         match world.push_wall(self.pos, action, &self.inventory) {
             Some(treasure) => {
-                self.log_action(&format!("reached out and got {}.", treasure.name));
+                self.log_action(&format!("grabbed {}.", treasure.name));
                 item_effects::use_on_actor(self, treasure.kind);
                 if !treasure.can_consume {
                     self.inventory.push(treasure);
