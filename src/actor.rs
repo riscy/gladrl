@@ -295,15 +295,12 @@ impl Actor {
     }
 
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
-        match world.push_wall(self.pos, action, &self.inventory) {
-            Some(treasure) => {
-                self.log_action(&format!("grabbed {}.", treasure.name));
-                item_effects::use_on_actor(self, treasure.kind);
-                if !treasure.can_consume {
-                    self.inventory.push(treasure);
-                }
+        if let Some(treasure) = world.push_wall(self.pos, action, &self.inventory) {
+            self.log_action(&format!("grabbed {}.", treasure.name));
+            item_effects::use_on_actor(self, treasure.kind);
+            if !treasure.can_consume {
+                self.inventory.push(treasure);
             }
-            None => {}
         }
     }
 
