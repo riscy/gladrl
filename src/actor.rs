@@ -334,10 +334,10 @@ impl Actor {
     }
 
     fn act_drop_item(&mut self, world: &mut World) {
-        if let Some(mut item) = self.inventory.pop() {
+        if let Some(item) = self.inventory.pop() {
             self.log_action(&format!("dropped {}.", item.name));
-            item.pos = world.neighbor(self.pos, self.direction, self.team, "");
-            world.add_item(item);
+            let pos = world.neighbor(self.pos, self.direction, self.team, "");
+            world.add_item(item, pos);
             let kind = self.kind;
             return self.initialize(kind);
         }
@@ -559,11 +559,11 @@ mod tests {
     fn fixtures() -> (Actor, Actor, World, Plan) {
         let soldier = Actor::new(0, 1, 0, (2, 2));
         let archer = Actor::new(2, 1, 1, (1, 2));
-        let boots = Item::new(7, (2, 2), 0, 0);
+        let boots = Item::new(7, 0, 0);
         let plan = Plan::new((5, 5), &HashSet::from_iter(vec![0, 1]));
         let mut world = World::new();
         world.reshape((5, 5));
-        world.add_item(boots);
+        world.add_item(boots, (2, 2));
         return (soldier, archer, world, plan);
     }
 

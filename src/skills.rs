@@ -365,7 +365,7 @@ pub fn grow_tree(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Ac
         let pos = wld.neighbor(slf.pos, (slf.direction + dir) % 8, slf.team, &slf.walls);
         if pos != slf.pos {
             slf.act_exert(6, "grew a tree.");
-            wld.add_item(Item::new(100, pos, slf.level, slf.team));
+            wld.add_item(Item::new(100, slf.level, slf.team), pos);
         }
     }
 }

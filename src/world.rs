@@ -143,8 +143,9 @@ impl World {
         }
     }
 
-    pub fn add_item(&mut self, new_item: Item) {
+    pub fn add_item(&mut self, mut new_item: Item, pos: (u16, u16)) {
         // prevent multiple placement of doors, trees:
+        new_item.pos = pos;
         if new_item.kind == DOOR || new_item.kind == TREE {
             if let Some(_item) = self
                 .items
@@ -166,8 +167,8 @@ mod tests {
     fn fixtures() -> (World, String) {
         let mut world = World::new();
         world.reshape((5, 5));
-        world.add_item(Item::new(DOOR, (1, 1), 0, 0));
-        world.add_item(Item::new(KEY, (4, 4), 0, 0));
+        world.add_item(Item::new(DOOR, 0, 0), (1, 1));
+        world.add_item(Item::new(KEY, 0, 0), (4, 4));
         let impassable_tiles = String::from("#");
         return (world, impassable_tiles);
     }

@@ -17,12 +17,12 @@ pub struct Item {
 }
 
 impl Item {
-    pub fn new(kind: u8, pos: (u16, u16), level: u16, team: usize) -> Item {
+    pub fn new(kind: u8, level: u16, team: usize) -> Item {
         let mut item = Item {
             kind,
-            pos,
             level,
             team,
+            pos: (0, 0),
             name: String::new(),
             glyph: '0',
             color: 0,
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn test_initialize() {
-        let mut item = Item::new(DEBRIS, (0, 0), 1, 0);
+        let mut item = Item::new(DEBRIS, 1, 0);
         assert!(item.is_debris());
         // reinitializing changes the item's type from debris:
         item.initialize(0);
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn test_damage() {
-        let mut item = Item::new(0, (0, 0), 1, 0);
+        let mut item = Item::new(0, 1, 0);
         assert!(!item.is_debris());
         for _ii in 0..5 {
             item.damage();

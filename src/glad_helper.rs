@@ -61,7 +61,9 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             continue;
         }
         if order == 2 && kind == 8 {
-            state.world.exits.push(Item::new(kind, pos, level, team));
+            let mut exit = Item::new(kind, level, team);
+            exit.pos = pos;
+            state.world.exits.push(exit);
             continue;
         }
         if order == 4 || state.world_completed.contains(&state.world_idx) {
@@ -74,7 +76,8 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             is_leader = true;
         }
         if order == 1 || order == 2 {
-            state.world.add_item(Item::new(kind, pos, level, team));
+            let mut item = Item::new(kind, level, team);
+            state.world.add_item(item, pos);
             continue;
         }
         let mut actor = Actor::new(kind, level, team, pos);
@@ -83,6 +86,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         if !name.is_empty() {
             actor.name = name.to_sentence_case();
         }
+        give_random_inventory(&mut actor);
         assert!(actor.glyph != '?');
         assert!(actor.move_lag != 0);
         state.add_actor(actor);
@@ -120,6 +124,16 @@ pub fn create_player_team(state: &mut State) {
         actor.is_persistent = true;
         state.player_team.push_front(actor);
     }
+}
+
+fn give_random_inventory(actor: &mut Actor) {
+    if actor.team == 0 || !actor.is_leader {
+        return;
+    }
+    let gold = Item::new(2, actor.level, actor.team);
+    let silver = Item::new(3, actor.level, actor.team);
+    actor.inventory.push(gold);
+    actor.inventory.push(silver);
 }
 
 fn read_bytes(amt: u64, file: &mut File) -> Vec<u8> {
