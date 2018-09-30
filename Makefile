@@ -20,5 +20,5 @@ clean:
 	cargo clean
 
 # Automatically add skills to registry source file $(SKILLS_REGISTRY).
-$(SKILLS_REGISTRY): $(SKILLS_REGISTRY_SCRIPT)
+$(SKILLS_REGISTRY): $(SKILLS_REGISTRY_SCRIPT) src/skills.rs
 	bash $(SKILLS_REGISTRY_SCRIPT) >| $(SKILLS_REGISTRY)
