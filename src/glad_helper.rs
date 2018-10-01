@@ -76,8 +76,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
             is_leader = true;
         }
         if order == 1 || order == 2 {
-            let mut item = Item::new(kind, level, team);
-            state.world.add_item(item, pos);
+            state.world.add_item(Item::new(kind, level, team), pos);
             continue;
         }
         let mut actor = Actor::new(kind, level, team, pos);
