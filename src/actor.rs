@@ -29,7 +29,7 @@ pub struct Actor {
     pub con: u16,
     pub strength: u16,
     pub walls: String,
-    pub selected_skill: usize,
+    skill_idx: usize,
 
     pub momentum: u8,
     pub stun: i16,
@@ -66,7 +66,7 @@ impl Actor {
             move_lag: 1,
             is_persistent: false,
             momentum: 0,
-            selected_skill: 0,
+            skill_idx: 0,
             skills: Vec::new(),
             time: 1,
             log: Vec::new(),
@@ -151,23 +151,23 @@ impl Actor {
     pub fn select_skill(&mut self, skill: &str) {
         for (idx, self_skill) in self.skills.iter().enumerate() {
             if self_skill == skill {
-                return self.selected_skill = idx;
+                return self.skill_idx = idx;
             }
         }
     }
 
     pub fn selected_skill(&self) -> String {
-        match self.skills.get(self.selected_skill) {
+        match self.skills.get(self.skill_idx) {
             Some(skill) => skill.to_owned(),
             None => String::new(),
         }
     }
 
     pub fn next_skill(&mut self) {
-        self.selected_skill = (self.selected_skill + 1) % self.skills.len();
+        self.skill_idx = (self.skill_idx + 1) % self.skills.len();
         for _idx in 0..self.skills.len() {
             if self.selected_skill().starts_with("passive") {
-                self.selected_skill = (self.selected_skill + 1) % self.skills.len();
+                self.skill_idx = (self.skill_idx + 1) % self.skills.len();
             }
         }
         let skill = self.selected_skill();
