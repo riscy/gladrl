@@ -401,10 +401,11 @@ impl Actor {
         }
         self.act_drop_all(world);
         self.is_leader = false;
-        if !self.is_flesh() {
-            return self.invis = -1;
+        if self.is_flesh() {
+            world.add_item(Item::new(0, self.level, self.team), self.pos);
+            world.change_tile(self.pos, 200);
         }
-        world.bleed(self.pos);
+        self.invis = -1; // 👻
     }
 
     pub fn act_exert(&mut self, amt: u16, action: &str) {
@@ -445,7 +446,7 @@ impl Actor {
             if self.is_hurt() && self.stun == 0 && rand_int(self.health) == 0 {
                 self.log_action("fell, bleeding profusely.");
                 self.stun(2);
-                world.bleed(self.pos);
+                world.change_tile(self.pos, 200);
             }
             if self.is_alive() {
                 self.act_get(world);

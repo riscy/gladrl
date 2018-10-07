@@ -57,12 +57,12 @@ impl World {
         final_pos
     }
 
-    pub fn bleed(&mut self, at: (u16, u16)) {
+    pub fn change_tile(&mut self, at: (u16, u16), tile: u16) {
         let mut dir = at.0 % 8;
         for _ii in 0..at.1 % 4 {
             let pos = self.offset(at, dir as u8);
             if self.glyph_at(pos) == '.' {
-                self.tiles[(pos.1 * self.size.0 + pos.0) as usize] = 200;
+                self.tiles[(pos.1 * self.size.0 + pos.0) as usize] = tile;
             }
             dir = (dir + 3) % 8;
         }
@@ -199,9 +199,9 @@ mod tests {
     }
 
     #[test]
-    fn test_bleed() {
+    fn test_change_tile() {
         let (mut world, _) = fixtures();
-        world.bleed((2, 2));
+        world.change_tile((2, 2), 200);
         assert!(world.tiles.iter().any(|tile| tile == &200));
     }
 
