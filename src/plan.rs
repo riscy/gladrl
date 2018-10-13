@@ -177,18 +177,6 @@ impl Plan {
             .collect()
     }
 
-    pub fn distance_to_goal_avg(&self, pos: (u16, u16), team: usize, wld: &World) -> i32 {
-        let mut avg = 0;
-        for mv in &MOVE_ACTIONS {
-            let new_pos = wld.neighbor(pos, *mv, team, DONT_PROPAGATE_OUT_OF);
-            let dist = self.distance_to_goal(new_pos, team);
-            if dist != UNKNOWN_DISTANCE {
-                avg += dist;
-            }
-        }
-        avg / (MOVE_ACTIONS.len() as i32)
-    }
-
     pub fn distance_to_goal(&self, from: (u16, u16), team: usize) -> i32 {
         if let Some(distances) = self.distances.get(&team) {
             return distances[(from.1 * self.world_size.0 + from.0) as usize];

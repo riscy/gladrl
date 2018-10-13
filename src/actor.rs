@@ -194,7 +194,6 @@ impl Actor {
     fn choose_action(&self, world: &World, plan: &Plan) -> u8 {
         let start_dir = self.choose_preferred_dir();
         let (mut best_value, mut best_direction) = (i32::MIN, start_dir);
-        let mut best_risk = i32::MAX;
         for mv in MOVE_ACTIONS.iter().map(|offset| (start_dir + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
             let mut movement = pos != self.pos;
@@ -212,13 +211,12 @@ impl Actor {
             }
             if movement || mv == WAIT_ACTION {
                 let value = self.value_of_pos(pos, plan);
-                if value >= best_value {
-                    let risk = self.estimate_risk(pos, world, plan);
-                    if value > best_value || risk < best_risk {
-                        best_direction = mv;
-                        best_value = value;
-                        best_risk = risk;
-                    }
+                if value < best_value {
+                    continue;
+                }
+                if value > best_value {
+                    best_direction = mv;
+                    best_value = value;
                 }
             }
         }
@@ -233,13 +231,6 @@ impl Actor {
         } else {
             -dist
         }
-    }
-
-    fn estimate_risk(&self, pos: (u16, u16), world: &World, plan: &Plan) -> i32 {
-        if self.team == 0 {
-            return 0;
-        }
-        -plan.distance_to_goal_avg(pos, self.team, world)
     }
 
     fn choose_preferred_dir(&self) -> u8 {
