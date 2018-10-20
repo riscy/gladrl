@@ -18,7 +18,7 @@ mod world;
 use state::State;
 
 fn main() {
-    let mut game_state = State::new();
+    let mut game_state = State::new("glad");
     game_state.view.show();
     game_state.loop_game(
         glad_helper::create_player_team,

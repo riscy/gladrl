@@ -11,7 +11,7 @@ use world::World;
 // See: https://github.com/openglad/openglad/blob/master/src/base.h
 // NOTE: Will pop state.player_team into spawn locations.
 pub fn load_world_and_spawn_team(state: &mut State) {
-    state.world = World::new();
+    state.world = World::new("glad");
     let mut file = File::open(format!("glad3.8/scen{}.fss", state.world_idx)).unwrap();
     let version = read_bytes(4, &mut file)[3]; // "FSS<version>"
     load_world_layout(

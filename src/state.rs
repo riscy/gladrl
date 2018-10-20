@@ -24,9 +24,9 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub fn new(config: &str) -> State {
         State {
-            world: World::new(),
+            world: World::new(config),
             world_idx: 1,
             world_completed: Vec::new(),
             time: 1,
@@ -276,7 +276,7 @@ mod tests {
     use glad_helper;
 
     fn fixtures() -> State {
-        let mut state = State::new();
+        let mut state = State::new("glad");
         state.world_idx = 42;
         glad_helper::create_player_team(&mut state);
         glad_helper::load_world_and_spawn_team(&mut state);

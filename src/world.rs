@@ -17,12 +17,14 @@ pub struct World {
     pub exits: Vec<Item>,
     pub tiles: Vec<u16>,
     pub log: Vec<((u16, u16), String, bool)>,
+    config: String,
     tileset: HashMap<u16, (char, i16)>,
 }
 
 impl World {
-    pub fn new() -> World {
+    pub fn new(config: &str) -> World {
         let mut world = World {
+            config: format!("config/{}/world.csv", config),
             size: (0, 0),
             name: String::new(),
             desc: String::new(),
@@ -32,7 +34,7 @@ impl World {
             log: Vec::new(),
             tileset: HashMap::new(),
         };
-        world.load_tileset("config/glad/world.csv");
+        world.load_tileset();
         world
     }
 
@@ -134,10 +136,10 @@ impl World {
         ('?', 0)
     }
 
-    fn load_tileset(&mut self, filename: &str) {
+    fn load_tileset(&mut self) {
         self.tileset.clear();
-        let mut reader = csv::Reader::from_file(filename).unwrap();
-        for record in reader.decode() {
+        let reader = csv::Reader::from_path(&self.config);
+        for record in reader.unwrap().deserialize() {
             let (idx, glyph, color, _desc): (u16, char, i16, String) = record.unwrap();
             self.tileset.insert(idx, (glyph, color));
         }
@@ -165,7 +167,7 @@ mod tests {
     use item_effects::{DOOR, DOOR_OPEN, KEY};
 
     fn fixtures() -> (World, String) {
-        let mut world = World::new();
+        let mut world = World::new("glad");
         world.reshape((5, 5));
         world.add_item(Item::new(DOOR, 0, 0), (1, 1));
         world.add_item(Item::new(KEY, 0, 0), (4, 4));

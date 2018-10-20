@@ -35,8 +35,8 @@ impl Item {
     }
 
     pub fn initialize(&mut self, kind: u8) {
-        let mut reader = csv::Reader::from_file("config/glad/item.csv").unwrap();
-        for record in reader.decode() {
+        let reader = csv::Reader::from_path("config/glad/item.csv");
+        for record in reader.unwrap().deserialize() {
             let row: (u8, char, i16, String, bool, bool) = record.unwrap();
             if row.0 == kind {
                 self.kind = row.0;

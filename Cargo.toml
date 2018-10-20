@@ -6,6 +6,6 @@ authors = ["Chris Rayner <dchrisrayner@gmail.com>"]
 [dependencies]
 rand = "0.3.0"
 ncurses = "5.85.0"
-csv = "0.14"
+csv = "1"
 Inflector = "0.10.1"
 clippy = {version = "*", optional = true}

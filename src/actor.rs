@@ -79,8 +79,8 @@ impl Actor {
     }
 
     pub fn initialize(&mut self, kind: u8) {
-        let mut reader = csv::Reader::from_file("config/glad/actor.csv").unwrap();
-        for record in reader.decode() {
+        let reader = csv::Reader::from_path("config/glad/actor.csv");
+        for record in reader.unwrap().deserialize() {
             let row: (u8, char, String, String, u16, String, u16, u16, u16, u16) = record.unwrap();
             if row.0 == kind {
                 self.kind = kind;
@@ -550,7 +550,7 @@ mod tests {
         let archer = Actor::new(2, 1, 1, (1, 2));
         let boots = Item::new(7, 0, 0);
         let plan = Plan::new((5, 5), &HashSet::from_iter(vec![0, 1]));
-        let mut world = World::new();
+        let mut world = World::new("glad");
         world.reshape((5, 5));
         world.add_item(boots, (2, 2));
         return (soldier, archer, world, plan);

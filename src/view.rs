@@ -77,8 +77,8 @@ impl View {
     pub fn reload_keybindings(&mut self) -> Vec<String> {
         self.keybindings.clear();
         let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
-        let mut reader = csv::Reader::from_file("config/keybindings.csv").unwrap();
-        for record in reader.decode() {
+        let reader = csv::Reader::from_path("config/keybindings.csv");
+        for record in reader.unwrap().deserialize() {
             let (kbd, num, desc): (char, usize, String) = record.unwrap();
             online_help.push(format!("{} --{}", kbd, desc));
             self.keybindings.insert(kbd as i32, num);

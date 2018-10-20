@@ -211,7 +211,7 @@ mod tests {
 
     fn fixtures() -> (Plan, World, Vec<Actor>, HashSet<usize>) {
         let team_idxs = HashSet::from_iter(vec![0, 1]);
-        let mut world = World::new();
+        let mut world = World::new("glad");
         world.reshape((5, 5));
         let plan = Plan::new((5, 5), &team_idxs);
         let actors = vec![Actor::new(1, 1, 0, (0, 0)), Actor::new(1, 1, 1, (1, 4))];
