@@ -1,17 +1,17 @@
-"kind","glyph","color","desc","can_get","can_consume"
+"kind","glyph","color","desc","can_get","can_keep"
 0,"x",1,"a corpse",false,false
-1,"+",1,"some meat - yum",true,true
-2,"$",3,"a gold piece",true,true
-3,"$",0,"a silver piece",true,true
-4,"=",5,"a magic ring",true,false
-5,"!",4,"an invisibility potion",true,true
-6,"[",6,"some armor",true,false
-7,"]",2,"boots of buoyancy",true,false
+1,"+",1,"some meat - yum",true,false
+2,"$",3,"a gold piece",true,false
+3,"$",0,"a silver piece",true,false
+4,"=",5,"a magic ring",true,true
+5,"!",4,"an invisibility potion",true,false
+6,"[",6,"some armor",true,true
+7,"]",2,"boots of buoyancy",true,true
 8,"@",5,"an exit",false,false
 9,"@",6,"a teleporter",false,false
 10,"*",2,"a life gem",true,true
-11,"`",6,"a key",true,false
-12,"""",3,"an amulet of speed",true,false
+11,"`",6,"a key",true,true
+12,"""",3,"an amulet of speed",true,true
 18,"+",3,"a locked door",false,false
 19,"-",3,"an open door",false,false
 50,"@",1,"a teleport marker",false,false

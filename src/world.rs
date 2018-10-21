@@ -77,22 +77,24 @@ impl World {
                 if self.items[idx].can_get {
                     return Some(self.items.swap_remove(idx));
                 }
-                self.push_item(from, idx, tools);
+                return self.push_item(from, idx, tools);
             }
         }
         None
     }
 
-    fn push_item(&mut self, from: (u16, u16), idx: usize, tools: &[Item]) {
+    fn push_item(&mut self, from: (u16, u16), idx: usize, tools: &[Item]) -> Option<Item> {
         if self.items[idx].kind != DOOR {
-            return;
+            return None;
         }
         for tool in tools {
             if use_on_item(&mut self.items[idx], tool.kind) {
-                return self.log_global("A door swung open.", from, false);
+                self.log_global("A door swung open.", from, false);
+                return None;
             }
         }
         self.items[idx].damage();
+        return Some(Item::new(18, 1, 0));
     }
 
     pub fn log_global(&mut self, txt: &str, pos: (u16, u16), important: bool) {

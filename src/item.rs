@@ -12,7 +12,7 @@ pub struct Item {
     pub color: i16,
     pub pos: (u16, u16),
     pub can_get: bool,
-    pub can_consume: bool,
+    pub can_keep: bool,
     health: u16,
 }
 
@@ -27,7 +27,7 @@ impl Item {
             glyph: '0',
             color: 0,
             can_get: false,
-            can_consume: false,
+            can_keep: false,
             health: 5,
         };
         item.initialize(kind);
@@ -44,7 +44,7 @@ impl Item {
                 self.color = row.2;
                 self.name = row.3;
                 self.can_get = row.4;
-                self.can_consume = row.5;
+                self.can_keep = row.5;
             }
         }
     }

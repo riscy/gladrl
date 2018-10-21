@@ -287,9 +287,9 @@ impl Actor {
 
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
         if let Some(treasure) = world.push_wall(self.pos, action, &self.inventory) {
-            self.log_action(&format!("grabbed {}.", treasure.name));
+            self.log_action(&format!("pulled {}.", treasure.name));
             item_effects::use_on_actor(self, treasure.kind);
-            if !treasure.can_consume {
+            if treasure.can_keep {
                 self.inventory.push(treasure);
             }
         }
@@ -310,9 +310,9 @@ impl Actor {
         while idx < world.items.len() {
             if self.pos == world.items[idx].pos && world.items[idx].can_get {
                 let item = world.items.remove(idx);
-                self.log_action(&format!("found {}.", item.name));
+                self.log_action(&format!("got {}.", item.name));
                 item_effects::use_on_actor(self, item.kind);
-                if !item.can_consume {
+                if item.can_keep {
                     self.inventory.push(item);
                 }
                 continue;
