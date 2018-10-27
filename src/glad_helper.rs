@@ -8,6 +8,13 @@ use std::io::prelude::*;
 use std::str;
 use world::World;
 
+const ORD_ACTOR: u8 = 0;
+const ORD_DOOR: u8 = 1;
+const ORD_ITEM_OR_EXIT: u8 = 2;
+const ORD_GENERATOR: u8 = 3;
+const ORD_EFFECT: u8 = 4;
+const ORD_SPAWN: u8 = 5;
+
 // See: https://github.com/openglad/openglad/blob/master/src/base.h
 // NOTE: Will pop state.player_team into spawn locations.
 pub fn load_world_and_spawn_team(state: &mut State) {
@@ -25,70 +32,11 @@ pub fn load_world_and_spawn_team(state: &mut State) {
     if version >= 8 {
         let _cash_bonus = read_bytes(2, &mut file);
     }
+
     let num_objects = read_bytes(2, &mut file); // 2 bytes for number of objects
     let num_objects = (num_objects[0] as usize) + (num_objects[1] as usize) * 256;
-
     for _obj_idx in 0..num_objects {
-        let buffer = read_bytes(10, &mut file);
-        let mut order = buffer[0];
-        let mut kind = buffer[1];
-        let pos = (
-            (u16::from(buffer[2]) + u16::from(buffer[3]) * 256) / 16,
-            (u16::from(buffer[4]) + u16::from(buffer[5]) * 256) / 16,
-        );
-        let team = buffer[6] as usize;
-        let direction = buffer[7];
-        let _command = buffer[8];
-        let mut level = buffer[9] as usize;
-        if version >= 7 {
-            level += read_bytes(1, &mut file)[0] as usize * 256;
-        }
-        let level = level as u16; // relax range
-        let name = read_c_string(12, &mut file);
-        let _reserved_bytes = read_bytes(10, &mut file);
-        let mut is_leader = !name.is_empty() && team != 0;
-
-        // 0=alive 1=doors 2=item|exit 3=generator 4=effects 5=spawn
-        if order == 5 {
-            // spawn points become teammates on team 0
-            if team == 0 {
-                if let Some(mut teammate) = state.player_team.pop_back() {
-                    teammate.pos = pos;
-                    state.actors.push(teammate);
-                    state.team_idxs.insert(team);
-                }
-            }
-            continue;
-        }
-        if order == 2 && kind == 8 {
-            let mut exit = Item::new(kind, level, team);
-            exit.pos = pos;
-            state.world.exits.push(exit);
-            continue;
-        }
-        if order == 4 || state.world_completed.contains(&state.world_idx) {
-            continue;
-        }
-        if order == 3 {
-            // generators can be regular actors in the > 30 range:
-            order = 0;
-            kind += 30;
-            is_leader = true;
-        }
-        if order == 1 || order == 2 {
-            state.world.add_item(Item::new(kind, level, team), pos);
-            continue;
-        }
-        let mut actor = Actor::new(kind, level, team, pos);
-        actor.direction = direction;
-        actor.is_leader = is_leader;
-        if !name.is_empty() {
-            actor.name = name.to_sentence_case();
-        }
-        give_random_inventory(&mut actor);
-        assert!(actor.glyph != '?');
-        assert!(actor.move_lag != 0);
-        state.add_actor(actor);
+        load_next_object(state, &mut file, version);
     }
 
     if !state.world_completed.contains(&state.world_idx) {
@@ -105,7 +53,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
 }
 
 // See: https://github.com/openglad/openglad/blob/master/src/pixdefs.h
-pub fn load_world_layout(world: &mut World, pix: &str) {
+fn load_world_layout(world: &mut World, pix: &str) {
     let mut buffer = [0; 100_000];
     let _amt_read = File::open(format!("glad3.8/{}.pix", pix.to_lowercase()))
         .unwrap()
@@ -123,6 +71,66 @@ pub fn create_player_team(state: &mut State) {
         actor.is_persistent = true;
         state.player_team.push_front(actor);
     }
+}
+
+fn load_next_object(state: &mut State, file: &mut File, version: u8) {
+    let buffer = read_bytes(10, file);
+    let order = buffer[0];
+    let mut kind = buffer[1];
+    let pos = (
+        (u16::from(buffer[2]) + u16::from(buffer[3]) * 256) / 16,
+        (u16::from(buffer[4]) + u16::from(buffer[5]) * 256) / 16,
+    );
+    let team = buffer[6] as usize;
+    let direction = buffer[7];
+    let _command = buffer[8];
+    let mut level = buffer[9] as usize;
+    if version >= 7 {
+        level += read_bytes(1, file)[0] as usize * 256;
+    }
+    let level = level as u16; // relax range
+    let name = read_c_string(12, file);
+    let _reserved_bytes = read_bytes(10, file);
+
+    // must load every time:
+    if order == ORD_SPAWN {
+        if team == 0 {
+            if let Some(mut teammate) = state.player_team.pop_back() {
+                teammate.pos = pos;
+                state.actors.push(teammate);
+                state.team_idxs.insert(team);
+            }
+        }
+        return;
+    } else if order == ORD_ITEM_OR_EXIT && kind == 8 {
+        let mut exit = Item::new(kind, level, team);
+        exit.pos = pos;
+        state.world.exits.push(exit);
+        return;
+    }
+
+    if order == ORD_EFFECT || state.world_completed.contains(&state.world_idx) {
+        return;
+    }
+
+    if order == ORD_DOOR || order == ORD_ITEM_OR_EXIT {
+        state.world.add_item(Item::new(kind, level, team), pos);
+        return;
+    } else if order == ORD_GENERATOR {
+        // generators are regular actors in the > 30 range:
+        kind += 30;
+    } else if order != ORD_ACTOR {
+        return;
+    }
+
+    let mut actor = Actor::new(kind, level, team, pos);
+    actor.direction = direction;
+    actor.is_leader = !name.is_empty() && team != 0;
+    if !name.is_empty() {
+        actor.name = name.to_sentence_case();
+    }
+    give_random_inventory(&mut actor);
+    state.add_actor(actor);
 }
 
 fn give_random_inventory(actor: &mut Actor) {

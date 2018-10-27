@@ -89,15 +89,8 @@ impl State {
     fn loop_turns(&mut self) {
         let current_world_idx = self.world_idx;
         while current_world_idx == self.world_idx {
-            self.player_control_confirm();
-            for idx in 0..self.actors.len() {
-                if self.actors[idx].is_ready_to_act(self.time) {
-                    self.update_logs();
-                    self.give_turn(idx);
-                }
-            }
+            self.give_turns();
             self.view.render(&self.world, &self.actors, self.player_idx);
-
             self.actors.append(&mut self.spawn);
             self.actors.retain(|a| a.is_alive() || !a.is_projectile());
             self.world.items.retain(|item| !item.is_debris());
@@ -113,6 +106,16 @@ impl State {
         }
     }
 
+    fn give_turns(&mut self) {
+        self.player_control_confirm();
+        for idx in 0..self.actors.len() {
+            if self.actors[idx].is_ready_to_act(self.time) {
+                self.update_logs();
+                self.give_turn(idx);
+            }
+        }
+    }
+
     fn give_turn(&mut self, idx: usize) {
         self.plan.fast_update(&self.actors);
         let choice = if idx == self.player_idx {
@@ -124,16 +127,17 @@ impl State {
         };
         // split actors, excluding current, to prevent reborrowing
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
-        let (actor, yet_to_act) = yet_to_act.split_first_mut().unwrap();
-        actor.act(
-            choice,
-            self.time,
-            &mut self.world,
-            &self.plan,
-            &mut vec![have_acted, yet_to_act],
-            &mut self.spawn,
-        );
-        actor.update(&mut self.world);
+        if let Some((actor, yet_to_act)) = yet_to_act.split_first_mut() {
+            actor.act(
+                choice,
+                self.time,
+                &mut self.world,
+                &self.plan,
+                &mut vec![have_acted, yet_to_act],
+                &mut self.spawn,
+            );
+            actor.update(&mut self.world);
+        }
     }
 
     fn choice_from_ai(&mut self, idx: usize) -> u8 {

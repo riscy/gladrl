@@ -82,23 +82,23 @@ impl Actor {
         let reader = csv::Reader::from_path("config/glad/actor.csv");
         for record in reader.unwrap().deserialize() {
             let row: (u8, char, String, String, u16, String, u16, u16, u16, u16) = record.unwrap();
-            if row.0 == kind {
-                self.kind = kind;
-                self.glyph = row.1;
-                self.walls = row.2;
-                if self.name.is_empty() {
-                    self.name = row.3;
-                }
-                self.move_lag = row.4;
-                self.strength = row.6;
-                self.con = row.8;
-                self.intel = row.9;
-                self.skills.clear();
-                for skill in row.5.split(' ') {
-                    self.skills.push(skill.into());
-                }
-                break;
+            if row.0 != kind {
+                continue;
             }
+            self.kind = kind;
+            self.glyph = row.1;
+            self.walls = row.2;
+            if self.name.is_empty() {
+                self.name = row.3;
+            }
+            self.move_lag = row.4;
+            for skill in row.5.split(' ') {
+                self.skills.push(skill.into());
+            }
+            self.strength = row.6;
+            self.con = row.8;
+            self.intel = row.9;
+            break;
         }
         self.initialize_inventory();
     }
@@ -112,10 +112,13 @@ impl Actor {
     pub fn glyph(&self) -> char {
         if !self.is_alive() {
             return 'x';
-        } else if self.stun > 0 {
-            return self.glyph.to_lowercase().next().unwrap();
+        } else if self.stun == 0 {
+            return self.glyph;
         }
-        self.glyph
+        if let Some(lower_char) = self.glyph.to_lowercase().next() {
+            return lower_char;
+        }
+        '?'
     }
 
     pub fn max_health(&self) -> u16 {
