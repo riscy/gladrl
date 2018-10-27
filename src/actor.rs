@@ -79,6 +79,7 @@ impl Actor {
     }
 
     pub fn initialize(&mut self, kind: u8) {
+        self.skills.clear();
         let reader = csv::Reader::from_path("config/glad/actor.csv");
         for record in reader.unwrap().deserialize() {
             let row: (u8, char, String, String, u16, String, u16, u16, u16, u16) = record.unwrap();
@@ -559,6 +560,14 @@ mod tests {
         world.reshape((5, 5));
         world.add_item(boots, (2, 2));
         return (soldier, archer, world, plan);
+    }
+
+    #[test]
+    fn test_initialize() {
+        let (mut soldier, archer, _world, _plan) = fixtures();
+        assert!(!soldier.skills.contains(&String::from("shoot")));
+        soldier.initialize(archer.kind);
+        assert!(soldier.skills.contains(&String::from("shoot")));
     }
 
     #[test]

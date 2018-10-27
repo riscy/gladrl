@@ -12,7 +12,7 @@
 9,"b","'^%#`*","a medium blob",8,"expand",3,1,9,2
 10,"B","'^%#`*","a large blob",9,"multiply passive_displace",4,1,12,3
 11,"T","'^%#`*~","a thief",4,"sprint cloak pick passive_backstab passive_displace",4,1,15,6
-12,"&","","a ghost passive_displace",12,"",1,1,80,5
+12,"&","","a ghost",12,"passive_displace",1,1,80,5
 13,"D","'^%#`*~","a druid",6,"grow_tree summon_faerie passive_grow",3,1,15,8
 14,"O","'^%#`*~","an orc",5,"passive_displace",5,1,24,2
 15,"O","'^%#`*~","an orc captain",5,"passive_displace",5,1,24,3
