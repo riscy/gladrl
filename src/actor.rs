@@ -292,9 +292,10 @@ impl Actor {
 
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
         if let Some(treasure) = world.push_wall(self.pos, action, &self.inventory) {
-            self.log_action(&format!("pulled {}.", treasure.name));
+            self.log_action(&format!("pulled on {}.", treasure.name));
             item_effects::use_on_actor(self, treasure.kind);
             if treasure.can_keep {
+                self.log_action(&format!("got {}.", treasure.name));
                 self.inventory.push(treasure);
             }
         }

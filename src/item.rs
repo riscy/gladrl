@@ -28,7 +28,7 @@ impl Item {
             color: 0,
             can_get: false,
             can_keep: false,
-            health: 5,
+            health: 20,
         };
         item.initialize(kind);
         item
@@ -50,9 +50,10 @@ impl Item {
     }
 
     pub fn damage(&mut self) {
-        self.health -= 1;
-        if self.health == 0 {
-            self.initialize(DEBRIS);
+        match self.health {
+            0 => return,
+            1 => self.initialize(DEBRIS),
+            _ => self.health -= 1,
         }
     }
 
@@ -78,7 +79,7 @@ mod tests {
     fn test_damage() {
         let mut item = Item::new(0, 1, 0);
         assert!(!item.is_debris());
-        for _ii in 0..5 {
+        for _ii in 0..100 {
             item.damage();
         }
         assert!(item.is_debris());
