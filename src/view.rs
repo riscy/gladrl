@@ -39,7 +39,7 @@ impl View {
         }
         initscr();
         start_color();
-        for color in COLOR_BLACK..COLOR_WHITE + 1 {
+        for color in COLOR_BLACK..=COLOR_WHITE {
             init_pair(color, color, COLOR_BLACK);
             init_pair(color + 100, COLOR_WHITE, color);
         }

@@ -51,13 +51,16 @@ impl State {
 
     pub fn loop_game(&mut self, setup_game: fn(&mut State), setup_scenario: fn(&mut State)) {
         setup_game(self);
+        self.view.hide();
         while self.world_idx != 0 {
             setup_scenario(self);
             self.plan = Plan::new(self.world.size, &self.team_idxs);
             self.player_idx = 0;
             self.player_control_confirm();
             self.load_world_description();
+            self.view.show();
             self.loop_turns();
+            self.view.hide();
             self.actors.clear();
             self.team_idxs.clear();
         }
