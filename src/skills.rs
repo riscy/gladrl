@@ -148,6 +148,10 @@ pub fn passive_heal(slf: &mut Actor, pal: &mut Actor, _ww: &mut World) {
     }
 }
 
+pub fn passive_grow(slf: &Actor, wld: &mut World) {
+    wld.change_tile(slf.pos, 60);
+}
+
 pub fn passive_aim(slf: &mut Actor, wld: &World, p: &Plan) {
     let mut closest = u16::MAX;
     let init_dir = slf.direction;

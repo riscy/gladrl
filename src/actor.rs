@@ -283,6 +283,7 @@ impl Actor {
         } else if movement {
             self.pos = pos;
             self.gain_momentum(1);
+            passive_effect!(passive_grow => self, wld);
         } else if MOVE_ACTIONS.contains(&mv) {
             self.act_push_wall(wld, mv);
         }
@@ -362,6 +363,7 @@ impl Actor {
         {
             let new_pos = other.pos;
             other.pos = (self.pos.0, self.pos.1);
+            other.stun(1);
             self.pos = new_pos;
             self.lose_momentum(1);
             self.log_interaction("displaced", other);
@@ -482,7 +484,7 @@ impl Actor {
     }
 
     fn can_displace(&self) -> bool {
-        self.is_leader
+        (self.team != 0 || self.is_leader) && self.has_skill("passive_displace")
     }
 
     pub fn is_playable(&self) -> bool {
