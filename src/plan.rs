@@ -104,7 +104,7 @@ impl Plan {
     }
 
     fn update_paths(&mut self, team: usize, world: &World, actors: &[Actor]) {
-        let maximum_steps = if team == 0 { 200 } else { 24 };
+        let maximum_steps = if team == 0 { 200 } else { 12 };
         let mut open_list = self.open_list(team, world, actors);
         self.initialize_all_distances(team, &open_list);
         let mut step = 0;

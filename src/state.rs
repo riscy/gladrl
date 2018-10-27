@@ -78,8 +78,8 @@ impl State {
                 actor.is_leader = false;
                 if level_up {
                     actor.level += 1;
+                    actor.log_action("survived the battle!");
                 }
-                actor.log.clear();
                 actor.recover_fully();
                 self.player_team.push_front(actor);
             }

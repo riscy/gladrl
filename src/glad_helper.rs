@@ -139,8 +139,10 @@ fn give_random_inventory(actor: &mut Actor) {
     }
     let gold = Item::new(2, actor.level, actor.team);
     let silver = Item::new(3, actor.level, actor.team);
+    let armor = Item::new(6, actor.level, actor.team);
     actor.inventory.push(gold);
     actor.inventory.push(silver);
+    actor.inventory.push(armor);
 }
 
 fn read_bytes(amt: u64, file: &mut File) -> Vec<u8> {
