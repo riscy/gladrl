@@ -60,7 +60,7 @@ impl World {
         final_pos
     }
 
-    pub fn change_tile(&mut self, at: (u16, u16), tile: u16) {
+    pub fn change_tiles(&mut self, at: (u16, u16), tile: u16) {
         let mut dir = at.0 % 8;
         for _ii in 0..at.1 % 4 {
             let pos = self.offset(at, dir as u8);
@@ -205,9 +205,9 @@ mod tests {
     }
 
     #[test]
-    fn test_change_tile() {
+    fn test_change_tiles() {
         let (mut world, _) = fixtures();
-        world.change_tile((2, 2), 200);
+        world.change_tiles((2, 2), 200);
         assert!(world.tiles.iter().any(|tile| tile == &200));
     }
 
