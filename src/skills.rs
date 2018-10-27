@@ -392,8 +392,9 @@ pub fn multiply(slf: &mut Actor, wld: &World, _p: &Plan, spawn: &mut Vec<Actor>)
     slf.initialize(8);
     slf.health = slf.max_health() / 2;
     let pos = wld.neighbor(slf.pos, slf.direction, slf.team, &slf.walls);
-    spawn.push(Actor::new(8, slf.level, slf.team, pos));
-    spawn.last_mut().unwrap().health /= 2;
+    let mut new_spawn = Actor::new(8, slf.level, slf.team, pos);
+    new_spawn.health /= 2;
+    spawn.push(new_spawn);
 }
 
 pub fn can_spawn_elf(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {

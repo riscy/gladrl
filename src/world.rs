@@ -3,6 +3,7 @@ use csv;
 use item::Item;
 use item_effects::{use_as_portal, use_on_item, DOOR, TREE};
 use std::collections::HashMap;
+use std::error::Error;
 use std::str;
 
 pub const WAIT_ACTION: u8 = 8;
@@ -34,7 +35,7 @@ impl World {
             log: Vec::new(),
             tileset: HashMap::new(),
         };
-        world.load_tileset();
+        world.load_tileset().unwrap();
         world
     }
 
@@ -94,7 +95,7 @@ impl World {
             }
         }
         self.items[idx].damage();
-        return Some(Item::new(18, 1, 0));
+        Some(Item::new(18, 1, 0))
     }
 
     pub fn log_global(&mut self, txt: &str, pos: (u16, u16), important: bool) {
@@ -138,13 +139,14 @@ impl World {
         ('?', 0)
     }
 
-    fn load_tileset(&mut self) {
+    fn load_tileset(&mut self) -> Result<(), Box<Error>> {
         self.tileset.clear();
         let reader = csv::Reader::from_path(&self.config);
-        for record in reader.unwrap().deserialize() {
-            let (idx, glyph, color, _desc): (u16, char, i16, String) = record.unwrap();
+        for record in reader?.deserialize() {
+            let (idx, glyph, color, _desc): (u16, char, i16, String) = record?;
             self.tileset.insert(idx, (glyph, color));
         }
+        Ok(())
     }
 
     pub fn add_item(&mut self, mut new_item: Item, pos: (u16, u16)) {
@@ -215,7 +217,7 @@ mod tests {
         let mut actor_inventory = vec![];
 
         // pushing the door does not create an open door
-        assert!(world.push_wall((0, 1), 2, &actor_inventory).is_none());
+        world.push_wall((0, 1), 2, &actor_inventory);
         assert!(!world.items.iter().any(|item| item.kind == DOOR_OPEN));
 
         // reaching for the key on the ground picks it up:

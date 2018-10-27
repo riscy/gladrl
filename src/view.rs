@@ -5,6 +5,7 @@ use item::Item;
 use ncurses::*;
 use std::cmp;
 use std::collections::HashMap;
+use std::error::Error;
 use world::World;
 
 pub struct View {
@@ -28,7 +29,7 @@ impl View {
             animation_frame: 0,
             animation_cycle,
         };
-        view.reload_keybindings();
+        view.reload_keybindings().unwrap();
         view
     }
 
@@ -74,12 +75,12 @@ impl View {
         self.scrollback = cmp::min(log_len - logs_to_show, self.scrollback);
     }
 
-    pub fn reload_keybindings(&mut self) -> Vec<String> {
+    pub fn reload_keybindings(&mut self) -> Result<Vec<String>, Box<Error>> {
         self.keybindings.clear();
         let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
         let reader = csv::Reader::from_path("config/keybindings.csv");
-        for record in reader.unwrap().deserialize() {
-            let (kbd, num, desc): (char, usize, String) = record.unwrap();
+        for record in reader?.deserialize() {
+            let (kbd, num, desc): (char, usize, String) = record?;
             online_help.push(format!("{} --{}", kbd, desc));
             self.keybindings.insert(kbd as i32, num);
         }
@@ -87,7 +88,7 @@ impl View {
         self.keybindings.insert(KEY_RIGHT as i32, 2);
         self.keybindings.insert(KEY_DOWN as i32, 4);
         self.keybindings.insert(KEY_LEFT as i32, 6);
-        online_help
+        Ok(online_help)
     }
 
     pub fn get_key_input(&mut self) -> u8 {
