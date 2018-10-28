@@ -84,7 +84,7 @@ impl View {
         self.keybindings.insert(KEY_DOWN, 4);
         self.keybindings.insert(KEY_LEFT, 6);
         for record in reader.deserialize() {
-            let (key, num, desc): (char, usize, String) = record?;
+            let (key, desc, num): (char, String, usize) = record?;
             self.keybindings.insert(key as i32, num);
             online_help.push(format!("{} --{}", key, desc));
         }

@@ -1,47 +1,40 @@
-"key (safe to edit)","internal code","description"
-"?",90,"access online help"
-
-"k",0,"go north"
-"u",1,"go northeast"
-"l",2,"go east"
-"n",3,"go southeast"
-"j",4,"go south"
-"b",5,"go southwest"
-"h",6,"go west"
-"y",7,"go northwest"
-".",8,"wait or use portal"
-
-"K",16,"turn north"
-"U",17,"turn northeast"
-"L",18,"turn east"
-"N",19,"turn southeast"
-"J",20,"turn south"
-"B",21,"turn southwest"
-"H",22,"turn west"
-"Y",23,"turn northwest"
-
-"z",30,"use your current skill"
-"s",32,"switch your current skill"
-
-"d",40,"drop an item"
-"i",41,"see inventory"
-
-"D",55,"tell your team to defend"
-"F",56,"tell your team to follow"
-"A",57,"tell your team to attack"
-"R",58,"tell your team to retreat"
-";",59,"let the AI decide your move"
-
-"`",60,"switch to the next character"
-"1",61,"switch to character 1"
-"2",62,"switch to character 2"
-"3",63,"switch to character 3"
-"4",64,"switch to character 4"
-"5",65,"switch to character 5"
-"6",66,"switch to character 6"
-"7",67,"switch to character 7"
-"8",68,"switch to character 8"
-"9",69,"switch to character 9"
-
-"<",70,"scroll the log up"
-">",71,"scroll the log down"
+"key (safe to edit)","description","internal code"
+"?","access online help",90
+"k","go north",0
+"u","go northeast",1
+"l","go east",2
+"n","go southeast",3
+"j","go south",4
+"b","go southwest",5
+"h","go west",6
+"y","go northwest",7
+".","wait or use portal",8
+"K","turn north",16
+"U","turn northeast",17
+"L","turn east",18
+"N","turn southeast",19
+"J","turn south",20
+"B","turn southwest",21
+"H","turn west",22
+"Y","turn northwest",23
+"z","use your current skill",30
+"s","switch your current skill",32
+"d","drop an item",40
+"i","see inventory",41
+"D","tell your team to defend",55
+"F","tell your team to follow",56
+"A","tell your team to attack",57
+"R","tell your team to retreat",58
+";","let the AI decide your move",59
+"`","switch to the next character",60
+"1","switch to character 1",61
+"2","switch to character 2",62
+"3","switch to character 3",63
+"4","switch to character 4",64
+"5","switch to character 5",65
+"6","switch to character 6",66
+"7","switch to character 7",67
+"8","switch to character 8",68
+"9","switch to character 9",69
+"<","scroll the log up",70
+">","scroll the log down",71
