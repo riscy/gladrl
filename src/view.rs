@@ -76,18 +76,18 @@ impl View {
     }
 
     pub fn reload_keybindings(&mut self) -> Result<Vec<String>, Box<Error>> {
-        self.keybindings.clear();
         let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
-        let reader = csv::Reader::from_path("config/keybindings.csv");
-        for record in reader?.deserialize() {
-            let (kbd, num, desc): (char, usize, String) = record?;
-            online_help.push(format!("{} --{}", kbd, desc));
-            self.keybindings.insert(kbd as i32, num);
+        let mut reader = csv::Reader::from_path("config/keybindings.csv")?;
+        self.keybindings.clear();
+        self.keybindings.insert(KEY_UP, 0);
+        self.keybindings.insert(KEY_RIGHT, 2);
+        self.keybindings.insert(KEY_DOWN, 4);
+        self.keybindings.insert(KEY_LEFT, 6);
+        for record in reader.deserialize() {
+            let (key, num, desc): (char, usize, String) = record?;
+            self.keybindings.insert(key as i32, num);
+            online_help.push(format!("{} --{}", key, desc));
         }
-        self.keybindings.insert(KEY_UP as i32, 0);
-        self.keybindings.insert(KEY_RIGHT as i32, 2);
-        self.keybindings.insert(KEY_DOWN as i32, 4);
-        self.keybindings.insert(KEY_LEFT as i32, 6);
         Ok(online_help)
     }
 
@@ -146,7 +146,7 @@ impl View {
         loop {
             match char::from(getch() as u8) {
                 'Y' | ';' => return true,
-                'N' => return false,
+                'N' | 'n' => return false,
                 _ => {}
             }
         }
