@@ -39,7 +39,7 @@ impl State {
             team_idxs: HashSet::new(),
             plan: Plan::new((0, 0), &HashSet::new()),
             spawn: Vec::new(),
-            view: View::new(200),
+            view: View::new(),
         }
     }
 

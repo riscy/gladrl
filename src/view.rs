@@ -14,12 +14,12 @@ pub struct View {
     screen_xy: (i32, i32),
     keybindings: HashMap<i32, usize>,
     last_key_pressed: i32,
-    animation_frame: i32, // delay per frame
-    animation_cycle: i32, // total delay
+    animation_frame: i32, // delay per animation frame (dynamic)
+    animation_cycle: i32, // total delay between player turns
 }
 
 impl View {
-    pub fn new(animation_cycle: i32) -> View {
+    pub fn new() -> View {
         let mut view = View {
             hidden: true,
             scrollback: 0,
@@ -27,7 +27,7 @@ impl View {
             keybindings: HashMap::new(),
             last_key_pressed: ERR,
             animation_frame: 0,
-            animation_cycle,
+            animation_cycle: 200,
         };
         view.reload_keybindings().unwrap();
         view
