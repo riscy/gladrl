@@ -1,12 +1,7 @@
 // Handles basic item effects.
 use actor::Actor;
+use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_KEY, ITEM_PORTAL, ITEM_TREE};
 use item::Item;
-
-pub const PORTAL: u8 = 9;
-pub const DOOR: u8 = 18;
-pub const DOOR_OPEN: u8 = 19;
-pub const KEY: u8 = 11;
-pub const TREE: u8 = 100;
 
 pub fn use_on_actor(actor: &mut Actor, kind: u8) -> bool {
     match kind {
@@ -22,8 +17,8 @@ pub fn use_on_actor(actor: &mut Actor, kind: u8) -> bool {
 }
 
 pub fn use_on_item(item: &mut Item, kind: u8) -> bool {
-    if kind == KEY && item.kind == DOOR {
-        item.initialize(DOOR_OPEN);
+    if kind == ITEM_KEY && item.kind == ITEM_DOOR {
+        item.initialize(ITEM_DOOR_OPEN);
         return true;
     }
     false
@@ -36,13 +31,13 @@ pub fn use_as_portal(
     team: usize,
     other_items: &[Item],
 ) -> (u16, u16) {
-    if item.kind == PORTAL && from == to {
-        for portal in other_items.iter().filter(|item| item.kind == PORTAL) {
+    if item.kind == ITEM_PORTAL && from == to {
+        for portal in other_items.iter().filter(|item| item.kind == ITEM_PORTAL) {
             if portal.level == item.level && portal.pos != item.pos {
                 return portal.pos;
             }
         }
-    } else if (item.kind == DOOR || item.kind == TREE) && item.team != team {
+    } else if (item.kind == ITEM_DOOR || item.kind == ITEM_TREE) && item.team != team {
         return from;
     }
     to

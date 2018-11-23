@@ -1,18 +1,19 @@
 // Handles tactics (for team 0), pathfinding, identifying friends/foes.
 use actor::Actor;
+use constants::ACT_MOVES;
 use std::collections::{HashMap, HashSet};
 use std::i32;
-use world::{World, MOVE_ACTIONS};
+use world::World;
 
-const TACTIC_ATTACK: u8 = 0;
-const TACTIC_FOLLOW: u8 = 1;
-const TACTIC_DEFEND: u8 = 2;
-const TACTIC_RETREAT: u8 = 3;
-const TACTIC_EXIT: u8 = 4;
+const PLAN_ATTACK: u8 = 0;
+const PLAN_FOLLOW: u8 = 1;
+const PLAN_DEFEND: u8 = 2;
+const PLAN_RETREAT: u8 = 3;
+const PLAN_EXIT: u8 = 4;
 
-const UNKNOWN_DISTANCE: i32 = i32::MAX;
-const DONT_PROPAGATE_INTO: &str = "`'*#^";
-const DONT_PROPAGATE_OUT_OF: &str = "~`'*#%^";
+const PATH_UNKNOWN_DISTANCE: i32 = i32::MAX;
+const PATH_DONT_PROPAGATE_INTO: &str = "`'*#^";
+const PATH_DONT_PROPAGATE_OUT_OF: &str = "~`'*#%^";
 
 pub struct Plan {
     team_0_enemies: usize,
@@ -30,12 +31,13 @@ impl Plan {
             distances: HashMap::new(),
             occupied_cells: HashMap::new(),
             team_0_enemies: 0,
-            team_0_tactic: TACTIC_FOLLOW,
+            team_0_tactic: PLAN_FOLLOW,
             team_0_muster_point: (0, 0),
         };
         for &team in teams {
             let area = (world_size.1 * world_size.0) as usize;
-            plan.distances.insert(team, vec![UNKNOWN_DISTANCE; area]);
+            plan.distances
+                .insert(team, vec![PATH_UNKNOWN_DISTANCE; area]);
         }
         plan
     }
@@ -43,25 +45,25 @@ impl Plan {
     fn tactic(&self, team: usize) -> u8 {
         match team {
             0 => self.team_0_tactic,
-            _ => TACTIC_ATTACK,
+            _ => PLAN_ATTACK,
         }
     }
 
     pub fn tactic_defend(&mut self, pos: (u16, u16)) {
-        self.team_0_tactic = TACTIC_DEFEND;
+        self.team_0_tactic = PLAN_DEFEND;
         self.team_0_muster_point = pos;
     }
 
     pub fn tactic_follow(&mut self) {
-        self.team_0_tactic = TACTIC_FOLLOW;
+        self.team_0_tactic = PLAN_FOLLOW;
     }
 
     pub fn tactic_attack(&mut self) {
-        self.team_0_tactic = TACTIC_ATTACK;
+        self.team_0_tactic = PLAN_ATTACK;
     }
 
     pub fn tactic_retreat(&mut self) {
-        self.team_0_tactic = TACTIC_RETREAT;
+        self.team_0_tactic = PLAN_RETREAT;
     }
 
     fn muster_point(&self, team: usize) -> (u16, u16) {
@@ -72,15 +74,15 @@ impl Plan {
     }
 
     pub fn is_defending(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == TACTIC_DEFEND
+        team == 0 && self.team_0_tactic == PLAN_DEFEND
     }
 
     pub fn is_attacking(&self, team: usize) -> bool {
-        team != 0 || self.team_0_tactic == TACTIC_ATTACK
+        team != 0 || self.team_0_tactic == PLAN_ATTACK
     }
 
     pub fn is_retreating(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == TACTIC_RETREAT
+        team == 0 && self.team_0_tactic == PLAN_RETREAT
     }
 
     pub fn fast_update(&mut self, actors: &[Actor]) {
@@ -95,8 +97,8 @@ impl Plan {
     }
 
     pub fn update(&mut self, teams: &HashSet<usize>, world: &World, actors: &[Actor]) {
-        if self.team_0_enemies == 0 && self.team_0_tactic == TACTIC_ATTACK {
-            self.team_0_tactic = TACTIC_EXIT;
+        if self.team_0_enemies == 0 && self.team_0_tactic == PLAN_ATTACK {
+            self.team_0_tactic = PLAN_EXIT;
         }
         for &team in teams {
             self.update_paths(team, world, actors);
@@ -116,17 +118,17 @@ impl Plan {
 
     fn open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
         match self.tactic(team) {
-            TACTIC_EXIT => self.locate_exits(world),
-            TACTIC_DEFEND => vec![self.muster_point(team)],
-            TACTIC_FOLLOW => self.locate_leaders(team, actors),
-            TACTIC_ATTACK | TACTIC_RETREAT => self.locate_enemies(team, actors),
+            PLAN_EXIT => self.locate_exits(world),
+            PLAN_DEFEND => vec![self.muster_point(team)],
+            PLAN_FOLLOW => self.locate_leaders(team, actors),
+            PLAN_ATTACK | PLAN_RETREAT => self.locate_enemies(team, actors),
             _ => Vec::new(),
         }
     }
 
     fn initialize_all_distances(&mut self, team: usize, open_list: &[(u16, u16)]) {
         for idx in 0..self.distances[&team].len() {
-            self.distances.get_mut(&team).unwrap()[idx] = UNKNOWN_DISTANCE;
+            self.distances.get_mut(&team).unwrap()[idx] = PATH_UNKNOWN_DISTANCE;
         }
         for pos in open_list {
             self.set_distance_to_goal(team, *pos, 0);
@@ -142,11 +144,11 @@ impl Plan {
     ) -> Vec<(u16, u16)> {
         let mut next_open_list: Vec<(u16, u16)> = Vec::new();
         for pos in open_list {
-            for dir in &MOVE_ACTIONS {
-                let next_pos = wld.neighbor(pos, *dir, team, DONT_PROPAGATE_INTO);
+            for dir in &ACT_MOVES {
+                let next_pos = wld.neighbor(pos, *dir, team, PATH_DONT_PROPAGATE_INTO);
                 // propogate forest to forest, but not forest to grass:
-                if self.distance_to_goal(next_pos, team) == UNKNOWN_DISTANCE
-                    && (!DONT_PROPAGATE_OUT_OF.contains(wld.glyph_at(pos))
+                if self.distance_to_goal(next_pos, team) == PATH_UNKNOWN_DISTANCE
+                    && (!PATH_DONT_PROPAGATE_OUT_OF.contains(wld.glyph_at(pos))
                         || wld.glyph_at(next_pos) == wld.glyph_at(pos))
                 {
                     self.set_distance_to_goal(team, next_pos, step + 1);
@@ -254,7 +256,7 @@ mod tests {
             assert!(
                 plan.distances[&actor.team]
                     .iter()
-                    .all(|distance| distance != &UNKNOWN_DISTANCE)
+                    .all(|distance| distance != &PATH_UNKNOWN_DISTANCE)
             );
         }
     }

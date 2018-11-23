@@ -1,14 +1,11 @@
 // Handles the scenario's map and the items scattered around it.
+use constants::{ITEM_DOOR, ITEM_TREE};
 use csv;
 use item::Item;
-use item_effects::{use_as_portal, use_on_item, DOOR, TREE};
+use item_effects::{use_as_portal, use_on_item};
 use std::collections::HashMap;
 use std::error::Error;
 use std::str;
-
-pub const WAIT_ACTION: u8 = 8;
-pub const MOVE_ACTIONS: [u8; 9] = [0, 1, 2, 3, 4, 5, 6, 7, WAIT_ACTION];
-pub const TURN_ACTIONS: [u8; 8] = [16, 17, 18, 19, 20, 21, 22, 23];
 
 pub struct World {
     pub size: (u16, u16), // cols x rows
@@ -85,7 +82,7 @@ impl World {
     }
 
     fn push_item(&mut self, from: (u16, u16), idx: usize, tools: &[Item]) -> Option<Item> {
-        if self.items[idx].kind != DOOR {
+        if self.items[idx].kind != ITEM_DOOR {
             return None;
         }
         for tool in tools {
@@ -152,7 +149,7 @@ impl World {
     pub fn add_item(&mut self, mut new_item: Item, pos: (u16, u16)) {
         // prevent multiple placement of doors, trees:
         new_item.pos = pos;
-        if new_item.kind == DOOR || new_item.kind == TREE {
+        if new_item.kind == ITEM_DOOR || new_item.kind == ITEM_TREE {
             if let Some(_item) = self
                 .items
                 .iter()
@@ -168,13 +165,13 @@ impl World {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use item_effects::{DOOR, DOOR_OPEN, KEY};
+    use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_KEY};
 
     fn fixtures() -> (World, String) {
         let mut world = World::new("glad");
         world.reshape((5, 5));
-        world.add_item(Item::new(DOOR, 0, 0), (1, 1));
-        world.add_item(Item::new(KEY, 0, 0), (4, 4));
+        world.add_item(Item::new(ITEM_DOOR, 0, 0), (1, 1));
+        world.add_item(Item::new(ITEM_KEY, 0, 0), (4, 4));
         let impassable_tiles = String::from("#");
         return (world, impassable_tiles);
     }
@@ -218,16 +215,16 @@ mod tests {
 
         // pushing the door does not create an open door
         world.push_wall((0, 1), 2, &actor_inventory);
-        assert!(!world.items.iter().any(|item| item.kind == DOOR_OPEN));
+        assert!(!world.items.iter().any(|item| item.kind == ITEM_DOOR_OPEN));
 
         // reaching for the key on the ground picks it up:
         let treasure = world.push_wall((3, 4), 2, &actor_inventory).unwrap();
         assert_eq!(world.items.len(), 1);
-        assert_eq!(treasure.kind, KEY);
+        assert_eq!(treasure.kind, ITEM_KEY);
 
         // pushing against the locked door, with the key, opens it:
         actor_inventory.push(treasure);
         world.push_wall((0, 1), 2, &actor_inventory);
-        assert!(world.items[0].kind == DOOR_OPEN);
+        assert!(world.items[0].kind == ITEM_DOOR_OPEN);
     }
 }

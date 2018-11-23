@@ -6,6 +6,7 @@ extern crate rand;
 #[macro_use]
 mod skills;
 mod actor;
+mod constants;
 mod glad_helper;
 mod item;
 mod item_effects;

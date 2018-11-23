@@ -1,4 +1,5 @@
 // Handles active objects like living entities and projectiles.
+use constants::{ACT_DROP, ACT_MOVES, ACT_SKILL, ACT_TURNS, ACT_WAIT};
 use csv;
 use inflector::Inflector;
 use item::Item;
@@ -7,10 +8,7 @@ use plan::Plan;
 use skills::*;
 use skills_registry::{choose_skill, use_skill};
 use std::{cmp, i32};
-use world::{World, MOVE_ACTIONS, TURN_ACTIONS, WAIT_ACTION};
-
-const DO_SKILL: u8 = 30;
-const DO_DROP: u8 = 40;
+use world::World;
 
 pub struct Actor {
     pub name: String,
@@ -190,7 +188,7 @@ impl Actor {
         if self.is_projectile() {
             return self.direction;
         } else if choose_skill(self, world, plan) {
-            return DO_SKILL;
+            return ACT_SKILL;
         }
         self.choose_action(world, plan)
     }
@@ -198,7 +196,7 @@ impl Actor {
     fn choose_action(&self, world: &World, plan: &Plan) -> u8 {
         let start_dir = self.choose_preferred_dir();
         let (mut best_value, mut best_direction) = (i32::MIN, start_dir);
-        for mv in MOVE_ACTIONS.iter().map(|offset| (start_dir + offset) % 9) {
+        for mv in ACT_MOVES.iter().map(|offset| (start_dir + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
             let mut movement = pos != self.pos;
             if !movement {
@@ -213,7 +211,7 @@ impl Actor {
                     }
                 }
             }
-            if movement || mv == WAIT_ACTION {
+            if movement || mv == ACT_WAIT {
                 let value = self.value_of_pos(pos, plan);
                 if value < best_value {
                     continue;
@@ -256,8 +254,8 @@ impl Actor {
         self.time = time;
         if self.stun == 0 {
             match mv {
-                DO_SKILL => use_skill(self, wld, plan, spawn),
-                DO_DROP => self.act_drop_item(wld),
+                ACT_SKILL => use_skill(self, wld, plan, spawn),
+                ACT_DROP => self.act_drop_item(wld),
                 _ => {
                     if self.is_mobile() {
                         self.act_move(mv, wld, plan, other);
@@ -285,7 +283,7 @@ impl Actor {
             self.pos = pos;
             self.gain_momentum(1);
             passive_effect!(passive_grow => self, wld);
-        } else if MOVE_ACTIONS.contains(&mv) {
+        } else if ACT_MOVES.contains(&mv) {
             self.act_push_wall(wld, mv);
         }
     }
@@ -302,9 +300,9 @@ impl Actor {
     }
 
     fn act_change_direction(&mut self, dir: u8, wld: &World, plan: &Plan) {
-        if MOVE_ACTIONS.contains(&dir) {
+        if ACT_MOVES.contains(&dir) {
             self.direction = dir % 8;
-        } else if TURN_ACTIONS.contains(&dir) {
+        } else if ACT_TURNS.contains(&dir) {
             self.log_action("turned in place.");
             self.direction = dir % 8;
         }

@@ -1,7 +1,6 @@
 // Handles inanimate objects like exits, potions, and treasure.
+use constants;
 use csv;
-
-const DEBRIS: u8 = 200;
 
 pub struct Item {
     pub name: String,
@@ -52,13 +51,13 @@ impl Item {
     pub fn damage(&mut self) {
         match self.health {
             0 => return,
-            1 => self.initialize(DEBRIS),
+            1 => self.initialize(constants::ITEM_DEBRIS),
             _ => self.health -= 1,
         }
     }
 
     pub fn is_debris(&self) -> bool {
-        self.kind == DEBRIS
+        self.kind == constants::ITEM_DEBRIS
     }
 }
 
@@ -68,7 +67,7 @@ mod tests {
 
     #[test]
     fn test_initialize() {
-        let mut item = Item::new(DEBRIS, 1, 0);
+        let mut item = Item::new(constants::ITEM_DEBRIS, 1, 0);
         assert!(item.is_debris());
         // reinitializing changes the item's type from debris:
         item.initialize(0);

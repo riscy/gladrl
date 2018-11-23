@@ -1,8 +1,8 @@
 // Handles actors' special abilities and side effects.
 use actor::Actor;
+use constants::{ITEM_DOOR, ITEM_DOOR_OPEN};
 use inflector::Inflector;
 use item::Item;
-use item_effects::{DOOR, DOOR_OPEN};
 
 use plan::Plan;
 use rand::*;
@@ -441,11 +441,11 @@ pub fn pick(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>)
     let door_pos = wld.offset(slf.pos, slf.direction);
     let cost = slf.max_mana();
     for item in wld.items.iter_mut().filter(|item| item.pos == door_pos) {
-        if item.kind == DOOR {
-            item.initialize(DOOR_OPEN);
+        if item.kind == ITEM_DOOR {
+            item.initialize(ITEM_DOOR_OPEN);
             return slf.act_exert(cost, "picked the lock.");
-        } else if item.kind == DOOR_OPEN && p.whos_at(door_pos).is_none() {
-            item.initialize(DOOR);
+        } else if item.kind == ITEM_DOOR_OPEN && p.whos_at(door_pos).is_none() {
+            item.initialize(ITEM_DOOR);
             item.team = slf.team;
             return slf.act_exert(cost, "relocked the door.");
         }
