@@ -21,10 +21,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
     state.world = World::new("glad");
     let mut file = File::open(format!("glad3.8/scen{}.fss", state.world_idx)).unwrap();
     let version = read_bytes(4, &mut file)[3]; // "FSS<version>"
-    load_world_layout(
-        &mut state.world,
-        str::from_utf8(&read_bytes(8, &mut file)).unwrap(),
-    );
+    load_world_layout(&mut state.world, &read_c_string(8, &mut file));
     if version >= 6 {
         state.world.name = read_c_string(30, &mut file);
     }
@@ -158,5 +155,5 @@ fn read_c_string(max_amt: u64, mut file: &mut File) -> String {
     if let Some(strlen) = buffer.iter().position(|&byte| (byte as char) < ' ') {
         return str::from_utf8(&buffer[..strlen]).unwrap().to_owned();
     }
-    String::new()
+    str::from_utf8(&buffer).unwrap().to_owned()
 }
