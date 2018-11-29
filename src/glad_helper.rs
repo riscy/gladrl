@@ -20,8 +20,11 @@ const ORD_SPAWN: u8 = 5;
 // NOTE: Will pop state.player_team into spawn locations.
 pub fn load_world_and_spawn_team(state: &mut State) {
     state.world = World::new("glad");
-    let mut file = File::open(format!("glad3.8/scen{}.fss", state.world_idx)).unwrap();
-    let version = read_bytes(4, &mut file)[3]; // "FSS<version>"
+    let filename = format!("scen/scen{}.fss", state.world_idx);
+    let mut archive = get_archive();
+    let mut file = archive.by_name(&filename).unwrap();
+    assert!(read_c_string(3, &mut file) == "FSS");
+    let version = read_bytes(1, &mut file)[0];
     load_world_layout(&mut state.world, &read_c_string(8, &mut file));
     if version >= 6 {
         state.world.name = read_c_string(30, &mut file);
@@ -29,6 +32,9 @@ pub fn load_world_and_spawn_team(state: &mut State) {
     let _scenario_type = read_bytes(1, &mut file);
     if version >= 8 {
         let _cash_bonus = read_bytes(2, &mut file);
+    }
+    if version >= 9 {
+        let _unknown = read_bytes(2, &mut file);
     }
 
     let num_objects = read_bytes(2, &mut file); // 2 bytes for number of objects
@@ -52,14 +58,15 @@ pub fn load_world_and_spawn_team(state: &mut State) {
 
 // See: https://github.com/openglad/openglad/blob/master/src/pixdefs.h
 fn load_world_layout(world: &mut World, pix: &str) {
-    let mut buffer = [0; 100_000];
-    let _amt_read = File::open(format!("glad3.8/{}.pix", pix.to_lowercase()))
-        .unwrap()
-        .read(&mut buffer)
-        .expect("Failed to open.");
-    world.reshape((u16::from(buffer[1]), u16::from(buffer[2])));
+    let mut archive = get_archive();
+    let filename = format!("pix/{}.pix", pix);
+    let mut file = archive.by_name(&filename).unwrap();
+    world.reshape((
+        u16::from(read_bytes(2, &mut file)[1]),
+        u16::from(read_bytes(1, &mut file)[0]),
+    ));
     for index in 0..((world.size.0 * world.size.1) as usize) {
-        world.tiles[index] = u16::from(buffer[index as usize + 3]);
+        world.tiles[index] = u16::from(read_bytes(1, &mut file)[0]);
     }
 }
 
@@ -71,7 +78,7 @@ pub fn create_player_team(state: &mut State) {
     }
 }
 
-fn load_next_object(state: &mut State, file: &mut File, version: u8) {
+fn load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u8) {
     let buffer = read_bytes(10, file);
     let order = buffer[0];
     let mut kind = buffer[1];
@@ -143,7 +150,7 @@ fn give_random_inventory(actor: &mut Actor) {
     actor.inventory.push(armor);
 }
 
-fn read_bytes(amt: u64, file: &mut File) -> Vec<u8> {
+fn read_bytes(amt: u64, file: &mut zip::read::ZipFile) -> Vec<u8> {
     let mut buffer = vec![0; amt as usize];
     let mut handler = file.take(amt);
     handler.read_exact(&mut buffer).expect("Failed to read.");
@@ -151,7 +158,7 @@ fn read_bytes(amt: u64, file: &mut File) -> Vec<u8> {
 }
 
 // Interpret a c-style string with a nul terminator.
-fn read_c_string(max_amt: u64, mut file: &mut File) -> String {
+fn read_c_string(max_amt: u64, mut file: &mut zip::read::ZipFile) -> String {
     let buffer = read_bytes(max_amt, &mut file);
     if let Some(strlen) = buffer.iter().position(|&byte| (byte as char) < ' ') {
         return str::from_utf8(&buffer[..strlen]).unwrap().to_owned();
