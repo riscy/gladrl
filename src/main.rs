@@ -2,6 +2,7 @@ extern crate csv;
 extern crate inflector;
 extern crate ncurses;
 extern crate rand;
+extern crate zip;
 
 #[macro_use]
 mod skills;

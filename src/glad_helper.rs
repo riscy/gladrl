@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::str;
 use world::World;
+use zip;
 
 const ORD_ACTOR: u8 = 0;
 const ORD_DOOR: u8 = 1;
@@ -156,4 +157,8 @@ fn read_c_string(max_amt: u64, mut file: &mut File) -> String {
         return str::from_utf8(&buffer[..strlen]).unwrap().to_owned();
     }
     str::from_utf8(&buffer).unwrap().to_owned()
+}
+
+fn get_archive() -> zip::ZipArchive<File> {
+    zip::ZipArchive::new(File::open("glad3.8/org.openglad.gladiator.glad").unwrap()).unwrap()
 }
