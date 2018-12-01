@@ -23,7 +23,7 @@ fn main() {
     let mut game_state = State::new("glad");
     game_state.view.show();
     game_state.loop_game(
-        glad_helper::create_player_team,
+        glad_helper::create_random_team,
         glad_helper::load_world_and_spawn_team,
     );
     game_state.view.hide();

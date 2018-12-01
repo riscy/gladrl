@@ -6,6 +6,8 @@ use std::collections::{HashSet, VecDeque};
 use view::View;
 use world::World;
 
+const TEAM_SIZE: usize = 3;
+
 pub struct State {
     pub world: World,
     pub world_idx: usize,
@@ -49,8 +51,15 @@ impl State {
         self.team_idxs.insert(team);
     }
 
-    pub fn loop_game(&mut self, setup_game: fn(&mut State), setup_scenario: fn(&mut State)) {
-        setup_game(self);
+    pub fn loop_game(
+        &mut self,
+        create_team: fn(usize, usize) -> Vec<Actor>,
+        setup_scenario: fn(&mut State),
+    ) {
+        let mut player_team = create_team(0, TEAM_SIZE);
+        for actor in player_team.drain(0..) {
+            self.player_team.push_front(actor);
+        }
         self.view.hide();
         while self.world_idx != 0 {
             setup_scenario(self);
@@ -287,7 +296,10 @@ mod tests {
     fn fixtures() -> State {
         let mut state = State::new("glad");
         state.world_idx = 42;
-        glad_helper::create_player_team(&mut state);
+        let mut team = glad_helper::create_random_team(0, 3);
+        for actor in team.drain(0..) {
+            state.player_team.push_front(actor);
+        }
         glad_helper::load_world_and_spawn_team(&mut state);
         state.plan = Plan::new(state.world.size, &state.team_idxs);
         state.load_world_description();

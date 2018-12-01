@@ -2,6 +2,7 @@
 use actor::Actor;
 use inflector::Inflector;
 use item::Item;
+use rand;
 use state::State;
 use std::fs::File;
 use std::io::prelude::*;
@@ -71,12 +72,14 @@ fn load_world_layout(world: &mut World, pix: &str) {
     }
 }
 
-pub fn create_player_team(state: &mut State) {
-    for kind in &[0, 2, 11, 1, 13, 5, 3] {
-        let mut actor = Actor::new(*kind, 1, 0, (0, 0));
+pub fn create_random_team(team: usize, count: usize) -> Vec<Actor> {
+    let mut actors = Vec::new();
+    for kind in rand::sample(&mut rand::thread_rng(), &[0, 1, 2, 3, 5, 11, 13], count) {
+        let mut actor = Actor::new(*kind, 1, team, (0, 0));
         actor.is_persistent = true;
-        state.player_team.push_front(actor);
+        actors.push(actor);
     }
+    actors
 }
 
 fn load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u8) {
@@ -104,6 +107,12 @@ fn load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u
             if let Some(mut teammate) = state.player_team.pop_back() {
                 teammate.pos = pos;
                 state.actors.push(teammate);
+                state.team_idxs.insert(team);
+            }
+        } else {
+            if let Some(mut enemy) = create_random_team(team, 1).pop() {
+                enemy.pos = pos;
+                state.actors.push(enemy);
                 state.team_idxs.insert(team);
             }
         }
