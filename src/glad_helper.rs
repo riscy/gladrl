@@ -9,6 +9,7 @@ use std::str;
 use world::World;
 use zip;
 
+const ARCHIVE: &str = "glad3.8/org.openglad.gladiator.glad";
 const ORD_ACTOR: u8 = 0;
 const ORD_DOOR: u8 = 1;
 const ORD_ITEM_OR_EXIT: u8 = 2;
@@ -59,7 +60,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
 // See: https://github.com/openglad/openglad/blob/master/src/pixdefs.h
 fn load_world_layout(world: &mut World, pix: &str) {
     let mut archive = get_archive();
-    let filename = format!("pix/{}.pix", pix);
+    let filename = format!("pix/{}.pix", pix).to_lowercase();
     let mut file = archive.by_name(&filename).unwrap();
     world.reshape((
         u16::from(read_bytes(2, &mut file)[1]),
@@ -167,5 +168,5 @@ fn read_c_string(max_amt: u64, mut file: &mut zip::read::ZipFile) -> String {
 }
 
 fn get_archive() -> zip::ZipArchive<File> {
-    zip::ZipArchive::new(File::open("glad3.8/org.openglad.gladiator.glad").unwrap()).unwrap()
+    zip::ZipArchive::new(File::open(ARCHIVE).unwrap()).unwrap()
 }
