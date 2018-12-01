@@ -86,7 +86,7 @@ impl View {
         for record in reader.deserialize() {
             let (key, desc, num): (char, String, usize) = record?;
             self.keybindings.insert(key as i32, num);
-            online_help.push(format!("{} --{}", key, desc));
+            online_help.push(format!("{} -- {}", key, desc));
         }
         Ok(online_help)
     }

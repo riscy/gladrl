@@ -53,7 +53,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         }
         state.world.desc = state.world.desc.to_uppercase();
     } else {
-        state.world.desc = "Wild dogs have picked the area clean.".to_owned();
+        state.world.desc += "Wild dogs have picked the area clean.";
     }
 }
 
