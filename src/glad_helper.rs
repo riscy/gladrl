@@ -22,8 +22,8 @@ const ORD_SPAWN: u8 = 5;
 // NOTE: Will pop state.player_team into spawn locations.
 pub fn load_world_and_spawn_team(state: &mut State) {
     state.world = World::new("glad");
-    let filename = format!("scen/scen{}.fss", state.world_idx);
     let mut archive = get_archive();
+    let filename = resolve_filename(&mut archive, state.world_idx);
     let mut file = archive.by_name(&filename).unwrap();
     assert!(read_c_string(3, &mut file) == "FSS");
     let version = read_bytes(1, &mut file)[0];
@@ -158,6 +158,21 @@ fn give_random_inventory(actor: &mut Actor) {
     actor.inventory.push(gold);
     actor.inventory.push(silver);
     actor.inventory.push(armor);
+}
+
+fn resolve_filename(archive: &mut zip::read::ZipArchive<File>, idx: usize) -> String {
+    let filename = format!("scen/scen{}.fss", idx);
+    let mut fallback = String::new();
+    for ii in 0..archive.len() {
+        let mut file = archive.by_index(ii).unwrap();
+        if file.name() == filename {
+            return filename;
+        }
+        if fallback.is_empty() && file.name().to_lowercase().ends_with(".fss") {
+            fallback = file.name().to_owned();
+        }
+    }
+    fallback
 }
 
 fn read_bytes(amt: u64, file: &mut zip::read::ZipFile) -> Vec<u8> {
