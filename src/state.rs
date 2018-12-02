@@ -57,7 +57,8 @@ impl State {
         setup_scenario: fn(&mut State),
     ) {
         let mut player_team = create_team(0, TEAM_SIZE);
-        for actor in player_team.drain(0..) {
+        for mut actor in player_team.drain(0..) {
+            actor.is_persistent = true;
             self.player_team.push_front(actor);
         }
         self.view.hide();

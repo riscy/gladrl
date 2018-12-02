@@ -76,7 +76,6 @@ pub fn create_random_team(team: usize, count: usize) -> Vec<Actor> {
     let mut actors = Vec::new();
     for kind in rand::sample(&mut rand::thread_rng(), &[0, 1, 2, 3, 5, 11, 13], count) {
         let mut actor = Actor::new(*kind, 1, team, (0, 0));
-        actor.is_persistent = true;
         actors.push(actor);
     }
     actors
