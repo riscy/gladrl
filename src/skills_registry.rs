@@ -15,6 +15,7 @@ pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
     choose_skill!(should_warp_space if can_warp_space => actor, wld, p);
     choose_skill!(should_blast if can_blast => actor, wld, p);
     choose_skill!(should_teleport if can_teleport => actor, wld, p);
+    choose_skill!(should_teleport_marker if can_teleport_marker => actor, wld, p);
     choose_skill!(should_heal if can_heal => actor, wld, p);
     choose_skill!(should_lie if can_lie => actor, wld, p);
     choose_skill!(should_summon_faerie if can_summon_faerie => actor, wld, p);
@@ -39,6 +40,7 @@ pub fn use_skill(actor: &mut Actor, wld: &mut World, p: &Plan, spawn: &mut Vec<A
     use_skill!(warp_space if can_warp_space => actor, wld, p, spawn);
     use_skill!(blast if can_blast => actor, wld, p, spawn);
     use_skill!(teleport if can_teleport => actor, wld, p, spawn);
+    use_skill!(teleport_marker if can_teleport_marker => actor, wld, p, spawn);
     use_skill!(heal if can_heal => actor, wld, p, spawn);
     use_skill!(lie if can_lie => actor, wld, p, spawn);
     use_skill!(summon_faerie if can_summon_faerie => actor, wld, p, spawn);
