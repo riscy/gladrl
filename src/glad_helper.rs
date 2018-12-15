@@ -1,5 +1,6 @@
 // Handles loading of game assets from the original Gladiator 3.8 sources.
 use actor::Actor;
+use constants::{ITEM_EXIT, ITEM_PORTAL};
 use inflector::Inflector;
 use item::Item;
 use rand;
@@ -116,11 +117,15 @@ fn load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u
             }
         }
         return;
-    } else if order == ORD_ITEM_OR_EXIT && kind == 8 {
-        let mut exit = Item::new(kind, level, team);
-        exit.pos = pos;
-        state.world.exits.push(exit);
-        return;
+    } else if order == ORD_ITEM_OR_EXIT {
+        if kind == ITEM_EXIT {
+            let mut exit = Item::new(kind, level, team);
+            exit.pos = pos;
+            state.world.exits.push(exit);
+            return;
+        } else if kind == ITEM_PORTAL {
+            state.world.add_item(Item::new(kind, level, team), pos);
+        }
     }
 
     if order == ORD_EFFECT || state.world_completed.contains(&state.world_idx) {
