@@ -12,6 +12,7 @@ pub struct Item {
     pub pos: (u16, u16),
     pub can_get: bool,
     pub can_keep: bool,
+    pub can_retain: bool,
     health: u16,
 }
 
@@ -27,6 +28,7 @@ impl Item {
             color: 0,
             can_get: false,
             can_keep: false,
+            can_retain: false,
             health: 20,
         };
         item.initialize(kind);
@@ -36,7 +38,7 @@ impl Item {
     pub fn initialize(&mut self, kind: u8) {
         let reader = csv::Reader::from_path("config/glad/item.csv");
         for record in reader.unwrap().deserialize() {
-            let row: (u8, char, i16, String, bool, bool) = record.unwrap();
+            let row: (u8, char, i16, String, bool, bool, bool) = record.unwrap();
             if row.0 == kind {
                 self.kind = row.0;
                 self.glyph = row.1;
@@ -44,6 +46,7 @@ impl Item {
                 self.name = row.3;
                 self.can_get = row.4;
                 self.can_keep = row.5;
+                self.can_retain = row.6;
             }
         }
     }

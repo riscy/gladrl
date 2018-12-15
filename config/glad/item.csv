@@ -1,19 +1,19 @@
-"kind","glyph","color","desc","can_get","can_keep"
-0,"x",1,"a corpse",false,false
-1,"+",1,"some meat - yum",true,false
-2,"$",3,"a gold piece",true,false
-3,"$",0,"a silver piece",true,false
-4,"=",5,"a magic ring",true,true
-5,"!",4,"an invisibility potion",true,false
-6,"[",6,"some armor",true,true
-7,"]",2,"boots of buoyancy",true,true
-8,"@",5,"an exit",false,false
-9,"@",6,"a teleporter",false,false
-10,"*",2,"a life gem",true,true
-11,"`",6,"a key",true,true
-12,"""",3,"an amulet of speed",true,true
-18,"+",3,"a locked door",false,false
-19,"-",3,"an open door",false,false
-50,"@",1,"a teleport marker",false,false
-100,"%",6,"a sturdy tree",false,false
-200,"x",3,"debris",false,false
+"kind","glyph","color","desc","can_get","can_hold","can_retain"
+0,"x",1,"a corpse",false,false,false
+1,"+",1,"some meat - yum",true,false,false
+2,"$",3,"a gold piece",true,true,false
+3,"$",0,"a silver piece",true,true,false
+4,"=",5,"a magic ring",true,true,true
+5,"!",4,"an invisibility potion",true,false,false
+6,"[",6,"some armor",true,true,true
+7,"]",2,"boots of buoyancy",true,true,true
+8,"@",5,"an exit",false,false,false
+9,"@",6,"a teleporter",false,false,false
+10,"*",2,"a life gem",true,true,false
+
+12,"""",3,"an amulet of speed",true,true,true
+18,"+",3,"a locked door",false,false,false
+19,"-",3,"an open door",false,false,false
+50,"@",1,"a teleport marker",true,true,false
+100,"%",6,"a sturdy tree",false,false,false
+200,"x",3,"debris",false,false,false

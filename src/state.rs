@@ -87,6 +87,7 @@ impl State {
 
     fn extract_team(&mut self, level_up: bool) {
         for mut actor in self.actors.drain(0..) {
+            actor.inventory.retain(|item| item.can_retain);
             if actor.is_persistent && actor.is_alive() {
                 actor.is_leader = false;
                 if level_up {
