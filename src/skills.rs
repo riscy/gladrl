@@ -311,6 +311,18 @@ pub fn teleport(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Act
     }
 }
 
+pub fn can_teleport_marker(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
+    slf.mana >= 10
+}
+pub fn should_teleport_marker(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
+    false
+}
+pub fn teleport_marker(slf: &mut Actor, wld: &mut World, _p: &Plan, _s: &mut Vec<Actor>) {
+    slf.log_action("conjured a strange glyph.");
+    let pos = wld.offset(slf.pos, slf.direction);
+    wld.add_item(Item::new(50, slf.level, slf.team), pos);
+}
+
 pub fn can_heal(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }

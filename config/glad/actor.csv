@@ -3,7 +3,7 @@
 0,"S","'^%#`*~","a soldier",5,"charge boomerang passive_slam passive_whirl passive_displace",5,1,24,4
 1,"e","'^#`*~","an elf",6,"forest_walk passive_trip passive_displace",2,1,16,5
 2,"A","'^%#`*~","an archer",5,"shoot barrage passive_aim",3,1,18,4
-3,"M","'^%#`*~","a mage",7,"blast warp_space teleport passive_aim",1,1,6,11
+3,"M","'^%#`*~","a mage",7,"blast teleport teleport_marker passive_aim",1,1,1000,1001
 4,"X","'^%#`*~","a skeleton",4,"lie sprint passive_displace",4,1,9,1
 5,"C","'^%#`*~","a cleric",6,"heal passive_heal",2,1,12,10
 6,"E","'^%#`","an elemental",5,"blast",4,1,18,2
