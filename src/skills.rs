@@ -55,7 +55,7 @@ pub fn rand_int(max: u16) -> u16 {
 fn raycast(slf: &Actor, dir: u8, wld: &World, p: &Plan, len: u16) -> Option<(usize, u16)> {
     let mut pos = slf.pos;
     for dist in 0..len {
-        let new_pos = wld.neighbor(pos, dir, slf.team, "#");
+        let new_pos = wld.neighbor(pos, dir, slf.team, "#%\"'");
         if new_pos == pos {
             break;
         }
@@ -218,15 +218,15 @@ pub fn can_shoot(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 2
 }
 pub fn should_shoot(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    match raycast(slf, slf.direction, wld, p, slf.level as u16 + 10) {
+    match raycast(slf, slf.direction, wld, p, slf.level as u16 + 5) {
         Some((team, _dist)) => team != slf.team,
         None => false,
     }
 }
 pub fn shoot(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
-    slf.act_exert(2, "released an arrow.");
     let mut shot = Actor::new(50, slf.level + 10, slf.team, slf.pos);
+    slf.act_exert(2, &format!("released {}.", shot.name));
     shot.glyph = match slf.direction {
         0 | 4 => '|',
         2 | 6 => '-',
