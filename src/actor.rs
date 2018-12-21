@@ -7,7 +7,7 @@ use item_effects;
 use plan::Plan;
 use skills::*;
 use skills_registry::{choose_skill, use_skill};
-use std::{cmp, i32};
+use std::{cmp, i32, u16};
 use world::World;
 
 pub struct Actor {
@@ -57,7 +57,7 @@ impl Actor {
             mana: 1,
             name: String::new(),
             walls: String::new(),
-            random_seed: rand_int(200),
+            random_seed: rand_int(u16::MAX),
             is_leader: false,
             stun: 0,
             glyph: '?',
@@ -202,7 +202,7 @@ impl Actor {
             if !movement {
                 pos = world.offset(self.pos, mv)
             }
-            if !self.is_hurt() {
+            if !self.is_hurt() && !plan.is_retreating(self.team) {
                 if let Some(&team) = plan.whos_at(pos) {
                     if team != self.team || (pos != self.pos && self.can_help()) {
                         return mv;
