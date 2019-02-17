@@ -109,12 +109,10 @@ fn load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u
                 state.actors.push(teammate);
                 state.team_idxs.insert(team);
             }
-        } else {
-            if let Some(mut enemy) = create_random_team(team, 1).pop() {
-                enemy.pos = pos;
-                state.actors.push(enemy);
-                state.team_idxs.insert(team);
-            }
+        } else if let Some(mut enemy) = create_random_team(team, 1).pop() {
+            enemy.pos = pos;
+            state.actors.push(enemy);
+            state.team_idxs.insert(team);
         }
         return;
     } else if order == ORD_ITEM_OR_EXIT {

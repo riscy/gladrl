@@ -6,7 +6,7 @@ use std::collections::{HashSet, VecDeque};
 use view::View;
 use world::World;
 
-const TEAM_SIZE: usize = 3;
+const TEAM_SIZE: usize = 4;
 
 pub struct State {
     pub world: World,
@@ -78,7 +78,7 @@ impl State {
 
     fn load_world_description(&mut self) {
         let name = &self.world.name.clone();
-        self.player_mut().log_event(&format!("[{}]", name), 0);
+        self.player_mut().log_event(&format!("[:{}:]", name), 0);
         for line in self.world.desc.clone().lines() {
             self.view.scroll_log_up(1);
             self.player_mut().log_event(line, 0);
