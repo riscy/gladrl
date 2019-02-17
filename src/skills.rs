@@ -95,14 +95,17 @@ pub fn passive_descend(slf: &mut Actor, wld: &mut World) {
     }
 }
 
-pub fn passive_slam(slf: &mut Actor, action: u8, vic: &mut Actor, wld: &World, p: &Plan) {
+pub fn passive_slam(slf: &mut Actor, action: u8, vic: &mut Actor, wld: &mut World, p: &Plan) {
     if slf.momentum != 0 && vic.is_mobile() && slf.direction == action {
         slf.log_interaction("slammed into", vic);
         vic.stun(2);
-        let pos = wld.neighbor(vic.pos, slf.direction, vic.team, &vic.walls);
-        match p.whos_at(pos) {
-            None => vic.pos = pos,
-            Some(&_team) => return,
+        for _ii in 0..2 {
+            wld.change_tiles(vic.pos, TILE_BLOOD);
+            let pos = wld.neighbor(vic.pos, slf.direction, vic.team, &vic.walls);
+            match p.whos_at(pos) {
+                None => vic.pos = pos,
+                Some(&_team) => return,
+            }
         }
     }
 }
@@ -203,6 +206,27 @@ pub fn charge(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor
     }
 }
 
+pub fn can_leap(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
+    slf.mana >= 1
+}
+pub fn should_leap(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
+    slf.is_hurt()
+}
+pub fn leap(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
+    slf.act_exert(1, "leapt back!");
+    slf.direction = (slf.direction + 4) % 8;
+    for _step in 0..2 {
+        let new_pos = wld.neighbor(slf.pos, slf.direction, slf.team, &slf.walls);
+        if let Some(&team) = p.whos_at(new_pos) {
+            if team == slf.team {
+                return slf.lose_momentum(1);
+            }
+        } else {
+            slf.pos = new_pos;
+        }
+    }
+}
+
 pub fn can_cloak(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
@@ -273,14 +297,14 @@ pub fn boomerang(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor
     spawn.push(boomerang);
 }
 
-pub fn can_warp_space(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
+pub fn can_starburst(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 20
 }
-pub fn should_warp_space(slf: &Actor, _wld: &World, p: &Plan) -> bool {
+pub fn should_starburst(slf: &Actor, _wld: &World, p: &Plan) -> bool {
     !slf.is_hurt() && p.distance_to_goal(slf.pos, slf.team) < 5
 }
-pub fn warp_space(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
-    slf.act_exert(20, "casted 'warp space'.");
+pub fn starburst(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
+    slf.act_exert(20, "unleashed fiery currents!");
     for direction in 0..8 {
         let mut blast = Actor::new(54, slf.level + 5, slf.team, slf.pos);
         blast.direction = direction;
@@ -370,8 +394,8 @@ pub fn lie(slf: &mut Actor, _wld: &World, _p: &Plan, _spawn: &mut Vec<Actor>) {
 pub fn can_summon_faerie(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
-pub fn should_summon_faerie(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    p.is_near_enemy(slf.pos, slf.team) || should_shoot(slf, wld, p)
+pub fn should_summon_faerie(slf: &Actor, _wld: &World, p: &Plan) -> bool {
+    p.is_near_enemy(slf.pos, slf.team)
 }
 pub fn summon_faerie(slf: &mut Actor, _wld: &World, _p: &Plan, spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "called a faerie.");

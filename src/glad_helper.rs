@@ -12,6 +12,8 @@ use world::World;
 use zip;
 
 const ARCHIVE: &str = "glad3.8/org.openglad.gladiator.glad";
+//const ARCHIVE: &str = "glad3.8/org.openglad.arenas.glad";
+//const ARCHIVE: &str = "glad3.8/org.openglad.tryxian.glad";
 const ORD_ACTOR: u8 = 0;
 const ORD_DOOR: u8 = 1;
 const ORD_ITEM_OR_EXIT: u8 = 2;

@@ -8,11 +8,12 @@ use world::World;
 pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
     choose_skill!(should_sprint if can_sprint => actor, wld, p);
     choose_skill!(should_charge if can_charge => actor, wld, p);
+    choose_skill!(should_leap if can_leap => actor, wld, p);
     choose_skill!(should_cloak if can_cloak => actor, wld, p);
     choose_skill!(should_shoot if can_shoot => actor, wld, p);
     choose_skill!(should_barrage if can_barrage => actor, wld, p);
     choose_skill!(should_boomerang if can_boomerang => actor, wld, p);
-    choose_skill!(should_warp_space if can_warp_space => actor, wld, p);
+    choose_skill!(should_starburst if can_starburst => actor, wld, p);
     choose_skill!(should_blast if can_blast => actor, wld, p);
     choose_skill!(should_teleport if can_teleport => actor, wld, p);
     choose_skill!(should_teleport_marker if can_teleport_marker => actor, wld, p);
@@ -33,11 +34,12 @@ pub fn choose_skill(actor: &mut Actor, wld: &World, p: &Plan) -> bool {
 pub fn use_skill(actor: &mut Actor, wld: &mut World, p: &Plan, spawn: &mut Vec<Actor>) {
     use_skill!(sprint if can_sprint => actor, wld, p, spawn);
     use_skill!(charge if can_charge => actor, wld, p, spawn);
+    use_skill!(leap if can_leap => actor, wld, p, spawn);
     use_skill!(cloak if can_cloak => actor, wld, p, spawn);
     use_skill!(shoot if can_shoot => actor, wld, p, spawn);
     use_skill!(barrage if can_barrage => actor, wld, p, spawn);
     use_skill!(boomerang if can_boomerang => actor, wld, p, spawn);
-    use_skill!(warp_space if can_warp_space => actor, wld, p, spawn);
+    use_skill!(starburst if can_starburst => actor, wld, p, spawn);
     use_skill!(blast if can_blast => actor, wld, p, spawn);
     use_skill!(teleport if can_teleport => actor, wld, p, spawn);
     use_skill!(teleport_marker if can_teleport_marker => actor, wld, p, spawn);
