@@ -9,5 +9,6 @@ pub const ITEM_PORTAL: u8 = 9;
 pub const ITEM_KEY: u8 = 11;
 pub const ITEM_DOOR: u8 = 18;
 pub const ITEM_DOOR_OPEN: u8 = 19;
+pub const ITEM_TELEPORT_MARKER: u8 = 50;
 pub const ITEM_TREE: u8 = 100;
 pub const ITEM_DEBRIS: u8 = 200;

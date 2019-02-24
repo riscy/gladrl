@@ -1,6 +1,6 @@
 // Handles actors' special abilities and side effects.
 use actor::Actor;
-use constants::{ITEM_DOOR, ITEM_DOOR_OPEN};
+use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_TELEPORT_MARKER};
 use inflector::Inflector;
 use item::Item;
 
@@ -301,14 +301,20 @@ pub fn should_teleport(slf: &Actor, _wld: &World, p: &Plan) -> bool {
     p.is_near_enemy(slf.pos, slf.team) && slf.health < slf.max_health() / 2
 }
 pub fn teleport(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>) {
-    loop {
-        let pos = (rand_int(wld.size.0 as u16), rand_int(wld.size.1 as u16));
-        if p.whos_at(pos).is_none() && !slf.walls.contains(wld.glyph_at(pos)) {
-            slf.act_exert(3, "teleported.");
-            wld.log_global("There was a sudden gust of wind.", pos, false);
-            return slf.pos = pos;
-        }
+    slf.act_exert(3, "teleported.");
+    if let Some(teleport_marker) = slf
+        .inventory
+        .iter()
+        .rev()
+        .position(|r| r.kind == ITEM_TELEPORT_MARKER && r.team == slf.team && r.pos != slf.pos)
+    {
+        // we reversed the list to ensure using the oldest teleport marker
+        // above.  now we invert the index so it matches the correct item:
+        let teleport_marker = slf.inventory.len() - teleport_marker - 1;
+        slf.inventory[teleport_marker].damage();
+        return slf.pos = slf.inventory[teleport_marker].pos;
     }
+    while p.whos_at(slf.teleport(wld)).is_some() {}
 }
 
 pub fn can_teleport_marker(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
@@ -320,7 +326,7 @@ pub fn should_teleport_marker(_slf: &Actor, _wld: &World, _p: &Plan) -> bool {
 pub fn teleport_marker(slf: &mut Actor, wld: &mut World, _p: &Plan, _s: &mut Vec<Actor>) {
     slf.log_action("conjured a strange glyph.");
     let pos = wld.offset(slf.pos, slf.direction);
-    wld.add_item(Item::new(50, slf.level, slf.team), pos);
+    wld.add_item(Item::new(ITEM_TELEPORT_MARKER, slf.level, slf.team), pos);
 }
 
 pub fn can_heal(slf: &Actor, _wld: &World, _p: &Plan) -> bool {

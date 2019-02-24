@@ -128,6 +128,16 @@ impl Actor {
         cmp::max(1, self.intel * self.level)
     }
 
+    pub fn teleport(&mut self, wld: &World) -> (u16, u16) {
+        loop {
+            let pos = (rand_int(wld.size.0 as u16), rand_int(wld.size.1 as u16));
+            if !self.walls.contains(wld.glyph_at(pos)) {
+                self.pos = pos;
+                return self.pos;
+            }
+        }
+    }
+
     pub fn log_event(&mut self, txt: &str, time: u32) {
         if let Some(last_log) = self.log.last_mut() {
             if last_log.1 == txt {
