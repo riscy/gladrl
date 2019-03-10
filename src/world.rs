@@ -1,5 +1,5 @@
 // Handles the scenario's map and the items scattered around it.
-use constants::{ITEM_DOOR, ITEM_TREE};
+use constants::{ITEM_DOOR, ITEM_TREE, TILE_BLOOD};
 use csv;
 use item::Item;
 use item_effects::{use_as_portal, use_on_item};
@@ -204,8 +204,8 @@ mod tests {
     #[test]
     fn test_change_tiles() {
         let (mut world, _) = fixtures();
-        world.change_tiles((2, 2), 200);
-        assert!(world.tiles.iter().any(|tile| tile == &200));
+        world.change_tiles((2, 2), TILE_BLOOD);
+        assert!(world.tiles.iter().any(|tile| tile == &TILE_BLOOD));
     }
 
     #[test]

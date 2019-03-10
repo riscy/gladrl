@@ -12,3 +12,6 @@ pub const ITEM_DOOR_OPEN: u8 = 19;
 pub const ITEM_TELEPORT_MARKER: u8 = 50;
 pub const ITEM_TREE: u8 = 100;
 pub const ITEM_DEBRIS: u8 = 200;
+
+pub const TILE_TREE: u16 = 60;
+pub const TILE_BLOOD: u16 = 200;

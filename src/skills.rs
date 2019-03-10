@@ -1,6 +1,6 @@
 // Handles actors' special abilities and side effects.
 use actor::Actor;
-use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_TELEPORT_MARKER};
+use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_TELEPORT_MARKER, TILE_BLOOD, TILE_TREE};
 use inflector::Inflector;
 use item::Item;
 
@@ -149,7 +149,7 @@ pub fn passive_heal(slf: &mut Actor, pal: &mut Actor, _ww: &mut World) {
 }
 
 pub fn passive_grow(slf: &Actor, wld: &mut World) {
-    wld.change_tiles(slf.pos, 60);
+    wld.change_tiles(slf.pos, TILE_TREE);
 }
 
 pub fn passive_aim(slf: &mut Actor, wld: &World, p: &Plan) {

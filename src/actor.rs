@@ -1,5 +1,5 @@
 // Handles active objects like living entities and projectiles.
-use constants::{ACT_DROP, ACT_MOVES, ACT_SKILL, ACT_TURNS, ACT_WAIT};
+use constants::{ACT_DROP, ACT_MOVES, ACT_SKILL, ACT_TURNS, ACT_WAIT, TILE_BLOOD};
 use csv;
 use inflector::Inflector;
 use item::Item;
@@ -409,7 +409,7 @@ impl Actor {
         self.is_leader = false;
         if self.is_flesh() {
             world.add_item(Item::new(0, self.level, self.team), self.pos);
-            world.change_tiles(self.pos, 200);
+            world.change_tiles(self.pos, TILE_BLOOD);
         }
         self.invis = -1; // 👻
     }
@@ -452,7 +452,7 @@ impl Actor {
             if self.is_hurt() && self.stun == 0 && rand_int(self.health) == 0 {
                 self.log_action("fell, bleeding profusely.");
                 self.stun(2);
-                world.change_tiles(self.pos, 200);
+                world.change_tiles(self.pos, TILE_BLOOD);
             }
             if self.is_alive() {
                 self.act_get(world);
