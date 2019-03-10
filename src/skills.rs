@@ -225,6 +225,10 @@ pub fn should_shoot(slf: &Actor, wld: &World, p: &Plan) -> bool {
 }
 pub fn shoot(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
     passive_effect!(passive_aim => slf, wld, p);
+    if slf.momentum > 0 {
+        slf.log_action("steadied my aim.");
+        return slf.momentum = 0;
+    }
     let mut shot = Actor::new(50, slf.level + 10, slf.team, slf.pos);
     slf.act_exert(2, &format!("released {}.", shot.name));
     shot.glyph = match slf.direction {
@@ -244,6 +248,10 @@ pub fn should_barrage(slf: &Actor, wld: &World, p: &Plan) -> bool {
     p.is_near_enemy(slf.pos, slf.team) && should_shoot(slf, wld, p)
 }
 pub fn barrage(slf: &mut Actor, wld: &World, p: &Plan, spawn: &mut Vec<Actor>) {
+    if slf.momentum > 0 {
+        slf.log_action("steadied my aim.");
+        return slf.momentum = 0;
+    }
     slf.direction = (slf.direction + 7) % 8;
     for _arrow in 0..3 {
         shoot(slf, wld, p, spawn);
