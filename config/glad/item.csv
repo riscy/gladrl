@@ -10,7 +10,7 @@
 8,"@",5,"an exit",false,false,false
 9,"@",6,"a teleporter",false,false,false
 10,"*",2,"a life gem",true,true,false
-11,"`",6,"a key",true,false,false
+11,"`",6,"a key",true,true,false
 12,"""",3,"an amulet of speed",true,true,true
 18,"+",3,"a locked door",false,false,false
 19,"-",3,"an open door",false,false,false
