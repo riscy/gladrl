@@ -1,5 +1,5 @@
 // Handles the scenario's map and the items scattered around it.
-use constants::{ITEM_DOOR, ITEM_TREE, TILE_BLOOD};
+use constants::{ITEM_DOOR, ITEM_TREE};
 use csv;
 use item::Item;
 use item_effects::{use_as_portal, use_on_item};
@@ -165,7 +165,7 @@ impl World {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_KEY};
+    use constants::{ITEM_DOOR, ITEM_DOOR_OPEN, ITEM_KEY, TILE_BLOOD};
 
     fn fixtures() -> (World, String) {
         let mut world = World::new("glad");
