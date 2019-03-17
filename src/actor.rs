@@ -216,7 +216,7 @@ impl Actor {
                 if let Some(&team) = plan.whos_at(pos) {
                     if team != self.team || (pos != self.pos && self.can_help()) {
                         return mv;
-                    } else if !self.can_displace() {
+                    } else if !self.can_displace(plan) {
                         movement = false;
                     }
                 }
@@ -360,7 +360,7 @@ impl Actor {
             passive_effect!(passive_backstab => self, action, other);
             passive_effect!(passive_slam => self, action, other, world, plan);
             return self.act_hit(other, world);
-        } else if self.can_displace() && other.is_mobile() {
+        } else if self.can_displace(plan) && other.is_mobile() {
             return self.act_displace(other, world);
         }
         passive_effect!(passive_heal => self, other, world);
@@ -493,8 +493,11 @@ impl Actor {
         self.is_combatant() && self.pos == pos
     }
 
-    fn can_displace(&self) -> bool {
-        (self.team != 0 || self.is_leader) && self.has_skill("passive_displace")
+    fn can_displace(&self, plan: &Plan) -> bool {
+        if !self.is_leader && self.team == 0 {
+            return false;
+        }
+        self.has_skill("passive_displace") || plan.num_enemies() == 0
     }
 
     pub fn is_playable(&self) -> bool {
