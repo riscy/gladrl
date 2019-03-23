@@ -253,11 +253,9 @@ mod tests {
         plan.update(&team_idxs, &world, &actors);
         for actor in actors {
             assert_eq!(plan.distance_to_goal(actor.pos, actor.team), 4);
-            assert!(
-                plan.distances[&actor.team]
-                    .iter()
-                    .all(|distance| distance != &PATH_UNKNOWN_DISTANCE)
-            );
+            assert!(plan.distances[&actor.team]
+                .iter()
+                .all(|distance| distance != &PATH_UNKNOWN_DISTANCE));
         }
     }
 }

@@ -6,7 +6,7 @@ use item::Item;
 use item_effects;
 use plan::Plan;
 use skills::*;
-use skills_registry::{choose_skill, use_skill};
+use skills_registry;
 use std::{cmp, i32, u16};
 use world::World;
 
@@ -197,7 +197,7 @@ impl Actor {
     pub fn choose(&mut self, world: &World, plan: &Plan) -> u8 {
         if self.is_projectile() {
             return self.direction;
-        } else if choose_skill(self, world, plan) {
+        } else if skills_registry::choose_skill(self, world, plan) {
             return ACT_SKILL;
         }
         self.choose_action(world, plan)
@@ -255,25 +255,24 @@ impl Actor {
     pub fn act(
         &mut self,
         mv: u8,
-        time: u32,
         wld: &mut World,
         plan: &Plan,
         other: &mut Vec<&mut [Actor]>,
         spawn: &mut Vec<Actor>,
     ) {
-        self.time = time;
-        if self.stun == 0 {
-            match mv {
-                ACT_SKILL => use_skill(self, wld, plan, spawn),
-                ACT_DROP => self.act_drop_item(wld),
-                _ => {
-                    if self.is_mobile() {
-                        self.act_move(mv, wld, plan, other);
-                    }
-                    self.act_change_direction(mv, wld, plan);
-                }
-            };
+        if self.stun != 0 {
+            return;
         }
+        match mv {
+            ACT_SKILL => skills_registry::use_skill(self, wld, plan, spawn),
+            ACT_DROP => self.act_drop_item(wld),
+            _ => {
+                if self.is_mobile() {
+                    self.act_move(mv, wld, plan, other);
+                }
+                self.act_change_direction(mv, wld, plan);
+            }
+        };
     }
 
     fn act_move(&mut self, mv: u8, wld: &mut World, plan: &Plan, other: &mut Vec<&mut [Actor]>) {

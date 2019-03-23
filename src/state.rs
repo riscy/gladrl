@@ -61,7 +61,6 @@ impl State {
             actor.is_persistent = true;
             self.player_team.push_front(actor);
         }
-        self.view.hide();
         while self.world_idx != 0 {
             setup_scenario(self);
             self.plan = Plan::new(self.world.size, &self.team_idxs);
@@ -142,9 +141,9 @@ impl State {
         // split actors, excluding current, to prevent reborrowing
         let (have_acted, yet_to_act) = (&mut self.actors).split_at_mut(idx);
         if let Some((actor, yet_to_act)) = yet_to_act.split_first_mut() {
+            actor.time = self.time;
             actor.act(
                 choice,
-                self.time,
                 &mut self.world,
                 &self.plan,
                 &mut vec![have_acted, yet_to_act],
@@ -164,7 +163,7 @@ impl State {
             self.view.render(&self.world, &self.actors, self.player_idx);
             let input = if self.autopilot {
                 self.plan.tactic_attack();
-                self.actors[player_idx].choose(&self.world, &self.plan)
+                self.choice_from_ai(player_idx)
             } else {
                 self.view.get_key_input()
             };
