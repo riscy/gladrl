@@ -20,10 +20,11 @@ mod world;
 use state::State;
 
 fn main() {
-    let mut game_state = State::new("glad");
-    game_state.loop_game(
+    let mut game_state = State::new(
+        glad_helper::CONFIG_DIRECTORY,
         glad_helper::create_random_team,
         glad_helper::load_world_and_spawn_team,
     );
+    game_state.loop_game();
     println!("Score: {}", game_state.score);
 }

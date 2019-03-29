@@ -23,10 +23,17 @@ pub struct State {
     pub plan: Plan,
     pub view: View,
     spawn: Vec<Actor>,
+
+    create_team: fn(usize, usize) -> Vec<Actor>,
+    setup_scenario: fn(&mut State),
 }
 
 impl State {
-    pub fn new(config: &str) -> State {
+    pub fn new(
+        config: &str,
+        create_team: fn(usize, usize) -> Vec<Actor>,
+        setup_scenario: fn(&mut State),
+    ) -> State {
         State {
             world: World::new(config),
             world_idx: 1,
@@ -42,6 +49,8 @@ impl State {
             plan: Plan::new((0, 0), &HashSet::new()),
             spawn: Vec::new(),
             view: View::new(),
+            create_team,
+            setup_scenario,
         }
     }
 
@@ -51,18 +60,14 @@ impl State {
         self.team_idxs.insert(team);
     }
 
-    pub fn loop_game(
-        &mut self,
-        create_team: fn(usize, usize) -> Vec<Actor>,
-        setup_scenario: fn(&mut State),
-    ) {
-        let mut player_team = create_team(0, TEAM_SIZE);
+    pub fn loop_game(&mut self) {
+        let mut player_team = (self.create_team)(0, TEAM_SIZE);
         for mut actor in player_team.drain(0..) {
             actor.is_persistent = true;
             self.player_team.push_front(actor);
         }
         while self.world_idx != 0 {
-            setup_scenario(self);
+            (self.setup_scenario)(self);
             self.plan = Plan::new(self.world.size, &self.team_idxs);
             self.player_idx = 0;
             self.player_control_confirm();
@@ -295,13 +300,17 @@ mod tests {
     use glad_helper;
 
     fn fixtures() -> State {
-        let mut state = State::new("glad");
+        let mut state = State::new(
+            "glad",
+            glad_helper::create_random_team,
+            glad_helper::load_world_and_spawn_team,
+        );
         state.world_idx = 42;
-        let mut team = glad_helper::create_random_team(0, 3);
+        let mut team = (state.create_team)(0, 3);
         for actor in team.drain(0..) {
             state.player_team.push_front(actor);
         }
-        glad_helper::load_world_and_spawn_team(&mut state);
+        (state.setup_scenario)(&mut state);
         state.plan = Plan::new(state.world.size, &state.team_idxs);
         state.load_world_description();
         state.player_idx = 0;

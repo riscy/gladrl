@@ -11,6 +11,8 @@ use std::str;
 use world::World;
 use zip;
 
+pub const CONFIG_DIRECTORY: &str = "glad";
+
 const ARCHIVE: &str = "glad3.8/org.openglad.gladiator.glad";
 //const ARCHIVE: &str = "glad3.8/org.openglad.arenas.glad";
 //const ARCHIVE: &str = "glad3.8/org.openglad.tryxian.glad";
