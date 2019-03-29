@@ -300,11 +300,10 @@ impl Actor {
     fn act_push_wall(&mut self, world: &mut World, action: u8) {
         if let Some(treasure) = world.push_wall(self.pos, action, &self.inventory) {
             self.log_action(&format!("pulled on {}.", treasure.name));
-            item_effects::use_on_actor(self, treasure.kind);
             if treasure.can_keep {
                 self.log_action(&format!("got {}.", treasure.name));
-                self.inventory.push(treasure);
             }
+            self._add_to_inventory(treasure);
         }
     }
 
@@ -318,19 +317,25 @@ impl Actor {
         passive_effect!(passive_aim => self, wld, plan);
     }
 
-    fn act_get(&mut self, world: &mut World) {
+    fn _act_get_all(&mut self, world: &mut World) {
         let mut idx = 0;
         while idx < world.items.len() {
             if self.pos == world.items[idx].pos && world.items[idx].can_get {
                 let item = world.items.remove(idx);
                 self.log_action(&format!("got {}.", item.name));
-                item_effects::use_on_actor(self, item.kind);
-                if item.can_keep {
-                    self.inventory.push(item);
-                }
-                continue;
+                self._add_to_inventory(item);
+            } else {
+                idx += 1;
             }
-            idx += 1;
+        }
+    }
+
+    fn _add_to_inventory(&mut self, item: Item) {
+        item_effects::use_on_actor(self, item.kind);
+        if item.can_keep {
+            self.inventory.push(item);
+            self.inventory
+                .sort_by(|a, b| a.kind.partial_cmp(&b.kind).unwrap());
         }
     }
 
@@ -454,7 +459,7 @@ impl Actor {
                 world.change_tiles(self.pos, TILE_BLOOD);
             }
             if self.is_alive() {
-                self.act_get(world);
+                self._act_get_all(world);
             }
         }
         if self.invis > 0 {
@@ -645,7 +650,7 @@ mod tests {
     fn test_get_and_drop() {
         let (mut soldier, _archer, mut world, plan) = fixtures();
         soldier.direction = 2;
-        soldier.act_get(&mut world);
+        soldier._act_get_all(&mut world);
         assert_eq!(soldier.inventory.len(), 1);
         soldier.act_drop_all(&mut world);
         assert_eq!(soldier.inventory.len(), 0);

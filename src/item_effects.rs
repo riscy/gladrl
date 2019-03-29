@@ -6,6 +6,8 @@ use item::Item;
 pub fn use_on_actor(actor: &mut Actor, kind: u8) -> bool {
     match kind {
         1 => actor.health = actor.max_health(),
+        2 => {} // gold
+        3 => {} // silver
         4 => actor.intel += 1,
         5 => actor.invis = 200,
         6 => actor.con += 1,
