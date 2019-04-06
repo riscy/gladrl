@@ -571,9 +571,10 @@ mod tests {
         let soldier = Actor::new(0, 1, 0, (2, 2));
         let archer = Actor::new(2, 1, 1, (1, 2));
         let boots = Item::new(7, 0, 0);
-        let plan = Plan::new((5, 5), &HashSet::from_iter(vec![0, 1]));
+        let wld_shape = (5, 5);
+        let plan = Plan::new(wld_shape, &HashSet::from_iter(vec![0, 1]));
         let mut world = World::new("glad");
-        world.reshape((5, 5));
+        world.reshape(wld_shape);
         world.add_item(boots, (2, 2));
         return (soldier, archer, world, plan);
     }
@@ -616,6 +617,7 @@ mod tests {
         soldier.hurt(all_but_2, &mut world);
         assert!(soldier.is_alive() && soldier.is_hurt());
         archer.act_touch(&mut soldier, &mut world, 2, &plan);
+        assert!(soldier.health < all_but_2);
         archer.act_hit(&mut soldier, &mut world);
         assert!(!soldier.is_alive());
     }
