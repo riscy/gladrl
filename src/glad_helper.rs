@@ -47,7 +47,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
     let num_objects = _read_bytes(2, &mut file); // 2 bytes for number of objects
     let num_objects = (num_objects[0] as usize) + (num_objects[1] as usize) * 256;
     for _obj_idx in 0..num_objects {
-        load_next_object(state, &mut file, version);
+        _load_next_object(state, &mut file, version);
     }
 
     if !state.world_completed.contains(&state.world_idx) {
@@ -91,7 +91,7 @@ pub fn create_random_team(team: usize, count: usize) -> Vec<Actor> {
     actors
 }
 
-fn load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u8) {
+fn _load_next_object(state: &mut State, file: &mut zip::read::ZipFile, version: u8) {
     let buffer = _read_bytes(10, file);
     let order = buffer[0];
     let mut kind = buffer[1];

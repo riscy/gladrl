@@ -99,10 +99,10 @@ impl Actor {
             self.intel = row.9;
             break;
         }
-        self.initialize_inventory();
+        self._initialize_inventory();
     }
 
-    fn initialize_inventory(&mut self) {
+    fn _initialize_inventory(&mut self) {
         for kind in self.inventory.iter().map(|it| it.kind).collect::<Vec<u8>>() {
             item_effects::use_on_actor(self, kind);
         }
@@ -200,11 +200,11 @@ impl Actor {
         } else if skills_registry::choose_skill(self, world, plan) {
             return ACT_SKILL;
         }
-        self.choose_action(world, plan)
+        self._choose_action(world, plan)
     }
 
-    fn choose_action(&self, world: &World, plan: &Plan) -> u8 {
-        let start_dir = self.choose_preferred_dir();
+    fn _choose_action(&self, world: &World, plan: &Plan) -> u8 {
+        let start_dir = self._choose_preferred_dir();
         let (mut best_value, mut best_direction) = (i32::MIN, start_dir);
         for mv in ACT_MOVES.iter().map(|offset| (start_dir + offset) % 9) {
             let mut pos = world.neighbor(self.pos, mv, self.team, &self.walls);
@@ -214,15 +214,15 @@ impl Actor {
             }
             if !self.is_hurt() && !plan.is_retreating(self.team) {
                 if let Some(&team) = plan.whos_at(pos) {
-                    if team != self.team || (pos != self.pos && self.can_help()) {
+                    if team != self.team || (pos != self.pos && self._can_help()) {
                         return mv;
-                    } else if !self.can_displace(plan) {
+                    } else if !self._can_displace(plan) {
                         movement = false;
                     }
                 }
             }
             if movement || mv == ACT_WAIT {
-                let value = self.value_of_pos(pos, plan);
+                let value = self._value_of_pos(pos, plan);
                 if value < best_value {
                     continue;
                 }
@@ -236,16 +236,16 @@ impl Actor {
     }
 
     // How good this position is to the actor (larger is better)
-    fn value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
+    fn _value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
         let dist = plan.distance_to_goal(pos, self.team);
-        if self.is_retreating(plan) {
+        if self._is_retreating(plan) {
             dist
         } else {
             -dist
         }
     }
 
-    fn choose_preferred_dir(&self) -> u8 {
+    fn _choose_preferred_dir(&self) -> u8 {
         if !self.is_projectile() && rand_int(5) == 0 {
             return rand_int(8) as u8;
         }
@@ -265,17 +265,17 @@ impl Actor {
         }
         match mv {
             ACT_SKILL => skills_registry::use_skill(self, wld, plan, spawn),
-            ACT_DROP => self.act_drop_item(wld),
+            ACT_DROP => self._act_drop_item(wld),
             _ => {
                 if self.is_mobile() {
-                    self.act_move(mv, wld, plan, other);
+                    self._act_move(mv, wld, plan, other);
                 }
-                self.act_change_direction(mv, wld, plan);
+                self._act_change_direction(mv, wld, plan);
             }
         };
     }
 
-    fn act_move(&mut self, mv: u8, wld: &mut World, plan: &Plan, other: &mut Vec<&mut [Actor]>) {
+    fn _act_move(&mut self, mv: u8, wld: &mut World, plan: &Plan, other: &mut Vec<&mut [Actor]>) {
         let mut pos = wld.neighbor(self.pos, mv, self.team, &self.walls);
         let movement = self.pos != pos;
         if !movement {
@@ -284,8 +284,8 @@ impl Actor {
         }
         if plan.whos_at(pos).is_some() {
             for actors in other {
-                for actor in actors.iter_mut().filter(|xx| xx.is_blocking(pos)) {
-                    self.act_touch(actor, wld, mv, plan);
+                for actor in actors.iter_mut().filter(|xx| xx._is_blocking(pos)) {
+                    self._act_touch(actor, wld, mv, plan);
                 }
             }
         } else if movement {
@@ -293,11 +293,11 @@ impl Actor {
             self.gain_momentum(1);
             passive_effect!(passive_grow => self, wld);
         } else if ACT_MOVES.contains(&mv) {
-            self.act_push_wall(wld, mv);
+            self._act_push_wall(wld, mv);
         }
     }
 
-    fn act_push_wall(&mut self, world: &mut World, action: u8) {
+    fn _act_push_wall(&mut self, world: &mut World, action: u8) {
         if let Some(treasure) = world.push_wall(self.pos, action, &self.inventory) {
             self.log_action(&format!("pulled on {}.", treasure.name));
             if treasure.can_keep {
@@ -307,7 +307,7 @@ impl Actor {
         }
     }
 
-    fn act_change_direction(&mut self, dir: u8, wld: &World, plan: &Plan) {
+    fn _act_change_direction(&mut self, dir: u8, wld: &World, plan: &Plan) {
         if ACT_MOVES.contains(&dir) {
             self.direction = dir % 8;
         } else if ACT_TURNS.contains(&dir) {
@@ -339,7 +339,7 @@ impl Actor {
         }
     }
 
-    fn act_drop_item(&mut self, world: &mut World) {
+    fn _act_drop_item(&mut self, world: &mut World) {
         if let Some(item) = self.inventory.pop() {
             self.log_action(&format!("dropped {}.", item.name));
             let pos = world.neighbor(self.pos, self.direction, self.team, "");
@@ -350,28 +350,28 @@ impl Actor {
         self.log_action("had nothing to drop.")
     }
 
-    fn act_drop_all(&mut self, world: &mut World) {
+    fn _act_drop_all(&mut self, world: &mut World) {
         while !self.inventory.is_empty() {
-            self.act_drop_item(world);
+            self._act_drop_item(world);
             self.direction = (self.direction + 1) % 8;
         }
     }
 
-    fn act_touch(&mut self, other: &mut Actor, world: &mut World, action: u8, plan: &Plan) {
+    fn _act_touch(&mut self, other: &mut Actor, world: &mut World, action: u8, plan: &Plan) {
         if other.is_enemy_of(self.team) && self.strength > 0 {
             passive_effect!(passive_trip => self, action, other);
             passive_effect!(passive_whirl => self, action, other);
             passive_effect!(passive_backstab => self, action, other);
             passive_effect!(passive_slam => self, action, other, world, plan);
-            return self.act_hit(other, world);
-        } else if self.can_displace(plan) && other.is_mobile() {
-            return self.act_displace(other, world);
+            return self._act_hit(other, world);
+        } else if self._can_displace(plan) && other.is_mobile() {
+            return self._act_displace(other, world);
         }
         passive_effect!(passive_heal => self, other, world);
-        self.act_help(other)
+        self._act_help(other)
     }
 
-    fn act_displace(&mut self, other: &mut Actor, world: &mut World) {
+    fn _act_displace(&mut self, other: &mut Actor, world: &mut World) {
         if !self.walls.contains(world.glyph_at(other.pos))
             && !other.walls.contains(world.glyph_at(self.pos))
         {
@@ -384,7 +384,7 @@ impl Actor {
         }
     }
 
-    fn act_help(&mut self, other: &mut Actor) {
+    fn _act_help(&mut self, other: &mut Actor) {
         if other.stun > 0 && !self.is_projectile() {
             other.stun = 0;
             self.log_action(&format!("hoisted {} up.", other.name));
@@ -393,7 +393,7 @@ impl Actor {
         self.lose_momentum(1);
     }
 
-    fn act_hit(&mut self, other: &mut Actor, world: &mut World) {
+    fn _act_hit(&mut self, other: &mut Actor, world: &mut World) {
         self.log_interaction("hit", other);
         self.lose_momentum(1);
         other.hurt(self.strength * self.level, world);
@@ -407,9 +407,9 @@ impl Actor {
         if !self.is_projectile() {
             let verb = if self.is_flesh() { "died" } else { "collapsed" };
             let msg = format!("{} {}!", self.name.to_sentence_case(), verb);
-            world.log_global(&msg, self.pos, self.is_important());
+            world.log_global(&msg, self.pos, self._is_important());
         }
-        self.act_drop_all(world);
+        self._act_drop_all(world);
         self.is_leader = false;
         if self.is_flesh() {
             world.add_item(Item::new(0, self.level, self.team), self.pos);
@@ -493,11 +493,11 @@ impl Actor {
         !self.is_projectile() && self.is_alive()
     }
 
-    fn is_blocking(&self, pos: (u16, u16)) -> bool {
+    fn _is_blocking(&self, pos: (u16, u16)) -> bool {
         self.is_combatant() && self.pos == pos
     }
 
-    fn can_displace(&self, plan: &Plan) -> bool {
+    fn _can_displace(&self, plan: &Plan) -> bool {
         if !self.is_leader && self.team == 0 {
             return false;
         }
@@ -532,7 +532,7 @@ impl Actor {
         self.team != team && self.is_alive()
     }
 
-    fn can_help(&self) -> bool {
+    fn _can_help(&self) -> bool {
         !self.is_hurt() && self.has_skill("heal")
     }
 
@@ -544,7 +544,7 @@ impl Actor {
         dx * dx + dy * dy <= 18
     }
 
-    fn is_retreating(&self, plan: &Plan) -> bool {
+    fn _is_retreating(&self, plan: &Plan) -> bool {
         plan.is_retreating(self.team) || (self.is_hurt() && plan.is_attacking(self.team))
     }
 
@@ -556,7 +556,7 @@ impl Actor {
         self.skills.iter().any(|s| s.as_str() == skill)
     }
 
-    fn is_important(&self) -> bool {
+    fn _is_important(&self) -> bool {
         self.team == 0 || self.is_persistent || self.is_leader
     }
 }
@@ -595,7 +595,7 @@ mod tests {
         assert!(soldier.is_mobile());
         assert!(soldier.is_playable());
         assert!(soldier.is_enemy_of(archer.team));
-        assert!(soldier.is_combatant() && soldier.is_blocking(soldier.pos));
+        assert!(soldier.is_combatant() && soldier._is_blocking(soldier.pos));
         assert!(!soldier.is_hurt());
         assert!(!soldier.is_undead());
         assert!(!soldier.is_projectile());
@@ -616,9 +616,9 @@ mod tests {
         let all_but_2 = soldier.health - 2;
         soldier.hurt(all_but_2, &mut world);
         assert!(soldier.is_alive() && soldier.is_hurt());
-        archer.act_touch(&mut soldier, &mut world, 2, &plan);
+        archer._act_touch(&mut soldier, &mut world, 2, &plan);
         assert!(soldier.health < all_but_2);
-        archer.act_hit(&mut soldier, &mut world);
+        archer._act_hit(&mut soldier, &mut world);
         assert!(!soldier.is_alive());
     }
 
@@ -630,7 +630,7 @@ mod tests {
         soldier.stun(1);
         assert_eq!(soldier.momentum, 0);
         assert_eq!(soldier.glyph(), 's');
-        archer.act_help(&mut soldier);
+        archer._act_help(&mut soldier);
         assert_eq!(soldier.glyph(), 'S');
         soldier.hurt(1, &mut world);
         soldier.act_exert(10, "threw an elf");
@@ -644,7 +644,7 @@ mod tests {
         let (mut soldier, mut archer, mut world, _plan) = fixtures();
         soldier.gain_momentum(1);
         assert_eq!(soldier.momentum, 1);
-        soldier.act_hit(&mut archer, &mut world);
+        soldier._act_hit(&mut archer, &mut world);
         assert_eq!(soldier.momentum, 0);
     }
 
@@ -654,10 +654,10 @@ mod tests {
         soldier.direction = 2;
         soldier._act_get_all(&mut world);
         assert_eq!(soldier.inventory.len(), 1);
-        soldier.act_drop_all(&mut world);
+        soldier._act_drop_all(&mut world);
         assert_eq!(soldier.inventory.len(), 0);
         // move forward and wait for auto-pickup:
-        soldier.act_move(2, &mut world, &plan, &mut vec![]);
+        soldier._act_move(2, &mut world, &plan, &mut vec![]);
         soldier.update(&mut world);
         assert_eq!(soldier.inventory.len(), 1);
     }

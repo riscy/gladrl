@@ -52,7 +52,7 @@ pub fn rand_int(max: u16) -> u16 {
     thread_rng().gen_range(0, cmp::max(1, max))
 }
 
-fn raycast(slf: &Actor, dir: u8, wld: &World, p: &Plan, len: u16) -> Option<(usize, u16)> {
+fn _raycast(slf: &Actor, dir: u8, wld: &World, p: &Plan, len: u16) -> Option<(usize, u16)> {
     let mut pos = slf.pos;
     for dist in 0..len {
         let new_pos = wld.neighbor(pos, dir, slf.team, "#%\"'");
@@ -159,7 +159,7 @@ pub fn passive_aim(slf: &mut Actor, wld: &World, p: &Plan) {
     let mut closest = u16::MAX;
     let init_dir = slf.direction;
     for dir in (0..8).map(|delta_dir| (init_dir + delta_dir) % 8) {
-        if let Some((team, dist)) = raycast(slf, dir, wld, p, 10) {
+        if let Some((team, dist)) = _raycast(slf, dir, wld, p, 10) {
             if dist < closest && team != slf.team {
                 closest = dist;
                 slf.direction = dir;
@@ -242,7 +242,7 @@ pub fn can_shoot(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 2
 }
 pub fn should_shoot(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    match raycast(slf, slf.direction, wld, p, slf.level as u16 + 5) {
+    match _raycast(slf, slf.direction, wld, p, slf.level as u16 + 5) {
         Some((team, _dist)) => team != slf.team,
         None => false,
     }
@@ -365,7 +365,7 @@ pub fn can_heal(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
 pub fn should_heal(slf: &Actor, wld: &World, p: &Plan) -> bool {
-    match raycast(slf, slf.direction, wld, p, 2) {
+    match _raycast(slf, slf.direction, wld, p, 2) {
         Some((team, _dist)) => !slf.is_hurt() && team == slf.team && p.num_enemies() != 0,
         None => false,
     }

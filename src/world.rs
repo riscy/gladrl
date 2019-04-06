@@ -32,7 +32,7 @@ impl World {
             log: Vec::new(),
             tileset: HashMap::new(),
         };
-        world.load_tileset().unwrap();
+        world._load_tileset().unwrap();
         world
     }
 
@@ -75,13 +75,13 @@ impl World {
                 if self.items[idx].can_get {
                     return Some(self.items.swap_remove(idx));
                 }
-                return self.push_item(from, idx, tools);
+                return self._push_item(from, idx, tools);
             }
         }
         None
     }
 
-    fn push_item(&mut self, from: (u16, u16), idx: usize, tools: &[Item]) -> Option<Item> {
+    fn _push_item(&mut self, from: (u16, u16), idx: usize, tools: &[Item]) -> Option<Item> {
         if self.items[idx].kind != ITEM_DOOR {
             return None;
         }
@@ -136,7 +136,7 @@ impl World {
         ('?', 0)
     }
 
-    fn load_tileset(&mut self) -> Result<(), Box<Error>> {
+    fn _load_tileset(&mut self) -> Result<(), Box<Error>> {
         self.tileset.clear();
         let reader = csv::Reader::from_path(&self.config);
         for record in reader?.deserialize() {

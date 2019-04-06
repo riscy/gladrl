@@ -42,7 +42,7 @@ impl Plan {
         plan
     }
 
-    fn tactic(&self, team: usize) -> u8 {
+    fn _tactic(&self, team: usize) -> u8 {
         match team {
             0 => self.team_0_tactic,
             _ => PLAN_ATTACK,
@@ -66,7 +66,7 @@ impl Plan {
         self.team_0_tactic = PLAN_RETREAT;
     }
 
-    fn muster_point(&self, team: usize) -> (u16, u16) {
+    fn _muster_point(&self, team: usize) -> (u16, u16) {
         match team {
             0 => self.team_0_muster_point,
             _ => (0, 0),
@@ -101,41 +101,41 @@ impl Plan {
             self.team_0_tactic = PLAN_EXIT;
         }
         for &team in teams {
-            self.update_paths(team, world, actors);
+            self._update_paths(team, world, actors);
         }
     }
 
-    fn update_paths(&mut self, team: usize, world: &World, actors: &[Actor]) {
+    fn _update_paths(&mut self, team: usize, world: &World, actors: &[Actor]) {
         let maximum_steps = if team == 0 { 200 } else { 12 };
-        let mut open_list = self.open_list(team, world, actors);
-        self.initialize_all_distances(team, &open_list);
+        let mut open_list = self._open_list(team, world, actors);
+        self._initialize_all_distances(team, &open_list);
         let mut step = 0;
         while !open_list.is_empty() && step < maximum_steps {
-            open_list = self.relax_distances_and_expand(open_list, step, team, world);
+            open_list = self._relax_distances_and_expand(open_list, step, team, world);
             step += 1;
         }
     }
 
-    fn open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
-        match self.tactic(team) {
-            PLAN_EXIT => self.locate_exits(world),
-            PLAN_DEFEND => vec![self.muster_point(team)],
-            PLAN_FOLLOW => self.locate_leaders(team, actors),
-            PLAN_ATTACK | PLAN_RETREAT => self.locate_enemies(team, actors),
+    fn _open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
+        match self._tactic(team) {
+            PLAN_EXIT => self._locate_exits(world),
+            PLAN_DEFEND => vec![self._muster_point(team)],
+            PLAN_FOLLOW => self._locate_leaders(team, actors),
+            PLAN_ATTACK | PLAN_RETREAT => self._locate_enemies(team, actors),
             _ => Vec::new(),
         }
     }
 
-    fn initialize_all_distances(&mut self, team: usize, open_list: &[(u16, u16)]) {
+    fn _initialize_all_distances(&mut self, team: usize, open_list: &[(u16, u16)]) {
         for idx in 0..self.distances[&team].len() {
             self.distances.get_mut(&team).unwrap()[idx] = PATH_UNKNOWN_DISTANCE;
         }
         for pos in open_list {
-            self.set_distance_to_goal(team, *pos, 0);
+            self._set_distance_to_goal(team, *pos, 0);
         }
     }
 
-    fn relax_distances_and_expand(
+    fn _relax_distances_and_expand(
         &mut self,
         open_list: Vec<(u16, u16)>,
         step: i32,
@@ -151,7 +151,7 @@ impl Plan {
                     && (!PATH_DONT_PROPAGATE_OUT_OF.contains(wld.glyph_at(pos))
                         || wld.glyph_at(next_pos) == wld.glyph_at(pos))
                 {
-                    self.set_distance_to_goal(team, next_pos, step + 1);
+                    self._set_distance_to_goal(team, next_pos, step + 1);
                     next_open_list.push(next_pos);
                 }
             }
@@ -159,11 +159,11 @@ impl Plan {
         next_open_list
     }
 
-    fn locate_exits(&self, world: &World) -> Vec<(u16, u16)> {
+    fn _locate_exits(&self, world: &World) -> Vec<(u16, u16)> {
         world.exits.iter().map(|exit| exit.pos).collect()
     }
 
-    fn locate_enemies(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
+    fn _locate_enemies(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
         actors
             .iter()
             .filter(|actor| actor.is_enemy_of(team) && actor.invis == 0)
@@ -171,7 +171,7 @@ impl Plan {
             .collect()
     }
 
-    fn locate_leaders(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
+    fn _locate_leaders(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {
         actors
             .iter()
             .filter(|actor| actor.is_leader && actor.team == team)
@@ -186,7 +186,7 @@ impl Plan {
         0
     }
 
-    fn set_distance_to_goal(&mut self, team: usize, pos: (u16, u16), val: i32) {
+    fn _set_distance_to_goal(&mut self, team: usize, pos: (u16, u16), val: i32) {
         if let Some(field) = self.distances.get_mut(&team) {
             field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
         }
@@ -226,7 +226,7 @@ mod tests {
         plan.tactic_defend((2, 2));
         assert!(plan.is_defending(0));
         assert!(!plan.is_defending(1));
-        assert_eq!(plan.muster_point(0), (2, 2));
+        assert_eq!(plan._muster_point(0), (2, 2));
         plan.tactic_attack();
         assert!(plan.is_attacking(0));
         plan.tactic_retreat();
