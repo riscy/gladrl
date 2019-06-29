@@ -75,7 +75,7 @@ impl View {
         self.scrollback = cmp::min(log_len - logs_to_show, self.scrollback);
     }
 
-    pub fn reload_keybindings(&mut self) -> Result<Vec<String>, Box<Error>> {
+    pub fn reload_keybindings(&mut self) -> Result<Vec<String>, Box<dyn Error>> {
         let mut online_help = vec!["[Reloading config/keybindings.csv...]".to_owned()];
         let mut reader = csv::Reader::from_path("config/keybindings.csv")?;
         self.keybindings.clear();

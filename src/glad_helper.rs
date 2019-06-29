@@ -85,8 +85,7 @@ fn _load_world_layout(world: &mut World, pix: &str) {
 pub fn create_random_team(team: usize, count: usize) -> Vec<Actor> {
     let mut actors = Vec::new();
     for kind in rand::sample(&mut rand::thread_rng(), &[0, 1, 2, 3, 5, 11, 13], count) {
-        let mut actor = Actor::new(*kind, 1, team, (0, 0));
-        actors.push(actor);
+        actors.push(Actor::new(*kind, 1, team, (0, 0)));
     }
     actors
 }
@@ -175,7 +174,7 @@ fn _resolve_filename(archive: &mut zip::read::ZipArchive<File>, idx: usize) -> S
     let filename = format!("scen/scen{}.fss", idx);
     let mut fallback = String::new();
     for ii in 0..archive.len() {
-        let mut file = archive.by_index(ii).unwrap();
+        let file = archive.by_index(ii).unwrap();
         if file.name() == filename {
             return filename;
         }

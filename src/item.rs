@@ -53,7 +53,7 @@ impl Item {
 
     pub fn damage(&mut self) {
         match self.health {
-            0 => return,
+            0 => (),
             1 => self.initialize(constants::ITEM_DEBRIS),
             _ => self.health -= 1,
         }

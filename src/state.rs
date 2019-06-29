@@ -204,7 +204,7 @@ impl State {
                     self.player_control_next();
                     return self.choice_from_ai(player_idx);
                 }
-                61...69 => {
+                61..=69 => {
                     self.player_control_set_by_number(usize::from(input - 60));
                     return self.choice_from_ai(player_idx);
                 }

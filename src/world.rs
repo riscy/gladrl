@@ -136,7 +136,7 @@ impl World {
         ('?', 0)
     }
 
-    fn _load_tileset(&mut self) -> Result<(), Box<Error>> {
+    fn _load_tileset(&mut self) -> Result<(), Box<dyn Error>> {
         self.tileset.clear();
         let reader = csv::Reader::from_path(&self.config);
         for record in reader?.deserialize() {
