@@ -182,7 +182,7 @@ impl View {
     }
 
     fn actor_color(&self, actor: &Actor) -> i16 {
-        if !actor.is_alive() || actor.is_undead() {
+        if !actor.is_alive() || actor.is_artificial() {
             return COLOR_RED;
         } else if actor.is_projectile() {
             return COLOR_YELLOW;

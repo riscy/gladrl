@@ -520,12 +520,12 @@ impl Actor {
         self.kind >= 50 && self.kind < 60
     }
 
-    pub fn is_undead(&self) -> bool {
+    pub fn is_artificial(&self) -> bool {
         self.kind == 4 || self.kind == 12
     }
 
     pub fn is_flesh(&self) -> bool {
-        !self.is_projectile() && !self.is_undead() && self.is_mobile()
+        !self.is_projectile() && !self.is_artificial() && self.is_mobile()
     }
 
     pub fn is_enemy_of(&self, team: usize) -> bool {
@@ -597,7 +597,7 @@ mod tests {
         assert!(soldier.is_enemy_of(archer.team));
         assert!(soldier.is_combatant() && soldier._is_blocking(soldier.pos));
         assert!(!soldier.is_hurt());
-        assert!(!soldier.is_undead());
+        assert!(!soldier.is_artificial());
         assert!(!soldier.is_projectile());
         assert!(archer.has_skill("shoot"));
         assert!(soldier.has_skill("charge"));
