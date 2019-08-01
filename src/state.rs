@@ -297,13 +297,13 @@ impl State {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use glad_helper;
+    use glad_loader;
 
     fn fixtures() -> State {
         let mut state = State::new(
             "glad",
-            glad_helper::create_random_team,
-            glad_helper::load_world_and_spawn_team,
+            glad_loader::create_random_team,
+            glad_loader::load_world_and_spawn_team,
         );
         state.world_idx = 42;
         let mut team = (state.create_team)(0, 3);
