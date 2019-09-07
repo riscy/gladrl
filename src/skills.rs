@@ -231,7 +231,7 @@ pub fn can_cloak(slf: &Actor, _wld: &World, _p: &Plan) -> bool {
     slf.mana >= 5
 }
 pub fn should_cloak(slf: &Actor, _wld: &World, p: &Plan) -> bool {
-    (slf.is_hurt() && !p.is_near_enemy(slf.pos, slf.team))
+    slf.is_hurt() && !p.is_near_enemy(slf.pos, slf.team)
 }
 pub fn cloak(slf: &mut Actor, _wld: &mut World, _p: &Plan, _spawn: &mut Vec<Actor>) {
     slf.act_exert(5, "started to sneak around.");

@@ -26,7 +26,7 @@ pub struct Actor {
     pub intel: u16,
     pub con: u16,
     pub strength: u16,
-    pub walls: String,
+    pub walls: String, // list of things I can't walk through
     skill_idx: usize,
 
     pub momentum: u8,
@@ -225,9 +225,6 @@ impl Actor {
             }
             if movement || mv == ACT_WAIT {
                 let value = self._value_of_pos(pos, plan);
-                if value < best_value {
-                    continue;
-                }
                 if value > best_value {
                     best_direction = mv;
                     best_value = value;

@@ -40,11 +40,8 @@ impl Plan {
                 .insert(team, vec![PATH_UNKNOWN_DISTANCE; area]);
             plan._enemies.insert(team, 0);
             plan._muster_point.insert(team, (0, 0));
-            if team == 0 {
-                plan._tactics.insert(team, PLAN_FOLLOW);
-            } else {
-                plan._tactics.insert(team, PLAN_ATTACK);
-            }
+            plan._tactics
+                .insert(team, if team == 0 { PLAN_FOLLOW } else { PLAN_ATTACK });
         }
         plan
     }
