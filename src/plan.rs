@@ -16,9 +16,9 @@ const PATH_DONT_PROPAGATE_INTO: &str = "`'*#^";
 const PATH_DONT_PROPAGATE_OUT_OF: &str = "~`'*#%^";
 
 pub struct Plan {
-    team_0_enemies: usize,
-    team_0_tactic: u8,
-    team_0_muster_point: (u16, u16),
+    _enemies: HashMap<usize, usize>,
+    _tactics: HashMap<usize, u8>,
+    _muster_point: HashMap<usize, (u16, u16)>,
     occupied_cells: HashMap<(u16, u16), usize>,
     world_size: (u16, u16),
     distances: HashMap<usize, Vec<i32>>,
@@ -30,75 +30,73 @@ impl Plan {
             world_size,
             distances: HashMap::new(),
             occupied_cells: HashMap::new(),
-            team_0_enemies: 0,
-            team_0_tactic: PLAN_FOLLOW,
-            team_0_muster_point: (0, 0),
+            _enemies: HashMap::new(),
+            _tactics: HashMap::new(),
+            _muster_point: HashMap::new(),
         };
         for &team in teams {
             let area = (world_size.1 * world_size.0) as usize;
             plan.distances
                 .insert(team, vec![PATH_UNKNOWN_DISTANCE; area]);
+            plan._enemies.insert(team, 0);
+            plan._muster_point.insert(team, (0, 0));
+            if team == 0 {
+                plan._tactics.insert(team, PLAN_FOLLOW);
+            } else {
+                plan._tactics.insert(team, PLAN_ATTACK);
+            }
         }
         plan
     }
 
-    fn _tactic(&self, team: usize) -> u8 {
-        match team {
-            0 => self.team_0_tactic,
-            _ => PLAN_ATTACK,
-        }
-    }
-
     pub fn tactic_defend(&mut self, pos: (u16, u16)) {
-        self.team_0_tactic = PLAN_DEFEND;
-        self.team_0_muster_point = pos;
+        self._tactics.insert(0, PLAN_DEFEND);
+        self._muster_point.insert(0, pos);
     }
 
     pub fn tactic_follow(&mut self) {
-        self.team_0_tactic = PLAN_FOLLOW;
+        self._tactics.insert(0, PLAN_FOLLOW);
     }
 
     pub fn tactic_attack(&mut self) {
-        self.team_0_tactic = PLAN_ATTACK;
+        self._tactics.insert(0, PLAN_ATTACK);
     }
 
     pub fn tactic_retreat(&mut self) {
-        self.team_0_tactic = PLAN_RETREAT;
+        self._tactics.insert(0, PLAN_RETREAT);
     }
 
     fn _muster_point(&self, team: usize) -> (u16, u16) {
-        match team {
-            0 => self.team_0_muster_point,
-            _ => (0, 0),
-        }
+        self._muster_point[&team]
     }
 
     pub fn is_defending(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == PLAN_DEFEND
+        self._tactics[&team] == PLAN_DEFEND
     }
 
     pub fn is_attacking(&self, team: usize) -> bool {
-        team != 0 || self.team_0_tactic == PLAN_ATTACK
+        self._tactics[&team] == PLAN_ATTACK
     }
 
     pub fn is_retreating(&self, team: usize) -> bool {
-        team == 0 && self.team_0_tactic == PLAN_RETREAT
+        self._tactics[&team] == PLAN_RETREAT
     }
 
     pub fn fast_update(&mut self, actors: &[Actor]) {
         self.occupied_cells.clear();
-        self.team_0_enemies = 0;
+        self._enemies.insert(0, 0);
         for actor in actors.iter().filter(|actor| actor.is_combatant()) {
             self.occupied_cells.insert(actor.pos, actor.team);
             if actor.team != 0 {
-                self.team_0_enemies += 1;
+                let current_enemies = self._enemies[&0];
+                self._enemies.insert(0, current_enemies + 1);
             }
         }
     }
 
     pub fn update(&mut self, teams: &HashSet<usize>, world: &World, actors: &[Actor]) {
-        if self.team_0_enemies == 0 && self.team_0_tactic == PLAN_ATTACK {
-            self.team_0_tactic = PLAN_EXIT;
+        if self._enemies[&0] == 0 && self._tactics[&0] == PLAN_ATTACK {
+            self._tactics.insert(0, PLAN_EXIT);
         }
         for &team in teams {
             self._update_paths(team, world, actors);
@@ -117,7 +115,7 @@ impl Plan {
     }
 
     fn _open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
-        match self._tactic(team) {
+        match self._tactics[&team] {
             PLAN_EXIT => self._locate_exits(world),
             PLAN_DEFEND => vec![self._muster_point(team)],
             PLAN_FOLLOW => self._locate_leaders(team, actors),
@@ -198,7 +196,7 @@ impl Plan {
     }
 
     pub fn num_enemies(&self) -> usize {
-        self.team_0_enemies
+        self._enemies[&0]
     }
 
     pub fn whos_at(&self, pos: (u16, u16)) -> Option<&usize> {
