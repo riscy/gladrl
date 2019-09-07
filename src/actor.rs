@@ -40,6 +40,7 @@ pub struct Actor {
 
     pub is_leader: bool,
     pub is_persistent: bool,
+    config: String,
 }
 
 impl Actor {
@@ -70,6 +71,7 @@ impl Actor {
             log: Vec::new(),
             inventory: Vec::new(),
             invis: 0,
+            config: "config/glad/actor.csv".to_owned(),
         };
         actor.initialize(kind);
         actor.recover_fully();
@@ -78,7 +80,7 @@ impl Actor {
 
     pub fn initialize(&mut self, kind: u8) {
         self.skills.clear();
-        let reader = csv::Reader::from_path("config/glad/actor.csv");
+        let reader = csv::Reader::from_path(&self.config);
         for record in reader.unwrap().deserialize() {
             let row: (u8, char, String, String, u16, String, u16, u16, u16, u16) = record.unwrap();
             if row.0 != kind {
