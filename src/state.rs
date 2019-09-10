@@ -12,6 +12,8 @@ pub struct State {
     pub world: World,
     pub world_idx: usize,
     pub world_completed: Vec<usize>,
+    pub world_desc: String,
+    pub world_name: String,
     pub score: u32,
     time: u32,
     autopilot: bool,
@@ -38,6 +40,8 @@ impl State {
             world: World::new(config),
             world_idx: 1,
             world_completed: Vec::new(),
+            world_desc: String::new(),
+            world_name: String::new(),
             time: 1,
             autopilot: false,
             score: 0,
@@ -81,9 +85,9 @@ impl State {
     }
 
     fn load_world_description(&mut self) {
-        let name = &self.world.name.clone();
+        let name = &self.world_name.clone();
         self.player_mut().log_event(&format!("[:{}:]", name), 0);
-        for line in self.world.desc.clone().lines() {
+        for line in self.world_desc.clone().lines() {
             self.view.scroll_log_up(1);
             self.player_mut().log_event(line, 0);
         }

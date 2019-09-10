@@ -34,7 +34,7 @@ pub fn load_world_and_spawn_team(state: &mut State) {
     let version = _read_bytes(1, &mut file)[0];
     _load_world_layout(&mut state.world, &_read_c_string(8, &mut file));
     if version >= 6 {
-        state.world.name = _read_c_string(30, &mut file);
+        state.world_name = _read_c_string(30, &mut file);
     }
     let _scenario_type = _read_bytes(1, &mut file);
     if version >= 8 {
@@ -54,12 +54,12 @@ pub fn load_world_and_spawn_team(state: &mut State) {
         let num_lines = _read_bytes(1, &mut file)[0];
         for _line in 0..num_lines {
             let num_chars = u64::from(_read_bytes(1, &mut file)[0]);
-            state.world.desc += str::from_utf8(&_read_bytes(num_chars, &mut file)).unwrap();
-            state.world.desc += "\n";
+            state.world_desc += str::from_utf8(&_read_bytes(num_chars, &mut file)).unwrap();
+            state.world_desc += "\n";
         }
-        state.world.desc = state.world.desc.to_uppercase();
+        state.world_desc = state.world_desc.to_uppercase();
     } else {
-        state.world.desc += "Wild dogs have picked the area clean.";
+        state.world_desc += "Wild dogs have picked the area clean.";
         let mut fillers = create_random_team(3, 3);
         for mut filler in fillers.drain(0..) {
             filler.teleport(&state.world);

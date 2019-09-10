@@ -9,8 +9,6 @@ use std::str;
 
 pub struct World {
     pub size: (u16, u16), // cols x rows
-    pub name: String,
-    pub desc: String,
     pub items: Vec<Item>,
     pub exits: Vec<Item>,
     pub tiles: Vec<u16>,
@@ -24,8 +22,6 @@ impl World {
         let mut world = World {
             config: format!("config/{}/world.csv", config),
             size: (0, 0),
-            name: String::new(),
-            desc: String::new(),
             items: Vec::new(),
             exits: Vec::new(),
             tiles: Vec::new(),
