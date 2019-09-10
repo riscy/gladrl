@@ -19,24 +19,24 @@ pub struct Plan {
     _enemies: HashMap<usize, usize>,
     _tactics: HashMap<usize, u8>,
     _muster_point: HashMap<usize, (u16, u16)>,
-    occupied_cells: HashMap<(u16, u16), usize>,
-    world_size: (u16, u16),
-    distances: HashMap<usize, Vec<i32>>,
+    _occupied_cells: HashMap<(u16, u16), usize>,
+    _world_size: (u16, u16),
+    _distances: HashMap<usize, Vec<i32>>,
 }
 
 impl Plan {
-    pub fn new(world_size: (u16, u16), teams: &HashSet<usize>) -> Plan {
+    pub fn new(_world_size: (u16, u16), teams: &HashSet<usize>) -> Plan {
         let mut plan = Plan {
-            world_size,
-            distances: HashMap::new(),
-            occupied_cells: HashMap::new(),
+            _world_size,
+            _distances: HashMap::new(),
+            _occupied_cells: HashMap::new(),
             _enemies: HashMap::new(),
             _tactics: HashMap::new(),
             _muster_point: HashMap::new(),
         };
         for &team in teams {
-            let area = (world_size.1 * world_size.0) as usize;
-            plan.distances
+            let area = (_world_size.1 * _world_size.0) as usize;
+            plan._distances
                 .insert(team, vec![PATH_UNKNOWN_DISTANCE; area]);
             plan._enemies.insert(team, 0);
             plan._muster_point.insert(team, (0, 0));
@@ -80,10 +80,10 @@ impl Plan {
     }
 
     pub fn fast_update(&mut self, actors: &[Actor]) {
-        self.occupied_cells.clear();
+        self._occupied_cells.clear();
         self._enemies.insert(0, 0);
         for actor in actors.iter().filter(|actor| actor.is_combatant()) {
-            self.occupied_cells.insert(actor.pos, actor.team);
+            self._occupied_cells.insert(actor.pos, actor.team);
             if actor.team != 0 {
                 let current_enemies = self._enemies[&0];
                 self._enemies.insert(0, current_enemies + 1);
@@ -122,8 +122,8 @@ impl Plan {
     }
 
     fn _initialize_all_distances(&mut self, team: usize, open_list: &[(u16, u16)]) {
-        for idx in 0..self.distances[&team].len() {
-            self.distances.get_mut(&team).unwrap()[idx] = PATH_UNKNOWN_DISTANCE;
+        for idx in 0..self._distances[&team].len() {
+            self._distances.get_mut(&team).unwrap()[idx] = PATH_UNKNOWN_DISTANCE;
         }
         for pos in open_list {
             self._set_distance_to_goal(team, *pos, 0);
@@ -175,15 +175,15 @@ impl Plan {
     }
 
     pub fn distance_to_goal(&self, from: (u16, u16), team: usize) -> i32 {
-        if let Some(distances) = self.distances.get(&team) {
-            return distances[(from.1 * self.world_size.0 + from.0) as usize];
+        if let Some(distances) = self._distances.get(&team) {
+            return distances[(from.1 * self._world_size.0 + from.0) as usize];
         }
         0
     }
 
     fn _set_distance_to_goal(&mut self, team: usize, pos: (u16, u16), val: i32) {
-        if let Some(field) = self.distances.get_mut(&team) {
-            field[(pos.1 * self.world_size.0 + pos.0) as usize] = val;
+        if let Some(field) = self._distances.get_mut(&team) {
+            field[(pos.1 * self._world_size.0 + pos.0) as usize] = val;
         }
     }
 
@@ -197,7 +197,7 @@ impl Plan {
     }
 
     pub fn whos_at(&self, pos: (u16, u16)) -> Option<&usize> {
-        self.occupied_cells.get(&pos)
+        self._occupied_cells.get(&pos)
     }
 }
 
@@ -248,7 +248,7 @@ mod tests {
         plan.update(&team_idxs, &world, &actors);
         for actor in actors {
             assert_eq!(plan.distance_to_goal(actor.pos, actor.team), 4);
-            assert!(plan.distances[&actor.team]
+            assert!(plan._distances[&actor.team]
                 .iter()
                 .all(|distance| distance != &PATH_UNKNOWN_DISTANCE));
         }
