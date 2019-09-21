@@ -10,6 +10,19 @@ use skills_registry;
 use std::{cmp, i32, u16};
 use world::World;
 
+type ActorCSV = (
+    u8,     // kind
+    char,   // glyph
+    String, // walls
+    String, // name
+    u16,    // move_lag
+    String, // space-separated skills
+    u16,    // strength
+    u16,    // con
+    u16,    // intel
+    u16,    // dex
+);
+
 pub struct Actor {
     pub name: String,
     pub kind: u8,
@@ -82,7 +95,7 @@ impl Actor {
         self.skills.clear();
         let reader = csv::Reader::from_path(&self.config);
         for record in reader.unwrap().deserialize() {
-            let row: (u8, char, String, String, u16, String, u16, u16, u16, u16) = record.unwrap();
+            let row: ActorCSV = record.unwrap();
             if row.0 != kind {
                 continue;
             }
@@ -115,8 +128,7 @@ impl Actor {
             return 'x';
         } else if self.stun == 0 {
             return self.glyph;
-        }
-        if let Some(lower_char) = self.glyph.to_lowercase().next() {
+        } else if let Some(lower_char) = self.glyph.to_lowercase().next() {
             return lower_char;
         }
         '?'

@@ -115,7 +115,7 @@ impl State {
             self.view.render(&self.world, &self.actors, self.player_idx);
             self.actors.append(&mut self.spawn);
             self.actors.retain(|a| a.is_alive() || !a.is_projectile());
-            self.world.items.retain(|item| !item.is_debris());
+            self.world.retain_items();
             self.check_exits();
             self.time += 1;
         }

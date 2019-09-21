@@ -91,6 +91,10 @@ impl World {
         Some(Item::new(18, 1, 0))
     }
 
+    pub fn retain_items(&mut self) {
+        self.items.retain(|item| !item.is_debris());
+    }
+
     pub fn log_global(&mut self, txt: &str, pos: (u16, u16), important: bool) {
         self.log.push((pos, txt.to_owned(), important));
     }

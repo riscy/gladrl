@@ -16,6 +16,16 @@ pub struct Item {
     health: u16,
 }
 
+type ItemCSV = (
+    u8,     // kind
+    char,   // glyph
+    i16,    // color
+    String, // name
+    bool,   // can_get
+    bool,   // can_keep
+    bool,   // can_retain
+);
+
 impl Item {
     pub fn new(kind: u8, level: u16, team: usize) -> Item {
         let mut item = Item {
@@ -38,7 +48,7 @@ impl Item {
     pub fn initialize(&mut self, kind: u8) {
         let reader = csv::Reader::from_path("config/glad/item.csv");
         for record in reader.unwrap().deserialize() {
-            let row: (u8, char, i16, String, bool, bool, bool) = record.unwrap();
+            let row: ItemCSV = record.unwrap();
             if row.0 == kind {
                 self.kind = row.0;
                 self.glyph = row.1;
