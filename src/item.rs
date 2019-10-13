@@ -41,11 +41,11 @@ impl Item {
             can_retain: false,
             health: 20,
         };
-        item.initialize(kind);
+        item.initialize_as(kind);
         item
     }
 
-    pub fn initialize(&mut self, kind: u8) {
+    pub fn initialize_as(&mut self, kind: u8) {
         let reader = csv::Reader::from_path("config/glad/item.csv");
         for record in reader.unwrap().deserialize() {
             let row: ItemCSV = record.unwrap();
@@ -64,7 +64,7 @@ impl Item {
     pub fn damage(&mut self) {
         match self.health {
             0 => (),
-            1 => self.initialize(constants::ITEM_DEBRIS),
+            1 => self.initialize_as(constants::ITEM_DEBRIS),
             _ => self.health -= 1,
         }
     }
@@ -79,11 +79,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_initialize() {
+    fn test_initialize_as() {
         let mut item = Item::new(constants::ITEM_DEBRIS, 1, 0);
         assert!(item.is_debris());
         // reinitializing changes the item's type from debris:
-        item.initialize(0);
+        item.initialize_as(0);
         assert!(!item.is_debris());
     }
 

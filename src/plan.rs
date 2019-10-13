@@ -113,7 +113,7 @@ impl Plan {
 
     fn _open_list(&self, team: usize, world: &World, actors: &[Actor]) -> Vec<(u16, u16)> {
         match self._tactics[&team] {
-            PLAN_EXIT => self._locate_exits(world),
+            PLAN_EXIT => world.exits(),
             PLAN_DEFEND => vec![self._muster_point(team)],
             PLAN_FOLLOW => self._locate_leaders(team, actors),
             PLAN_ATTACK | PLAN_RETREAT => self._locate_enemies(team, actors),
@@ -152,10 +152,6 @@ impl Plan {
             }
         }
         next_open_list
-    }
-
-    fn _locate_exits(&self, world: &World) -> Vec<(u16, u16)> {
-        world.exits.iter().map(|exit| exit.pos).collect()
     }
 
     fn _locate_enemies(&self, team: usize, actors: &[Actor]) -> Vec<(u16, u16)> {

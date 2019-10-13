@@ -20,7 +20,7 @@ pub fn use_on_actor(actor: &mut Actor, kind: u8) -> bool {
 
 pub fn use_on_item(item: &mut Item, kind: u8) -> bool {
     if kind == ITEM_KEY && item.kind == ITEM_DOOR {
-        item.initialize(ITEM_DOOR_OPEN);
+        item.initialize_as(ITEM_DOOR_OPEN);
         return true;
     }
     false

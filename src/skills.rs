@@ -492,10 +492,10 @@ pub fn pick(slf: &mut Actor, wld: &mut World, p: &Plan, _spawn: &mut Vec<Actor>)
     let cost = slf.max_mana();
     for item in wld.items.iter_mut().filter(|item| item.pos == door_pos) {
         if item.kind == ITEM_DOOR {
-            item.initialize(ITEM_DOOR_OPEN);
+            item.initialize_as(ITEM_DOOR_OPEN);
             return slf.act_exert(cost, "picked the lock.");
         } else if item.kind == ITEM_DOOR_OPEN && p.whos_at(door_pos).is_none() {
-            item.initialize(ITEM_DOOR);
+            item.initialize_as(ITEM_DOOR);
             item.team = slf.team;
             return slf.act_exert(cost, "relocked the door.");
         }

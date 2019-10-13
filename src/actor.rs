@@ -214,10 +214,6 @@ impl Actor {
         } else if skills_registry::choose_skill(self, world, plan) {
             return ACT_SKILL;
         }
-        self._choose_action(world, plan)
-    }
-
-    fn _choose_action(&self, world: &World, plan: &Plan) -> u8 {
         let start_dir = self._choose_preferred_dir();
         let (mut best_value, mut best_direction) = (i32::MIN, start_dir);
         for mv in ACT_MOVES.iter().map(|offset| (start_dir + offset) % 9) {
@@ -246,6 +242,13 @@ impl Actor {
         best_direction
     }
 
+    fn _choose_preferred_dir(&self) -> u8 {
+        if !self.is_projectile() && rand_int(5) == 0 {
+            return rand_int(8) as u8;
+        }
+        self.direction
+    }
+
     // How good this position is to the actor (larger is better)
     fn _value_of_pos(&self, pos: (u16, u16), plan: &Plan) -> i32 {
         let dist = plan.distance_to_goal(pos, self.team);
@@ -254,13 +257,6 @@ impl Actor {
         } else {
             -dist
         }
-    }
-
-    fn _choose_preferred_dir(&self) -> u8 {
-        if !self.is_projectile() && rand_int(5) == 0 {
-            return rand_int(8) as u8;
-        }
-        self.direction
     }
 
     pub fn act(

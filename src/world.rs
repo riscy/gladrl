@@ -91,7 +91,7 @@ impl World {
         Some(Item::new(18, 1, 0))
     }
 
-    pub fn retain_items(&mut self) {
+    pub fn clear_debris(&mut self) {
         self.items.retain(|item| !item.is_debris());
     }
 
@@ -134,6 +134,10 @@ impl World {
             }
         }
         ('?', 0)
+    }
+
+    pub fn exits(&self) -> Vec<(u16, u16)> {
+        self.exits.iter().map(|exit| exit.pos).collect()
     }
 
     fn _load_tileset(&mut self) -> Result<(), Box<dyn Error>> {
