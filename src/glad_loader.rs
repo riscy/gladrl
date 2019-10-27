@@ -27,6 +27,7 @@ const ORD_SPAWN: u8 = 5;
 // NOTE: Will pop state.player_team into spawn locations.
 pub fn load_world_and_spawn_team(state: &mut State) {
     state.world = World::new(CONFIG_DIRECTORY);
+    state.world_desc = String::new();
     let mut archive = _get_archive();
     let filename = _resolve_filename(&mut archive, state.world_idx);
     let mut file = archive.by_name(&filename).unwrap();
