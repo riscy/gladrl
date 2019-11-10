@@ -1,6 +1,9 @@
 // Handles inanimate objects like exits, potions, and treasure.
 use constants;
 use csv;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::error::Error;
 
 pub struct Item {
     pub name: String,
@@ -16,7 +19,7 @@ pub struct Item {
     health: u16,
 }
 
-type ItemCSV = (
+type ItemStats = (
     u8,     // kind
     char,   // glyph
     i16,    // color
@@ -25,6 +28,8 @@ type ItemCSV = (
     bool,   // can_keep
     bool,   // can_retain
 );
+
+thread_local!(static _ITEM_CSV_CACHE: RefCell<HashMap<u8, ItemStats>> = RefCell::new(HashMap::new()));
 
 impl Item {
     pub fn new(kind: u8, level: u16, team: usize) -> Item {
@@ -46,19 +51,14 @@ impl Item {
     }
 
     pub fn initialize_as(&mut self, kind: u8) {
-        let reader = csv::Reader::from_path("config/glad/item.csv");
-        for record in reader.unwrap().deserialize() {
-            let row: ItemCSV = record.unwrap();
-            if row.0 == kind {
-                self.kind = row.0;
-                self.glyph = row.1;
-                self.color = row.2;
-                self.name = row.3;
-                self.can_get = row.4;
-                self.can_keep = row.5;
-                self.can_retain = row.6;
-            }
-        }
+        let row: ItemStats = _load_from_csv(kind, "config/glad/item.csv").unwrap();
+        self.kind = row.0;
+        self.glyph = row.1;
+        self.color = row.2;
+        self.name = row.3;
+        self.can_get = row.4;
+        self.can_keep = row.5;
+        self.can_retain = row.6;
     }
 
     pub fn damage(&mut self) {
@@ -72,6 +72,23 @@ impl Item {
     pub fn is_debris(&self) -> bool {
         self.kind == constants::ITEM_DEBRIS
     }
+}
+
+fn _load_from_csv(kind: u8, config: &str) -> Result<ItemStats, Box<dyn Error>> {
+    return _ITEM_CSV_CACHE.with(|item_cache_cell| {
+        let mut item_cache = item_cache_cell.borrow_mut();
+        if let Some(item_csv) = item_cache.get(&kind) {
+            return Ok(item_csv.clone());
+        }
+        for record in csv::Reader::from_path(&config)?.deserialize() {
+            let row: ItemStats = record?;
+            item_cache.insert(row.0, row.clone());
+            if row.0 == kind {
+                return Ok(row);
+            }
+        }
+        panic!("Unable to load {} from {}", kind, config)
+    });
 }
 
 #[cfg(test)]

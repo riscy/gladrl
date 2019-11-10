@@ -7,10 +7,13 @@ use item_effects;
 use plan::Plan;
 use skills::*;
 use skills_registry;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::error::Error;
 use std::{cmp, i32, u16};
 use world::World;
 
-type ActorCSV = (
+type ActorStats = (
     u8,     // kind
     char,   // glyph
     String, // walls
@@ -22,6 +25,8 @@ type ActorCSV = (
     u16,    // intel
     u16,    // dex
 );
+
+thread_local!(static _ACTOR_CSV_CACHE: RefCell<HashMap<u8, ActorStats>> = RefCell::new(HashMap::new()));
 
 pub struct Actor {
     pub name: String,
@@ -93,27 +98,20 @@ impl Actor {
 
     pub fn initialize(&mut self, kind: u8) {
         self.skills.clear();
-        let reader = csv::Reader::from_path(&self.config);
-        for record in reader.unwrap().deserialize() {
-            let row: ActorCSV = record.unwrap();
-            if row.0 != kind {
-                continue;
-            }
-            self.kind = kind;
-            self.glyph = row.1;
-            self.walls = row.2;
-            if self.name.is_empty() {
-                self.name = row.3;
-            }
-            self.move_lag = row.4;
-            for skill in row.5.split(' ') {
-                self.skills.push(skill.into());
-            }
-            self.strength = row.6;
-            self.con = row.8;
-            self.intel = row.9;
-            break;
+        let row: ActorStats = _load_from_csv(kind, &self.config).unwrap();
+        self.kind = row.0;
+        self.glyph = row.1;
+        self.walls = row.2;
+        if self.name.is_empty() {
+            self.name = row.3;
         }
+        self.move_lag = row.4;
+        for skill in row.5.split(' ') {
+            self.skills.push(skill.into());
+        }
+        self.strength = row.6;
+        self.con = row.8;
+        self.intel = row.9;
         self._initialize_inventory();
     }
 
@@ -566,6 +564,23 @@ impl Actor {
     fn _is_important(&self) -> bool {
         self.team == 0 || self.is_persistent || self.is_leader
     }
+}
+
+fn _load_from_csv(kind: u8, config: &str) -> Result<ActorStats, Box<dyn Error>> {
+    return _ACTOR_CSV_CACHE.with(|actor_cache_cell| {
+        let mut actor_cache = actor_cache_cell.borrow_mut();
+        if let Some(actor_csv) = actor_cache.get(&kind) {
+            return Ok(actor_csv.clone());
+        }
+        for record in csv::Reader::from_path(&config)?.deserialize() {
+            let row: ActorStats = record?;
+            actor_cache.insert(row.0, row.clone());
+            if row.0 == kind {
+                return Ok(row);
+            }
+        }
+        panic!("Unable to load {} from {}", kind, config)
+    });
 }
 
 #[cfg(test)]
