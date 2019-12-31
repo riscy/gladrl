@@ -142,7 +142,7 @@ impl View {
     pub fn yes_or_no(&self, prompt: &str) -> bool {
         mv(0, 0);
         clrtoeol();
-        printw(format!("{} (Y/N) ", prompt).as_str());
+        addstr(format!("{} (Y/N) ", prompt).as_str());
         loop {
             match char::from(getch() as u8) {
                 'Y' | ';' => return true,
@@ -233,19 +233,19 @@ impl View {
             if actor.is_leader {
                 attron(COLOR_PAIR(COLOR_WHITE + 100));
             }
-            printw(&format!("{:>2}> ", idx + 1));
-            printw(&format!("{:<width$} ", actor.name, width = 10));
+            addstr(&format!("{:>2}> ", idx + 1));
+            addstr(&format!("{:<width$} ", actor.name, width = 10));
             if actor.is_leader {
                 attroff(COLOR_PAIR(COLOR_WHITE + 100));
             }
             if actor.is_hurt() {
                 attron(COLOR_PAIR(COLOR_RED + 100));
             }
-            printw(&format!("{:>3}/{:<3} ", actor.health, actor.max_health()));
+            addstr(&format!("{:>3}/{:<3} ", actor.health, actor.max_health()));
             if actor.is_hurt() {
                 attroff(COLOR_PAIR(COLOR_RED + 100));
             }
-            printw(&format!("{:>3}/{:<3} ", actor.mana, actor.max_mana()));
+            addstr(&format!("{:>3}/{:<3} ", actor.mana, actor.max_mana()));
             idx += 1;
         }
         mv(idx, col);
@@ -284,9 +284,9 @@ impl View {
                 } else if entry.0 >= time {
                     attron(COLOR_PAIR(COLOR_YELLOW));
                 }
-                printw(&entry.1);
+                addstr(&entry.1);
                 if entry.2 > 1 {
-                    printw(&format!(" ({}x)", entry.2));
+                    addstr(&format!(" ({}x)", entry.2));
                 }
                 if entry.1.starts_with('[') {
                     attroff(COLOR_PAIR(COLOR_RED));
@@ -299,7 +299,7 @@ impl View {
             mv(height as i32 - 1 + pos.1, pos.0);
             clrtoeol();
             attron(COLOR_PAIR(COLOR_CYAN));
-            printw(&format!(
+            addstr(&format!(
                 "({:>2} more lines: scroll with <,>)",
                 self.scrollback
             ));
