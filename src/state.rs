@@ -120,12 +120,16 @@ impl State {
             self.time += 1;
         }
         let victory =
-            self.plan.num_enemies() <= 5 && !self.world_completed.contains(&current_world_idx);
+            self._is_cleared() && !self.world_completed.contains(&current_world_idx);
         self.extract_team(victory);
         if victory {
             self.world_completed.push(current_world_idx);
             self.score += 10 * self.player_team.len() as u32;
         }
+    }
+
+    fn _is_cleared(&self) -> bool {
+        self.plan.num_enemies() <= 5
     }
 
     fn give_turns(&mut self) {
@@ -241,7 +245,7 @@ impl State {
     }
 
     fn check_exits(&mut self) {
-        if self.player().is_ready_to_act(self.time) && self.plan.num_enemies() <= 5 {
+        if self.player().is_ready_to_act(self.time) && self._is_cleared() {
             if let Some(exit) = self.world.exits.iter().find(|x| x.pos == self.player().pos) {
                 if self.autopilot || self.view.yes_or_no("Exit?") {
                     return self.world_idx = exit.level as usize;
