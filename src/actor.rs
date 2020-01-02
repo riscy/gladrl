@@ -567,7 +567,7 @@ impl Actor {
 }
 
 fn _load_from_csv(kind: u8, config: &str) -> Result<ActorStats, Box<dyn Error>> {
-    return _ACTOR_CSV_CACHE.with(|actor_cache_cell| {
+    _ACTOR_CSV_CACHE.with(|actor_cache_cell| {
         let mut actor_cache = actor_cache_cell.borrow_mut();
         if let Some(actor_csv) = actor_cache.get(&kind) {
             return Ok(actor_csv.clone());
@@ -580,7 +580,7 @@ fn _load_from_csv(kind: u8, config: &str) -> Result<ActorStats, Box<dyn Error>> 
             }
         }
         panic!("Unable to load {} from {}", kind, config)
-    });
+    })
 }
 
 #[cfg(test)]
